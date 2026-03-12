@@ -33,7 +33,7 @@ geometry=$(slurp) || exit 0
 grim -g "$geometry" "$tmp" || exit 1
 
 satty -f "$tmp" \
-    --fullscreen \
+    --floating-hack \
     --actions-on-enter save-to-file \
     --early-exit || {
     rm -f "$tmp"

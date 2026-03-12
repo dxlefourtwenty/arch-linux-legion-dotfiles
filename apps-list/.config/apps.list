@@ -1,15 +1,14 @@
 chromium.desktop|/usr/share/icons/hicolor/128x128/apps/chromium.png|Chromium
 kitty.desktop|/usr/share/icons/hicolor/scalable/apps/kitty.svg|Kitty
-discord.desktop|/usr/share/icons/Qogir/scalable/apps/discord.svg|Discord
+discord.desktop|/home/dxle/.local/share/icons/discord.png|Discord
 chatgpt-webapp.desktop|/home/dxle/.local/share/icons/ChatGPT.png|ChatGPT
 claude-code-webapp.desktop|/home/dxle/.local/share/icons/claude-color.svg|Claude
 spotify.desktop|/usr/share/icons/hicolor/128x128/apps/spotify.png|Spotify
 com.obsproject.Studio.desktop|/usr/share/icons/hicolor/128x128/apps/com.obsproject.Studio.png|OBS Studio
-Alacritty.desktop|/home/dxle/.local/share/icons/alacritty.png|Alacritty
 brave-browser.desktop|/usr/share/icons/hicolor/128x128/apps/brave-desktop.png|Brave
 youtube-webapp.desktop|/home/dxle/.local/share/icons/YouTube.png|YouTube
 instagram-webapp.desktop|/home/dxle/.local/share/icons/Instagram.png|Instagram
 github-webapp.desktop|/home/dxle/.local/share/icons/GitHub.png|GitHub
-localsend.desktop|/usr/share/icons/hicolor/128x128/apps/localsend.png|LocalSend
+localsend.desktop|/home/dxle/.local/share/icons/localsend.png|LocalSend
 nemo.desktop|/usr/share/icons/AdwaitaLegacy/22x22/legacy/system-file-manager.png|Files
 org.pulseaudio.pavucontrol.desktop|/usr/share/icons/hicolor/scalable/apps/org.pulseaudio.pavucontrol.svg|Volume

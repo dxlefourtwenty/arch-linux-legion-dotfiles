@@ -27,12 +27,15 @@ case "$chosen" in
     systemctl reboot
     ;;
   *Lock)
+    sleep 0.1
     ~/.config/swaylock/lock.sh
     ;;
   *Logout)
     swaymsg exit
     ;;
   *Suspend)
-    systemctl suspend
+    ~/.config/swaylock/lock.sh
+    sleep 1
+    loginctl suspend
     ;;
 esac
