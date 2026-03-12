@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+PIDFILE="/tmp/launch-screenshot-clipboard.pid"
+
+if [[ -f "$PIDFILE" ]]; then
+    pid=$(cat "$PIDFILE" 2>/dev/null || true)
+    if [[ -n "${pid:-}" ]] && kill -0 "$pid" 2>/dev/null; then
+        kill -TERM -- "-$pid" 2>/dev/null || kill -TERM "$pid" 2>/dev/null || true
+        exit 0
+    fi
+    rm -f "$PIDFILE"
+fi
+
+setsid bash -c '
+set -euo pipefail
+PIDFILE="/tmp/launch-screenshot-clipboard.pid"
+echo "$$" > "$PIDFILE"
+
+cleanup() {
+    rm -f "$PIDFILE"
+}
+trap cleanup EXIT INT TERM
+
+DIR="$HOME/Pictures/Screenshots"
+mkdir -p "$DIR"
+
+tmp=$(mktemp /tmp/satty-XXXXXX.png) || exit 1
+geometry=$(slurp) || exit 0
+[[ -z "$geometry" ]] && exit 0
+
+grim -g "$geometry" "$tmp" || exit 1
+
+satty -f "$tmp" \
+    --fullscreen \
+    --actions-on-enter save-to-file \
+    --early-exit || {
+    rm -f "$tmp"
+    exit 1
+}
+
+wl-copy --type image/png < "$tmp"
+
+notify-send \
+    -i /usr/share/icons/hicolor/scalable/apps/satty.svg \
+    -t 3000 \
+    "Clipboard" "Screenshot appended."
+
+file="$DIR/screenshot-$(date +%Y-%m-%d_%H-%M-%S).png"
+mv "$tmp" "$file"
+' >/dev/null 2>&1 &

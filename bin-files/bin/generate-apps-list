@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+set -euo pipefail
+shopt -s nullglob
+
+rm -rf ~/.config/apps.list
+
+APP_DIR="$HOME/.local/share/applications"
+OUT="$HOME/.config/apps.list"
+
+mkdir -p "$HOME/.config"
+: > "$OUT"
+
+# Prefer PNG because it's most reliable; fall back to SVG if present.
+resolve_icon_path() {
+  local icon="$1"
+  local hit
+
+  # already absolute
+  if [[ "$icon" == /* && -f "$icon" ]]; then
+      echo "$icon"
+      return
+  fi
+
+  # system icons FIRST
+  hit=$(find /usr/share/icons \
+      -type f \( -iname "$icon.png" -o -iname "$icon.svg" \) \
+      2>/dev/null | head -n 1)
+
+  [[ -n "$hit" ]] && { echo "$hit"; return; }
+
+  # pixmaps fallback
+  hit=$(find /usr/share/pixmaps \
+      -type f -iname "$icon.png" \
+      2>/dev/null | head -n 1)
+
+  [[ -n "$hit" ]] && { echo "$hit"; return; }
+
+  # user icons LAST
+  hit=$(find "$HOME/.local/share/icons" \
+      -type f \( -iname "$icon.png" -o -iname "$icon.svg" \) \
+      2>/dev/null | head -n 1)
+
+  [[ -n "$hit" ]] && { echo "$hit"; return; }
+
+  echo ""
+}
+
+for link in "$APP_DIR"/*.desktop; do
+  [[ -f "$link" ]] || continue
+
+  target="$(readlink -f "$link")"
+
+  desktop="$(basename "$link")"
+
+  name="$(grep -m1 '^Name=' "$target" | cut -d= -f2- | xargs || true)"
+  icon_name="$(grep -m1 '^Icon=' "$target" | cut -d= -f2- | xargs || true)"
+
+  [[ -n "$name" ]] || name="$desktop"
+
+  icon_name="$(eval echo "$icon_name")"
+
+  icon_path="$(resolve_icon_path "$icon_name")"
+
+  printf "%s|%s|%s\n" "$desktop" "$icon_path" "$name" >> "$OUT"
+done
+
+sort -o "$OUT" "$OUT"
+echo "Wrote: $OUT"

@@ -1,0 +1,26 @@
+[
+  {
+    "task": "Workout: Biceps",
+    "recurrence_type": "weekly",
+    "recurrence_value": "Mon,Thu,Sat",
+    "created_at": "2026-03-01T08:52:26Z"
+  },
+  {
+    "task": "Workout: Chest, Shoulders, and Triceps",
+    "recurrence_type": "weekly",
+    "recurrence_value": "Sun,Wed",
+    "created_at": "2026-03-01T09:09:19Z"
+  },
+  {
+    "task": "CS4080 Presentation",
+    "recurrence_type": "daily",
+    "recurrence_value": "daily",
+    "created_at": "2026-03-01T09:10:33Z"
+  },
+  {
+    "task": "CS4310 Project",
+    "recurrence_type": "daily",
+    "recurrence_value": "daily",
+    "created_at": "2026-03-05T23:16:45Z"
+  }
+]

@@ -1,0 +1,69 @@
+@import "~/.config/rofi/colors.rasi"
+
+* {
+    font: "JetBrainsMono Nerd Font 16";
+    background-color: transparent;
+    text-color: @fg;
+}
+
+window {
+    width: 400px;
+    border: 2px;
+    border-radius: 0px;
+    border-color: @border;
+    padding: 20px;
+    background-color: @bg;
+}
+
+mainbox {
+    background-color: transparent;
+}
+
+inputbar {
+    background-color: transparent;
+}
+
+listview {
+    spacing: 8px;
+    background-color: transparent;
+}
+
+element {
+    padding: 8px 8px;
+    background-color: transparent;
+    orientation: horizontal;
+    spacing: 12px;
+}
+
+element-text {
+    text-color: @fg;
+    highlight: none;
+    text-decoration: none;
+    padding-left: 4px;
+    horizontal-align: 0.0;
+}
+
+element-icon {
+    size: 24px;
+}
+
+element-text selected {
+    text-color: @accent;    
+}
+
+element selected {
+    background-color: transparent;
+}
+
+entry {
+    placeholder: "Launch…";
+    placeholder-color: @muted;
+    background-color: @bg-2;
+    margin: 0 -10px 10px 0;
+    padding: 5px 0 5px 5px;
+}
+
+listview {
+    fixed-height: false;
+    lines: 10;
+}

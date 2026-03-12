@@ -1,0 +1,14 @@
+anchor=top-right
+margin=30
+padding=12
+
+background-color=#1e1e2eD9
+text-color=#cdd6f4
+border-color=#cba6f7
+border-size=2
+border-radius=0
+
+font=JetBrainsMono Nerd Font 12
+
+default-timeout=8000
+ignore-timeout=1

@@ -1,0 +1,69 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+THEME_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/themes"
+THEME_DIR_RESOLVED="$(readlink -f "$THEME_DIR" 2>/dev/null || printf '%s' "$THEME_DIR")"
+
+[ ! -d "$THEME_DIR_RESOLVED" ] && {
+    notify-send -t 4000 "Theme" "Themes directory not found: $THEME_DIR"
+    exit 1
+}
+
+# Get current theme from symlink
+CURRENT_THEME=$(basename "$(readlink -f "$THEME_DIR_RESOLVED/current")")
+
+# List valid theme directories
+THEMES=$(find "$THEME_DIR_RESOLVED" -mindepth 1 -maxdepth 1 -type d \
+    ! -name "current" \
+    ! -name ".*" \
+    -printf "%f\n" | sort)
+
+DISPLAY=""
+
+while IFS= read -r theme; do
+    # Pretty formatting
+    pretty=$(echo "$theme" | sed -E '
+        s/rose-pine/Rosé Pine/;
+        s/[-_]/ /g;
+        s/\b(.)/\U\1/g
+    ')
+
+    # Italicize current theme using Pango markup
+    if [ "$theme" = "$CURRENT_THEME" ]; then
+        pretty="<i>$pretty</i>"
+    fi
+
+    DISPLAY+="$pretty\n"
+done <<< "$THEMES"
+
+# Show rofi menu (enable markup)
+DISPLAY="${DISPLAY%\\n}"
+SELECTED_DISPLAY=$(printf '%b' "$DISPLAY" | rofi -dmenu -i \
+    -markup-rows \
+    -p "" \
+    -theme-str '
+        window { width: 210px; }
+        entry { placeholder: "Theme…"; }
+        element { 
+            orientation: horizontal;
+            children: [ element-text ];
+            spacing: 0px;
+            padding: 8px 8px;
+        }
+        element-text { 
+            horizontal-align: 0.0;
+            padding-left: 0px;
+            margin: 0 2px;
+        }
+    ')
+
+# Exit if nothing selected
+[ -z "$SELECTED_DISPLAY" ] && exit 0
+
+# Strip markup and convert back to directory format
+SELECTED=$(echo "$SELECTED_DISPLAY" | \
+    sed -E 's/<[^>]+>//g' | \
+    tr '[:upper:]' '[:lower:]' | \
+    sed 's/é/e/g; s/ /-/g')
+
+"$SCRIPT_DIR/theme" "$SELECTED"

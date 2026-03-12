@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+
+options="󰐥  Shutdown\n󰤁  Reboot\n  Lock\n󰍃  Logout\n󰤄  Suspend"
+
+chosen=$(echo -e "$options" | rofi -dmenu -i \
+    -p "" \
+    -theme-str '
+        window { width: 260px; }
+        entry { placeholder: "Power…"; }
+        element { 
+            orientation: horizontal;
+            children: [ element-text ];
+            spacing: 0px;
+            padding: 8px 10px;
+        }
+        element-text { 
+            horizontal-align: 0.0;
+            padding-left: 0px;
+        }
+    ')
+
+case "$chosen" in
+  *Shutdown)
+    systemctl poweroff
+    ;;
+  *Reboot)
+    systemctl reboot
+    ;;
+  *Lock)
+    ~/.config/swaylock/lock.sh
+    ;;
+  *Logout)
+    swaymsg exit
+    ;;
+  *Suspend)
+    systemctl suspend
+    ;;
+esac

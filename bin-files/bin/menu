@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
+options="󰋁  Apps
+󰨝  Dashboard
+  Style
+󰧑  Learn
+  Config
+  Tools
+  Activity
+⏻  System"
+
+chosen=$(echo -e "$options" | rofi -dmenu -i \
+    -p "" \
+    -theme-str '
+        window { width: 245px; }
+        entry { placeholder: "Go…"; }
+        element { 
+            orientation: horizontal;
+            children: [ element-text ];
+            spacing: 0px;
+            padding: 8px 8px;
+        }
+        element-text { 
+            horizontal-align: 0.0;
+            padding-left: 0px;
+        }
+    ')
+
+label="${chosen##* }"
+
+case "$label" in
+    Apps) "$SCRIPT_DIR/menu-apps" ;;
+    Dashboard) "$SCRIPT_DIR/toggle-dashboard" ;;
+    Style) "$SCRIPT_DIR/menu-style" ;;
+    Learn) "$SCRIPT_DIR/menu-learn" ;;
+    Config) "$SCRIPT_DIR/menu-config" ;;
+    Tools) "$SCRIPT_DIR/menu-tools" ;;
+    Activity) "$SCRIPT_DIR/launch-terminal" btop ;;
+    System) "$SCRIPT_DIR/menu-power" ;;
+esac

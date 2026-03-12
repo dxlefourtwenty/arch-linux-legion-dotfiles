@@ -1,0 +1,14 @@
+@import url("theme.css");
+
+@define-color unfocused @foreground-inactive;
+@define-color focused @cyan;
+@define-color inactive @purple;
+@define-color sound @magenta;
+@define-color bluetooth @bright-yellow;
+@define-color network @blue;
+@define-color wallpaper @bright-magenta;
+@define-color battery @green;
+@define-color date @bright-magenta;
+@define-color time @yellow;
+@define-color menu @bright-blue;
+@define-color power @cyan;

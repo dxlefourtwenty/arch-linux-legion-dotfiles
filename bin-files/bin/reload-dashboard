@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+pkill -x topdash 2>/dev/null
+exec /home/dxle/dev/dashboard/build/topdash &

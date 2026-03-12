@@ -1,0 +1,7 @@
+--resource
+/home/dxle/builds/livepaper/build/.qt/rcc/qmake_LivePaper.qrc
+--resource
+/home/dxle/builds/livepaper/build/.qt/rcc/livepaper_raw_qml_0.qrc
+--resource
+/home/dxle/builds/livepaper/build/.qt/rcc/livepaper_raw_qml_0_extra_qmldirs.qrc
+/qt/qml/LivePaper/qml/Main.qml

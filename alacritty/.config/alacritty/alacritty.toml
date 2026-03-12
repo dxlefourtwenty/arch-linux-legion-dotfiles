@@ -1,0 +1,6 @@
+general.live_config_reload = true
+
+general.import = [
+  "~/.config/themes/current/alacritty.toml"
+]
+

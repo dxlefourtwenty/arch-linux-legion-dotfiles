@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+
+# Exit if nothing was passed
+[ -z "$1" ] && exit 1
+
+# Fallback if TERMINAL isn't set
+: "${TERMINAL:=kitty}"
+
+term_bin="${TERMINAL%% *}"
+
+if ! command -v "$term_bin" >/dev/null 2>&1; then
+    TERMINAL=kitty
+    term_bin=kitty
+fi
+
+case "$term_bin" in
+    kitty|alacritty|foot|ghostty|xterm)
+        exec "$term_bin" -e "$@"
+        ;;
+    wezterm)
+        exec "$term_bin" start --always-new-process -- "$@"
+        ;;
+    gnome-terminal)
+        exec "$term_bin" -- "$@"
+        ;;
+    konsole)
+        exec "$term_bin" -e "$@"
+        ;;
+    xfce4-terminal)
+        exec "$term_bin" --command="$*"
+        ;;
+    *)
+        exec kitty -e "$@"
+        ;;
+esac

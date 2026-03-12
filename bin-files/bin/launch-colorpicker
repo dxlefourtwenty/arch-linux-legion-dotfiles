@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+PIDFILE="/tmp/launch-colorpicker.pid"
+
+if [[ -f "$PIDFILE" ]]; then
+    pid=$(cat "$PIDFILE" 2>/dev/null || true)
+    if [[ -n "${pid:-}" ]] && kill -0 "$pid" 2>/dev/null; then
+        kill -TERM -- "-$pid" 2>/dev/null || kill -TERM "$pid" 2>/dev/null || true
+        exit 0
+    fi
+    rm -f "$PIDFILE"
+fi
+
+setsid bash -c '
+set -euo pipefail
+PIDFILE="/tmp/launch-colorpicker.pid"
+echo "$$" > "$PIDFILE"
+
+cleanup() {
+    rm -f "$PIDFILE"
+}
+trap cleanup EXIT INT TERM
+
+geometry=$(slurp -p) || exit 0
+[[ -z "$geometry" ]] && exit 0
+
+color=$(grim -g "$geometry" -t ppm - | \
+    tail -c 3 | \
+    od -An -t u1 | \
+    awk "{printf \"#%02X%02X%02X\\n\", \$1, \$2, \$3}")
+
+[[ -z "$color" ]] && exit 0
+echo "$color" | wl-copy
+
+icon="/tmp/colorpick.png"
+magick -size 32x32 xc:"$color" "$icon"
+
+notify-send \
+    -i "$icon" \
+    -t 5000 \
+    "Color Picker" \
+    "$color"
+' >/dev/null 2>&1 &

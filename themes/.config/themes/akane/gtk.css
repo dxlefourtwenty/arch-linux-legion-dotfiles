@@ -1,0 +1,17 @@
+@define-color base        #0E1E36;
+@define-color mantle      #0C182C;
+@define-color crust       #081220;
+
+@define-color surface0    #4A2036;
+@define-color surface1    #574F72;
+@define-color surface2    #763C5D;
+
+@define-color text        #F4B999;
+@define-color subtext     #BE6F76;
+
+@define-color accent      #D2495B; /* amaranth */
+@define-color blue        #9279AA;
+@define-color green       #C85670;
+@define-color red         #FA7E75;
+@define-color orange      #F4B999;
+

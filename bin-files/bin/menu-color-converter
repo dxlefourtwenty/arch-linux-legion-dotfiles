@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
+rofi \
+    -show color \
+    -modi "color:${SCRIPT_DIR}/generate-rgba-or-hex" \
+    -show-icons \
+    -p "" \
+    -theme-str '
+        window { width: 525px; }
+        inputbar {
+            children: [ entry ];
+        }
+        entry { placeholder: "Enter a #RRGGBBAA or rgba(r,g,b,a)…"; }
+        element { 
+            orientation: horizontal;
+            children: [ element-icon, element-text ];
+            spacing: 8px;
+            padding: 8px 10px;
+        }
+        element-icon {
+            size: 20px;
+        }
+        element-text { 
+            horizontal-align: 0.0;
+            padding-left: 0px;
+        }
+    '

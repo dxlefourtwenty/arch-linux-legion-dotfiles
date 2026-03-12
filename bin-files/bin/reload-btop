@@ -1,0 +1,3 @@
+if pgrep -x btop >/dev/null; then
+    pkill -SIGUSR2 btop
+fi

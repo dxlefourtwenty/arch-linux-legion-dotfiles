@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
+options="  Add Task
+  Remove Task"
+
+chosen=$(echo -e "$options" | rofi -dmenu -i \
+    -p "" \
+    -theme-str '
+        window { width: 260px; }
+        entry { placeholder: "Tasks…"; }
+        element { 
+            orientation: horizontal;
+            children: [ element-text ];
+            spacing: 0px;
+            padding: 8px 10px;
+        }
+        element-text { 
+            horizontal-align: 0.0;
+            padding-left: 0px;
+        }
+    ')
+
+label="${chosen#*  }"
+
+case "$label" in
+  "Add Task")
+    "$SCRIPT_DIR/menu-tasks-add"
+    ;;
+  "Remove Task")
+    "$SCRIPT_DIR/menu-tasks-remove"
+    ;;
+esac

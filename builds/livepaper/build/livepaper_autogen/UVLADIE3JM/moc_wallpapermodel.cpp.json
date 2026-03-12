@@ -1,0 +1,18 @@
+{
+    "classes": [
+        {
+            "className": "WallpaperModel",
+            "lineNumber": 15,
+            "object": true,
+            "qualifiedClassName": "WallpaperModel",
+            "superClasses": [
+                {
+                    "access": "public",
+                    "name": "QAbstractListModel"
+                }
+            ]
+        }
+    ],
+    "inputFile": "wallpapermodel.h",
+    "outputRevision": 69
+}

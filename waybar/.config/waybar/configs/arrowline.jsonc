@@ -1,0 +1,243 @@
+{
+	"layer": "top",
+	"position": "top",
+  "output": "HDMI-A-1",
+    "reload_style_on_change": true,
+	"modules-left": [
+		"hyprland/workspaces",
+		"custom/arrow10",
+    "custom/arrow11",
+		"hyprland/window"
+	],
+
+	"modules-right": [
+    "custom/arrow7",
+    "custom/bluetooth",
+		"custom/arrow6",
+		"wireplumber",
+		"custom/arrow5",
+		"network",
+		"custom/arrow4",
+		"battery",
+		"custom/arrow3",
+		"clock#time",
+		"custom/arrow2",
+		"custom/wallpapers",
+		"custom/arrow1",
+		"custom/menu",
+    "custom/arrow0",
+    "custom/power"
+	],
+
+	// Modules
+	"clock#time": {
+        "format": "󱑍  {:%H:%M}",
+        "align": 1,
+        "cursor": false,
+        "justify": "right",
+        "tooltip-format": "{:%I:%M %p ~  %a. %d.%m }",
+        "timezones": [
+            "America/Los_Angeles",
+            "America/Los_Angeles",
+        ],
+        "actions":  {
+            "on-click": "tz_up",
+        }
+    },
+    
+	"clock#date": {
+		"format": " {:%d/%m}",
+        "tooltip-format": "{:%I:%M %p ~  %a. %d.%m }",
+        "timezones": [
+            "Asia/Kolkata",
+            "America/Los_Angeles",
+        ],
+        "actions":  {
+            "on-click": "tz_up",
+        }
+	},
+
+  // Modules configuration
+  "hyprland/workspaces": {
+      "disable-scroll": true,
+      "all-outputs": false,
+      "warp-on-scroll": false,
+      "format": "{icon}",
+      "format-icons": {
+          "1": "",
+          "2": "",
+          "3": "",
+          "4": "",
+          "5": "",
+          "6": "",
+          "7": "",
+          "8": "",
+          "9": "",
+          "10": "",
+          "active": "",
+      },
+      "persistent-workspaces": {
+          "HDMI-A-1": [ 1,2,3,4,5 ],
+      },
+  },
+  "hyprland/window": {
+      "format": "{}",
+      "max-length": 30,
+      "tooltip": false
+  },
+
+	"tray": {
+		"icon-size": 18,
+		"spacing": 10
+	},
+	
+    "battery": {
+        "bat": "BAT0",
+        "interval": 60,
+        "format": "{icon} {capacity}%",
+        "format-icons": ["󰂎", "󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"],
+        "tooltip-format": "{capacity}%",
+    },
+
+	"temperature": {
+		"critical-threshold": 90,
+		"interval": 5,
+		"format": "{icon} {temperatureC}°",
+		"format-icons": [ "","","","",""],
+	},
+	
+  "network": {
+      "format": "",
+      "cursor": false,
+      "on-click": "launch-terminal nmtui",
+      "format-ethernet": "",
+      "format-wifi": "{icon} {signalStrength}%",
+      "format-disconnected": "󰞃 no signal",
+      "format-icons": ["󰢿 ", "󰢼 ", "󰢽 ", "󰢾 "],
+      "tooltip-format-wifi": "{essid} ({signalStrength}%)",
+      "tooltip-format-ethernet": "{ifname}",
+      "tooltip-format-disconnected": "Disconnected",
+  },
+
+  "wireplumber": {
+      "format": "{icon} {volume}%",
+      "cursor": false,
+  "format-muted": "󰝟",
+  "format-icons": ["󰖀 ", "󰕾 "],        
+      "on-click": "pavucontrol",        
+      "max-volume": 150,
+      "scroll-step": 2,
+      "tooltip-format": "{icon}  {volume}%",
+  },
+    
+	"niri/window": {
+		"format": "{}",
+		"max-length": 30,
+		"tooltip": false
+	},
+
+    "niri/workspaces": {
+        "format": "{value}",
+        "on-click": "activate",
+        "sort-by-number": true,
+    },
+
+	"custom/arrow1": {
+		// "format": "",
+		"format": "",
+		// "format": "",
+		"tooltip": false
+	},
+
+	"custom/arrow2": {
+		// "format": "",
+		"format": "",
+		// "format": "",
+		"tooltip": false
+	},
+
+	"custom/arrow3": {
+		// "format": "",
+		"format": "",
+		// "format": "",
+		"tooltip": false
+	},
+
+	"custom/arrow4": {
+		// "format": "",
+		"format": "",
+		// "format": "",
+		"tooltip": false
+	},
+
+	"custom/arrow5": {
+		// "format": "",
+		"format": "",
+		// "format": "",
+		"tooltip": false
+	},
+
+	"custom/arrow6": {
+		// "format": "",
+		"format": "",
+		// "format": "",
+		"tooltip": false
+	},
+
+  "custom/arrow7": {
+		// "format": "",
+		"format": "",
+		// "format": "",
+		"tooltip": false
+	},
+
+	"custom/arrow10": {
+		// "format": "",
+		"format": "",
+		// "format": "",
+		"tooltip": false
+	},
+
+  "custom/arrow11": {
+		// "format": "",
+		"format": "",
+		// "format": "",
+		"tooltip": false
+	},
+
+  "custom/arrow0": {
+		// "format": "",
+		"format": "",
+		// "format": "",
+		"tooltip": false
+	},
+
+  "custom/power": {
+    "format": " ",
+    "on-click": "~/bin/menu-power",
+    "tooltip": false,
+    "cursor": false
+  },
+  "custom/menu": {
+    "format": "󰣇 ",
+    "on-click": "~/bin/menu",
+    "tooltip": false,
+    "cursor": false
+  },
+  "custom/wallpapers": {
+    "format": " ",  
+    "on-click": "bg-set",
+    "tooltip": false,
+    "cursor": false
+  },
+
+  "custom/bluetooth": {
+        "format": " ",  
+        "on-click": "~/bin/launch-terminal bluetuith",
+        "tooltip": false,
+        "cursor": false
+  },
+
+  
+}
+

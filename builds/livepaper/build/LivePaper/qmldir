@@ -1,0 +1,6 @@
+module LivePaper
+typeinfo livepaper.qmltypes
+prefer :/qt/qml/LivePaper/
+Main 1.0 qml/Main.qml
+depends QtQuick
+

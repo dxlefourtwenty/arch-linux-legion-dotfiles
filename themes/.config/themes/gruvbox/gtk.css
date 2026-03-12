@@ -1,0 +1,16 @@
+@define-color base        #282828; /* dark0 */
+@define-color mantle      #1d2021; /* darker bg */
+@define-color crust       #141617; /* deepest bg */
+
+@define-color surface0    #3c3836; /* dark1 */
+@define-color surface1    #504945; /* dark2 */
+@define-color surface2    #665c54; /* dark3 */
+
+@define-color text        #ebdbb2; /* light1 */
+@define-color subtext     #a89984; /* gray */
+
+@define-color accent      #a89984; /* requested accent */
+@define-color blue        #7daea3;
+@define-color green       #a9b665;
+@define-color red         #ea6962;
+@define-color orange      #fe8019; /* strong orange */

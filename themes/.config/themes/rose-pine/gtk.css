@@ -1,0 +1,16 @@
+@define-color base        #191724;
+@define-color mantle      #1f1d2e;
+@define-color crust       #14121a;
+
+@define-color surface0    #26233a;
+@define-color surface1    #403d52;
+@define-color surface2    #524f67;
+
+@define-color text        #e0def4;
+@define-color subtext     #908caa;
+
+@define-color accent      #9ccfd8; /* foam */
+@define-color blue        #31748f; /* pine */
+@define-color green       #31748f; /* pine */
+@define-color red         #eb6f92; /* love */
+@define-color orange      #f6c177; /* gold */

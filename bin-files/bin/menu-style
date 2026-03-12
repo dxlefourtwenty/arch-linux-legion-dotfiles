@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
+options="󰸌  Theme
+  Background
+󱢈  Live Gallery
+󰍜  Waybar"
+
+chosen=$(echo -e "$options" | rofi -dmenu -i \
+    -p "" \
+    -theme-str '
+        window { width: 265px; }
+        entry { placeholder: "Style…"; }
+        element { 
+            orientation: horizontal;
+            children: [ element-text ];
+            spacing: 0px;
+            padding: 8px 8px;
+        }
+        element-text { 
+            horizontal-align: 0.0;
+            padding-left: 0px;
+        }
+    ')
+
+label="${chosen#*  }"   # remove up to the double-space after the icon
+
+case "$label" in
+  "Theme")
+    "$SCRIPT_DIR/menu-theme"
+    ;;
+  "Background")
+    "$SCRIPT_DIR/bg-set"
+    ;;
+  "Live Gallery")
+    "$SCRIPT_DIR/bg-live"
+    ;;
+  "Waybar")
+    "$SCRIPT_DIR/menu-waybar"
+    ;;
+esac

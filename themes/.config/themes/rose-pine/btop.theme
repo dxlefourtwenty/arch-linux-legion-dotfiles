@@ -1,0 +1,105 @@
+# -------------------------------------------------
+# Rose Pine btop theme
+# Soft contrast / foam-forward / dusk aesthetic
+# Matches custom YASB Rose Pine theme
+# -------------------------------------------------
+
+# Main background (base)
+theme[main_bg]="#191724"
+
+# Main foreground text (text)
+theme[main_fg]="#e0def4"
+
+# Titles / box headers
+theme[title]="#f5f3ff"
+
+# Highlight (PRIMARY ACCENT – foam)
+theme[hi_fg]="#9ccfd8"
+
+# Selected process background (surface)
+theme[selected_bg]="#26233a"
+
+# Selected process foreground
+theme[selected_fg]="#9ccfd8"
+
+# Inactive / dimmed text
+theme[inactive_fg]="#6e6a86"
+
+# Text drawn on top of graphs
+theme[graph_text]="#f5f3ff"
+
+# Meter backgrounds
+theme[meter_bg]="#1f1d2e"
+
+# Process misc text
+theme[proc_misc]="#e0def4"
+
+# -------------------------------------------------
+# Box outlines (semantic Rose Pine)
+# -------------------------------------------------
+theme[cpu_box]="#9ccfd8"   # foam (primary)
+theme[mem_box]="#31748f"   # pine
+theme[net_box]="#c4a7e7"   # iris
+theme[proc_box]="#ebbcba"  # rose
+
+# Divider lines
+theme[div_line]="#403d52"
+
+# -------------------------------------------------
+# Temperature graph (Pine → Gold → Love)
+# -------------------------------------------------
+theme[temp_start]="#31748f"
+theme[temp_mid]="#f6c177"
+theme[temp_end]="#eb6f92"
+
+# -------------------------------------------------
+# CPU graph (Foam → Pine → Iris)
+# -------------------------------------------------
+theme[cpu_start]="#9ccfd8"
+theme[cpu_mid]="#31748f"
+theme[cpu_end]="#c4a7e7"
+
+# -------------------------------------------------
+# Memory / Disk meters
+# -------------------------------------------------
+
+# Free (Iris → Foam)
+theme[free_start]="#c4a7e7"
+theme[free_mid]="#9ccfd8"
+theme[free_end]="#31748f"
+
+# Cached (Pine → Foam)
+theme[cached_start]="#31748f"
+theme[cached_mid]="#9ccfd8"
+theme[cached_end]="#c4a7e7"
+
+# Available (Gold → Rose)
+theme[available_start]="#f6c177"
+theme[available_mid]="#ebbcba"
+theme[available_end]="#eb6f92"
+
+# Used (Pine → Foam)
+theme[used_start]="#31748f"
+theme[used_mid]="#9ccfd8"
+theme[used_end]="#c4a7e7"
+
+# -------------------------------------------------
+# Network graphs
+# -------------------------------------------------
+
+# Download (Rose → Love)
+theme[download_start]="#ebbcba"
+theme[download_mid]="#eb6f92"
+theme[download_end]="#eb6f92"
+
+# Upload (Pine → Foam)
+theme[upload_start]="#31748f"
+theme[upload_mid]="#9ccfd8"
+theme[upload_end]="#c4a7e7"
+
+# -------------------------------------------------
+# Process usage gradients
+# -------------------------------------------------
+theme[process_start]="#9ccfd8"
+theme[process_mid]="#31748f"
+theme[process_end]="#c4a7e7"

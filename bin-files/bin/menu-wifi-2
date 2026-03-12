@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+
+CHOICE=$(nmcli -t -f SSID,SECURITY,SIGNAL device wifi list | \
+    sed '/^$/d' | \
+    sort -u | \
+    rofi -dmenu -p "" \
+    -theme-str '
+       window { width: 600px; }
+        entry { placeholder: "WiFi…"; }
+        element { 
+            orientation: horizontal;
+            children: [ element-text ];
+            spacing: 0px;
+            padding: 8px 8px;
+        }
+        element-text { 
+            horizontal-align: 0.0;
+            padding-left: 0px;
+            margin: 0 2px;
+        } 
+      ')
+
+[ -z "$CHOICE" ] && exit 1
+
+SSID=$(echo "$CHOICE" | cut -d':' -f1)
+
+SECURITY=$(nmcli -t -f SSID,SECURITY device wifi list | \
+    grep "^$SSID:" | head -n1 | cut -d':' -f2)
+
+if [ -z "$SECURITY" ]; then
+    nmcli device wifi connect "$SSID"
+else
+    PASS=$(rofi -dmenu -password -p "Password")
+    [ -z "$PASS" ] && exit 1
+    nmcli device wifi connect "$SSID" password "$PASS"
+fi

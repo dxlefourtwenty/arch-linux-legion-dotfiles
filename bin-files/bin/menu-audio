@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+
+# Get sinks
+sinks=$(pactl list sinks short)
+
+options=""
+
+while read -r id name driver format channels rate state; do
+    # Pretty names
+    if [[ "$name" == *usb* ]]; then
+        label="󰋋  Headset"
+    elif [[ "$name" == *hdmi* ]]; then
+        label="󰍹  Monitor"
+    elif [[ "$name" == *analog* ]]; then
+        label="󰓃  Speakers"
+    else
+        label="󰕾  Audio"
+    fi
+
+    options+="$label|$id\n"
+done <<< "$sinks"
+
+chosen=$(echo -e "$options" | cut -d'|' -f1 | rofi -dmenu -i \
+    -p "" \
+    -theme-str '
+        window { width: 260px; }
+        entry { placeholder: "Audio…"; }
+        element {
+            orientation: horizontal;
+            children: [ element-text ];
+            spacing: 0px;
+            padding: 8px 10px;
+        }
+        element-text {
+            horizontal-align: 0.0;
+            padding-left: 0px;
+        }
+    ')
+
+sink_id=$(echo -e "$options" | grep "$chosen" | cut -d'|' -f2)
+
+if [ -n "$sink_id" ]; then
+    pactl set-default-sink "$sink_id"
+
+    # Move existing audio streams
+    pactl list sink-inputs short | while read -r input rest; do
+        pactl move-sink-input "$input" "$sink_id"
+    done
+fi

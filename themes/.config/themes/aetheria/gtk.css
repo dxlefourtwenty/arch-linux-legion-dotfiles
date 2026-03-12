@@ -1,0 +1,18 @@
+/* Aetheria */
+
+@define-color base        #0e091d;
+@define-color mantle      #0e091d;
+@define-color crust       #000000;
+
+@define-color surface0    #2a2e55;
+@define-color surface1    #2a2e55;
+@define-color surface2    #2a2e55;
+
+@define-color text        #14B9B5;
+@define-color subtext     #2a2e55;
+
+@define-color accent      #14B9B5;
+@define-color blue        #04C5F0;
+@define-color green       #7cd699;
+@define-color red         #E20342;
+@define-color orange      #FF7F41;

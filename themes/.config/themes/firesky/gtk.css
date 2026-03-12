@@ -1,0 +1,18 @@
+/* Firesky */
+
+@define-color base        #0f0f0f;
+@define-color mantle      #1a2424;
+@define-color crust       #0f0f0f;
+
+@define-color surface0    #1a2424;
+@define-color surface1    #4d5a5a;
+@define-color surface2    #4d6b6b;
+
+@define-color text        #e0d8d0;
+@define-color subtext     #d0c8c0;
+
+@define-color accent      #e66a4d;
+@define-color blue        #52c9cd;
+@define-color green       #40c4c0;
+@define-color red         #e6441a;
+@define-color orange      #e68040;

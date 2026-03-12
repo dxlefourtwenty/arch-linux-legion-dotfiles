@@ -1,0 +1,15 @@
+-rootPath
+/home/dxle/builds/livepaper
+-cmake-output
+-output-file
+/home/dxle/builds/livepaper/build/.qt/qml_imports/livepaper_build.cmake
+-importPath
+/home/dxle/builds/livepaper/build
+-importPath
+/home/dxle/builds/livepaper/build/LivePaper
+-importPath
+/usr/lib/qt6/qml
+-qrcFiles
+/home/dxle/builds/livepaper/build/.qt/rcc/qmake_LivePaper.qrc
+/home/dxle/builds/livepaper/build/.qt/rcc/livepaper_raw_qml_0.qrc
+/home/dxle/builds/livepaper/build/.qt/rcc/livepaper_raw_qml_0_extra_qmldirs.qrc

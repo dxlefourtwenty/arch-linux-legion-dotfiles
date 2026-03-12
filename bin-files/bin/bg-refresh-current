@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+FLAGS="--transition-type=none"
+SELECTED="$HOME/.config/themes/current/wallpaper.png"
+
+# Ensure daemon exists
+pgrep -x swww-daemon >/dev/null || swww-daemon &
+
+# Wait until daemon is ready
+while ! swww query >/dev/null 2>&1; do
+    sleep 0.1
+done
+
+swww img "$SELECTED" $FLAGS
