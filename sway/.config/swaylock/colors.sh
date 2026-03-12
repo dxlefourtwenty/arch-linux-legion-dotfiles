@@ -1,1 +1,0 @@
-/home/dxle/.config/themes/current/swaylock.sh
