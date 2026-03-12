@@ -4,6 +4,22 @@ set -euo pipefail
 
 PIDFILE="/tmp/launch-colorpicker.pid"
 
+notify_missing_dep() {
+    local dep="$1"
+    if command -v notify-send >/dev/null 2>&1; then
+        notify-send -t 5000 "Color Picker" "Missing dependency: $dep"
+    else
+        printf 'launch-colorpicker: missing dependency: %s\n' "$dep" >&2
+    fi
+}
+
+for cmd in setsid hyprpicker; do
+    if ! command -v "$cmd" >/dev/null 2>&1; then
+        notify_missing_dep "$cmd"
+        exit 1
+    fi
+done
+
 if [[ -f "$PIDFILE" ]]; then
     pid=$(cat "$PIDFILE" 2>/dev/null || true)
     if [[ -n "${pid:-}" ]] && kill -0 "$pid" 2>/dev/null; then
@@ -23,23 +39,27 @@ cleanup() {
 }
 trap cleanup EXIT INT TERM
 
-geometry=$(slurp -p) || exit 0
-[[ -z "$geometry" ]] && exit 0
-
-color=$(grim -g "$geometry" -t ppm - | \
-    tail -c 3 | \
-    od -An -t u1 | \
-    awk "{printf \"#%02X%02X%02X\\n\", \$1, \$2, \$3}")
-
+color=$(hyprpicker -a -b -f rgb -o "#{0:02X}{1:02X}{2:02X}") || exit 0
 [[ -z "$color" ]] && exit 0
-echo "$color" | wl-copy
 
 icon="/tmp/colorpick.png"
-magick -size 32x32 xc:"$color" "$icon"
 
-notify-send \
-    -i "$icon" \
-    -t 5000 \
-    "Color Picker" \
-    "$color"
+if command -v magick >/dev/null 2>&1; then
+    magick -size 32x32 xc:"$color" "$icon"
+fi
+
+if command -v notify-send >/dev/null 2>&1; then
+    if [[ -f "$icon" ]]; then
+        notify-send \
+            -i "$icon" \
+            -t 5000 \
+            "Color Picker" \
+            "$color"
+    else
+        notify-send \
+            -t 5000 \
+            "Color Picker" \
+            "$color"
+    fi
+fi
 ' >/dev/null 2>&1 &

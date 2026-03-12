@@ -1,5 +1,7 @@
 SUPER + ALT + SPACE | Menu
 SUPER + SPACE | App Launcher
+SUPER + RETURN | Open Terminal
+SUPER + SHIFT + RETURN | Open Main Tmux
 SUPER + CTRL + ALT + SPACE | Open Background Gallery
 SUPER + CTRL + ALT + M | Open Live Background Gallery
 CTRL + ALT + SPACE | Next Background

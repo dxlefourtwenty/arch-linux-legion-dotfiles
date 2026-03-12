@@ -33,7 +33,7 @@ ln -sfn "$NEW_THEME" "$CURRENT_LINK"
 "$SCRIPT_DIR/reload-discord" || true
 "$SCRIPT_DIR/reload-nemo" || true
 "$SCRIPT_DIR/reload-swayosd" || true
-"$SCRIPT_DIR/cursor-set" "$1"
+"$SCRIPT_DIR/cursor-set" "$1" || true
 
 
 # # wallpaper AFTER reload (prevents flicker)
@@ -44,11 +44,13 @@ ln -sfn "$NEW_THEME" "$CURRENT_LINK"
 # Pretty notification
 FORMATTED_NAME=$(echo "$1" | tr '-' ' ' | sed -E 's/\b(.)/\U\1/g')
 
-# Wait until mako is alive
+# Start mako if needed, then wait until it is alive.
+pgrep -x mako >/dev/null || "$SCRIPT_DIR/launch-mako" || true
+
 for i in {1..20}; do
     pgrep -x mako >/dev/null && break
     sleep 0.1
 done
 
 sleep 0.5
-notify-send -t 5000 "Theme" "Updated to $FORMATTED_NAME."
+notify-send -t 5000 "Theme" "Updated to $FORMATTED_NAME." >/dev/null 2>&1 || true
