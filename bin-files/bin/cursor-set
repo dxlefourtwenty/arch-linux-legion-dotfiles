@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+
+CURSOR_FILE="$HOME/.config/themes/current/cursor"
+DEFAULT_CURSOR="Bibata-Modern-Ice"
+SIZE=24
+
+# Read and sanitize
+if [ -f "$CURSOR_FILE" ]; then
+    CURSOR=$(sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//' "$CURSOR_FILE")
+fi
+
+# Fallback if empty
+if [ -z "$CURSOR" ]; then
+    CURSOR="$DEFAULT_CURSOR"
+fi
+
+# Validate theme exists
+if [ ! -d "/usr/share/icons/$CURSOR" ] && \
+   [ ! -d "$HOME/.local/share/icons/$CURSOR" ]; then
+    CURSOR="$DEFAULT_CURSOR"
+fi
+
+echo "Applying: $CURSOR"
+
+# Apply
+swaymsg "seat * xcursor_theme $CURSOR $SIZE" >/dev/null 2>&1
+echo "seat * xcursor_theme $CURSOR $SIZE" > ~/.config/sway/cursor.conf

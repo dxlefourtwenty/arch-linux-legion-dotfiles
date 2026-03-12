@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+THEME='
+window { width: 1000; }
+entry { placeholder: "Remove Task…"; }
+element {
+    orientation: horizontal;
+    children: [ element-text ];
+    spacing: 0px;
+    padding: 8px 10px;
+}
+element-text {
+    horizontal-align: 0.0;
+    padding-left: 0px;
+}
+'
+
+dashboard_cmd="dashboard"
+
+tasks=$($dashboard_cmd list-tasks)
+
+[[ -z "$tasks" ]] && {
+    notify-send "Tasks" "No tasks found"
+    exit 0
+}
+
+chosen=$(echo "$tasks" | rofi -dmenu -i \
+    -p "" \
+    -theme-str "$THEME" \
+    -theme-str 'entry { placeholder: "Remove Task…"; }')
+
+[[ -z "$chosen" ]] && exit 0
+
+task_id=$(echo "$chosen" | awk -F':' '{print $1}')
+
+$dashboard_cmd remove-task "$task_id"
+
+notify-send "Tasks" "Removed $task_id"

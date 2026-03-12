@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
+options="  Keybindings
+  Neovim
+󰒲  Lazyvim
+󱆃  Bash
+  Git"
+
+chosen=$(echo -e "$options" | rofi -dmenu -i \
+    -p "" \
+    -theme-str '
+        window { width: 260px; }
+        entry { placeholder: "Learn…"; }
+        element { 
+            orientation: horizontal;
+            children: [ element-text ];
+            spacing: 0px;
+            padding: 8px 10px;
+        }
+        element-text { 
+            horizontal-align: 0.0;
+            padding-left: 0px;
+        }
+    ')
+
+case "$chosen" in
+  *Keybindings)
+    "$SCRIPT_DIR/menu-keybindings"
+    ;;
+  *Neovim)
+    "$SCRIPT_DIR/menu-neovim-bindings"
+    ;;
+  *Lazyvim)
+    "$SCRIPT_DIR/launch-web-app" https://www.lazyvim.org/keymaps
+    ;;
+  *Bash)
+    "$SCRIPT_DIR/launch-web-app" https://devhints.io/bash
+    ;;
+  *Git)
+    "$SCRIPT_DIR/launch-web-app" https://git-scm.com/cheat-sheet
+    ;;
+esac

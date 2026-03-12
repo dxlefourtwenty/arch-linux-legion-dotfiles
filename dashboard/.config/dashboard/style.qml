@@ -1,0 +1,1 @@
+/home/dxle/.config/dashboard/styles/island.qml

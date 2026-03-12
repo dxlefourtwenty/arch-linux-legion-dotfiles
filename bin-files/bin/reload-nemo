@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+# Only reload if Nemo is running
+if pgrep -x nemo > /dev/null; then
+    pkill nemo
+    sleep 0.2
+    nohup nemo >/dev/null 2>&1 &
+fi
+
+

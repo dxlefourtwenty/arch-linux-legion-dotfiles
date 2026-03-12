@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+DASH="/home/dxle/dev/dashboard/build/topdash"
+
+# If running: toggle
+if pgrep -x topdash >/dev/null; then
+  pkill -USR1 -x topdash
+  exit 0
+fi
+
+# Not running: start hidden, then toggle open
+"$DASH" >/dev/null 2>&1 &
+sleep 0.05
+pkill -USR1 -x topdash

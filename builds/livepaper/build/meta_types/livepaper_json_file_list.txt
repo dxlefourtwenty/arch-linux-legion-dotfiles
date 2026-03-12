@@ -1,0 +1,2 @@
+/home/dxle/builds/livepaper/build/livepaper_autogen/include/../UVLADIE3JM/moc_livepapercontroller.cpp.json
+/home/dxle/builds/livepaper/build/livepaper_autogen/include/../UVLADIE3JM/moc_wallpapermodel.cpp.json

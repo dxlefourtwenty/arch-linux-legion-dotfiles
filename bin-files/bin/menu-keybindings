@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+FILE="$SCRIPT_DIR/scans/keybindings"
+arrow=" "
+
+[[ ! -f "$FILE" ]] && {
+    notify-send "Keybind Menu" "File not found: $FILE"
+    exit 1
+}
+
+# Get longest left column width
+max_width=$(awk -F'|' '
+{
+    gsub(/^ +| +$/, "", $1)
+    print length($1)
+}' "$FILE" | sort -nr | head -1)
+
+# Format for rofi
+formatted=$(
+awk -F'|' -v arrow="$arrow" -v width="$max_width" '
+{
+    left=$1
+    right=$2
+
+    gsub(/^ +| +$/, "", left)
+    gsub(/^ +| +$/, "", right)
+
+    printf "%-*s    %s %s\n", width, left, arrow, right
+}
+' "$FILE"
+)
+
+chosen=$(echo "$formatted" | rofi -dmenu -i \
+    -p "" \
+    -theme-str '
+        window { width: 1000px; }
+        entry { placeholder: "Keybindings…"; }
+        element { 
+            orientation: horizontal;
+            children: [ element-text ];
+            spacing: 0px;
+            padding: 8px 10px;
+        }
+        element-text { 
+            horizontal-align: 0.0;
+            padding-left: 0px;
+            font: "JetBrainsMono Nerd Font 16";
+        }
+    ')
+
+# Do nothing on selection (view-only menu)
+exit 0

@@ -1,0 +1,365 @@
+@import url("theme.css");
+
+* {
+    /* `otf-font-awesome` is required to be installed for icons */
+    font-family: JetBrainsMono Nerd Font;
+    font-size: 15px;
+    min-height: 0;
+    padding: 0;
+    margin: 0;
+}
+
+.modules-center {
+  background: @background;
+  padding: 6px 12px;
+  border-radius: 28px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+window#waybar {
+    background-color: transparent;
+}
+
+window#waybar.hidden {
+    opacity: 0.2;
+}
+
+/*
+window#waybar.empty {
+    background-color: transparent;
+}
+window#waybar.solo {
+    background-color: #FFFFFF;
+}
+*/
+
+tooltip {
+  background: @background-gray;
+  border: 1px solid @foreground;
+  border-radius: 12px;
+}
+
+tooltip label {
+  color: @foreground;
+  padding: 6px;
+}
+
+window#waybar.termite {
+    background-color: #3F3F3F;
+}
+
+window#waybar.chromium {
+    background-color: #000000;
+    border: none;
+}
+
+button {
+    /* Use box-shadow instead of border so the text isn't offset */
+    box-shadow: inset 0 -3px transparent;
+    /* Avoid rounded borders under each button name */
+    border: none;
+    border-radius: 0;
+}
+
+/* https://github.com/Alexays/Waybar/wiki/FAQ#the-workspace-buttons-have-a-strange-hover-effect */
+
+
+/* you can set a style on hover for any module like this */
+#pulseaudio:hover {
+    background-color: transparent;
+}
+
+#workspaces {
+    padding: 0;
+    background-color: transparent;
+    margin: 0 10px 0 10px;
+    border: none;
+    box-shadow: none;
+}
+
+#workspaces button {
+    padding: 0 6px;
+    margin: 0px 2px;
+    border-radius: 16px;
+    color: @muted;
+    background: transparent;
+    color: @foreground;
+    transition: all 0.3s ease-in-out;
+}
+
+#workspaces button.empty {
+    color: @muted;
+}
+
+#workspaces button.active {
+    background: linear-gradient(135deg, @blue 5%, @magenta 50%, @red 100%);
+    color: @background;
+    min-width: 40px;
+    transition: all 0.3s ease-in-out;
+}
+
+#workspaces button:hover {
+    background-color: @primary;
+    color: @foreground;
+}
+
+#workspaces button.urgent {
+    background-color: @red;
+    color: @background;
+}
+
+#mode {
+    background-color: @background;
+    box-shadow: inset 0 -3px @foreground;
+}
+
+#clock,
+#battery,
+#cpu,
+#memory,
+#disk,
+#temperature,
+#backlight,
+#network,
+#pulseaudio,
+#wireplumber,
+#custom-media,
+#tray,
+#mode,
+#idle_inhibitor,
+#scratchpad,
+#power-profiles-daemon,
+#custom-bluetooth,
+#mpd {
+    padding: 0 8px;
+    margin: 0 5px;
+    color: @foreground;
+}
+
+#clock {
+    background-color: transparent;
+}
+
+#battery {
+    background-color: transparent;
+    color: @cyan;
+}
+
+#battery.charging, #battery.plugged {
+    color: @cyan;
+    background-color: transparent;
+}
+
+@keyframes blink {
+    to {
+        background-color: @background;
+        color: @foreground;
+    }
+}
+
+/* Using steps() instead of linear as a timing function to limit cpu usage */
+#battery.critical:not(.charging) {
+    background-color: #f53c3c;
+    color: #ffffff;
+    animation-name: blink;
+    animation-duration: 0.5s;
+    animation-timing-function: steps(12);
+    animation-iteration-count: infinite;
+    animation-direction: alternate;
+}
+
+#power-profiles-daemon {
+    padding-right: 15px;
+}
+
+#power-profiles-daemon.performance {
+    background-color: #f53c3c;
+    color: #ffffff;
+}
+
+#power-profiles-daemon.balanced {
+    background-color: #2980b9;
+    color: #ffffff;
+}
+
+#power-profiles-daemon.power-saver {
+    background-color: #2ecc71;
+    color: #000000;
+}
+
+#cpu {
+    background-color: transparent;
+    color: @foreground;
+    padding-left: 0;
+}
+
+#memory {
+    background-color: transparent;
+    padding-left: 5px;
+}
+
+#disk {
+    background-color: transparent;
+}
+
+#backlight {
+    background-color: transparent;
+}
+
+#network {
+    margin-right: 10px;
+    background-color: transparent;
+    color: @bright-red;
+}
+
+#network.disconnected {
+    background-color: transparent;
+}
+
+#pulseaudio {
+    background-color: transparent;
+    color: @bright-yellow;
+    padding-right: 0;
+}
+
+#pulseaudio.muted {
+    background-color: transparent;
+    color: @foreground;
+}
+
+#wireplumber {
+    background-color: transparent;
+    color: @foreground;
+}
+
+#wireplumber.muted {
+    background-color: transparent;
+}
+
+#custom-media {
+    background-color: #66cc99;
+    color: #2a5c45;
+    min-width: 100px;
+}
+
+#custom-media.custom-spotify {
+    background-color: #66cc99;
+}
+
+#custom-media.custom-vlc {
+    background-color: #ffa000;
+}
+
+#temperature {
+    background-color: transparent;
+    padding-left: 4px;
+}
+
+#temperature.critical {
+    background-color: transparent;
+}
+
+#tray {
+    background-color: transparent;
+}
+
+#tray > .passive {
+    -gtk-icon-effect: dim;
+}
+
+#tray > .needs-attention {
+    -gtk-icon-effect: highlight;
+    background-color: #eb4d4b;
+}
+
+#idle_inhibitor {
+    background-color: #2d3436;
+}
+
+#idle_inhibitor.activated {
+    background-color: #ecf0f1;
+    color: #2d3436;
+}
+
+#mpd {
+    background-color: #66cc99;
+    color: #2a5c45;
+}
+
+#mpd.disconnected {
+    background-color: #f53c3c;
+}
+
+#mpd.stopped {
+    background-color: #90b1b1;
+}
+
+#mpd.paused {
+    background-color: #51a37a;
+}
+
+#language {
+    background: #00b093;
+    color: #740864;
+    padding: 0 5px;
+    margin: 0 5px;
+    min-width: 16px;
+}
+
+#keyboard-state {
+    background: #97e1ad;
+    color: #000000;
+    padding: 0 0px;
+    margin: 0 5px;
+    min-width: 16px;
+}
+
+#keyboard-state > label {
+    padding: 0 5px;
+}
+
+#keyboard-state > label.locked {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+#scratchpad {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+#scratchpad.empty {
+	background-color: transparent;
+}
+
+#privacy {
+    padding: 0;
+}
+
+#privacy-item {
+    padding: 0 5px;
+    color: white;
+}
+
+#privacy-item.screenshare {
+    background-color: #cf5700;
+}
+
+#privacy-item.audio-in {
+    background-color: #1ca000;
+}
+
+#privacy-item.audio-out {
+    background-color: #0069d4;
+}
+
+#custom-power {
+    padding-right: 13px;
+}
+
+#custom-menu {
+    padding-left: 15px;
+    padding-right: 5px;
+}
+
+#custom-bluetooth {
+    padding-right: 5px; 
+}

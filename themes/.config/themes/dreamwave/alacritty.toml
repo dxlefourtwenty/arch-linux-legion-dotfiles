@@ -1,0 +1,49 @@
+general.live_config_reload = true
+general.ipc_socket = true
+
+[window]
+opacity = 0.92
+
+[window.padding]
+x = 10
+y = 10
+
+[font]
+size = 14.0
+
+[font.normal]
+family = "JetBrainsMono Nerd Font"
+
+[colors.primary]
+background = "#0A0716"
+foreground = "#f5eafd"
+
+[colors.normal]
+black = "#0A0716"
+red = "#A70B68"
+green = "#7f049e"
+yellow = "#790aac"
+blue = "#8CF8F7"
+magenta = "#a604e9"
+cyan = "#C429B2"
+white = "#c78bf5"
+
+[colors.bright]
+black = "#8c53b7"
+red = "#f1279f"
+green = "#c911f8"
+yellow = "#b52af3"
+blue = "#e37bd1"
+magenta = "#cc58fc"
+cyan = "#ef6469"
+white = "#f5eafd"
+
+[colors.dim]
+black = "#f5eafd"
+red = "#f1279f"
+green = "#c911f8"
+yellow = "#b52af3"
+blue = "#e37bd1"
+magenta = "#cc58fc"
+cyan = "#ef6469"
+white = "#8c53b7"

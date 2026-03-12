@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+set -e 
+
+echo "==> Installing Broadcom WiFi driver..."
+
+# Ensure headers exist (needed for dkms builds)
+sudo pacman -S --needed linux-headers
+
+# Try normal package first
+if sudo pacman -S --needed broadcom-wl; then
+    echo "==> broadcom-wl installed successfully."
+else
+    echo "==> broadcom-wl failed. Trying DKMS version..."
+    sudo pacman -S --needed broadcom-wl-dkms
+fi
+
+echo
+echo "======================================"
+echo "⚠  Driver installed."
+echo "⚠  REBOOT REQUIRED."
+echo "======================================"
+echo

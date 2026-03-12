@@ -1,0 +1,208 @@
+{
+	"layer": "top",
+	"position": "top",
+  "output": "HDMI-A-1",
+  // "height": 30,
+  "reload_style_on_change": true,
+	"modules-left": [
+		"hyprland/workspaces",
+    "custom/right-arrow-dark",
+    "custom/right-arrow-light",
+    "custom/wallpapers",
+		"custom/menu",
+		"custom/right-arrow-dark"
+	],
+
+  "modules-center": [
+		"custom/left-arrow-dark",
+		"clock#1",
+		"custom/left-arrow-light",
+		"custom/left-arrow-dark",
+		"clock#2",
+		"custom/right-arrow-dark",
+		"custom/right-arrow-light",
+		"clock#3",
+		"custom/right-arrow-dark"
+	],
+
+	"modules-right": [
+    "custom/left-arrow-dark",
+		"wireplumber",
+		"custom/left-arrow-light",
+    "custom/left-arrow-dark",
+		"network",
+		"custom/left-arrow-light",
+    "custom/left-arrow-dark",
+		"battery",
+		"custom/left-arrow-light",
+    "custom/left-arrow-dark",
+    "custom/bluetooth",
+		
+    "custom/power"
+	],
+
+	// Modules
+	"clock#1": {
+		"format": "{:%a}",
+        "cursor": false,
+        "justify": "right",
+        "tooltip-format": "{:%I:%M %p ~  %a. %d.%m }",
+        "timezones": [
+            "America/Los_Angeles",
+        ],
+        "on-click": "/home/dxle/bin/toggle-dashboard",
+
+	},
+	"clock#2": {
+        "format": "{:%I:%M %p}",
+        "cursor": false,
+        "justify": "right",
+        "tooltip-format": "{:%I:%M %p ~  %a. %d.%m }",
+        "timezones": [
+            "America/Los_Angeles",
+        ],
+        "on-click": "/home/dxle/bin/toggle-dashboard",
+    },
+    
+	"clock#3": {
+		"format": "{:%m/%d}",
+        "cursor": false,
+        "justify": "right",
+        "tooltip-format": "{:%I:%M %p ~  %a. %d.%m }",
+        "timezones": [
+            "America/Los_Angeles",
+        ],
+        "on-click": "/home/dxle/bin/toggle-dashboard",
+
+	},
+	"tray": {
+		"icon-size": 18,
+		"spacing": 10
+	},
+	
+    "battery": {
+        "bat": "BAT0",
+        "interval": 60,
+        "format": "bat:  {capacity}%",
+        "format-icons": ["󰂎", "󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"],
+        "tooltip-format": "{capacity}%",
+    },
+
+	"temperature": {
+		"critical-threshold": 90,
+		"interval": 5,
+		"format": "{icon} {temperatureC}°",
+		"format-icons": [ "","","","",""],
+	},
+	
+  "network": {
+      "format": "",
+      "cursor": false,
+      "on-click": "launch-terminal nmtui",
+      "format-ethernet": "",
+      "format-wifi": "net:  {signalStrength}%",
+      "format-disconnected": "net:  no signal",
+      "format-icons": ["󰢿 ", "󰢼 ", "󰢽 ", "󰢾 "],
+      "tooltip-format-wifi": "{essid} ({signalStrength}%)",
+      "tooltip-format-ethernet": "{ifname}",
+      "tooltip-format-disconnected": "Disconnected",
+  },
+
+  "wireplumber": {
+      "format": "vol:  {volume}%",
+      "cursor": false,
+  "format-muted": "󰝟",
+  "format-icons": ["󰖀 ", "󰕾 "],        
+      "on-click": "pavucontrol",        
+      "max-volume": 150,
+      "scroll-step": 2,
+      "tooltip-format": "{icon}  {volume}%",
+  },
+    
+	"niri/window": {
+		"format": "{}",
+		"max-length": 30,
+		"tooltip": false
+	},
+
+    "niri/workspaces": {
+        "format": "{value}",
+        "on-click": "activate",
+        "sort-by-number": true,
+    },
+
+	"custom/right-arrow-dark": {
+		// "format": "",
+		"format": "",
+		// "format": "",
+		"tooltip": false
+	},
+
+	"custom/right-arrow-light": {
+		// "format": "",
+		"format": "",
+		// "format": "",
+		"tooltip": false
+	},
+
+	"custom/left-arrow-dark": {
+		// "format": "",
+		"format": "",
+		// "format": "",
+		"tooltip": false
+	},
+
+	"custom/left-arrow-light": {
+		// "format": "",
+		"format": "",
+		// "format": "",
+		"tooltip": false
+	},
+
+  "custom/power": {
+    "format": " ",
+    "on-click": "~/bin/menu-power",
+    "tooltip": false,
+    "cursor": false
+  },
+  "custom/menu": {
+    "format": "󰣇 ",
+    "on-click": "~/bin/menu",
+    "tooltip": false,
+    "cursor": false
+  },
+  "custom/wallpapers": {
+    "format": " ",  
+    "on-click": "bg-set",
+    "tooltip": false,
+    "cursor": false
+  },
+
+  "custom/bluetooth": {
+        "format": " ",  
+        "on-click": "~/bin/launch-terminal bluetuith",
+        "tooltip": false,
+        "cursor": false
+  },
+
+  // Modules configuration
+  "hyprland/workspaces": {
+        "disable-scroll": true,
+        "all-outputs": false,
+        "warp-on-scroll": false,
+        "format": "{icon}",
+        "format-icons": {
+            "default": "",
+            "active": ""
+        },
+        "persistent-workspaces": {
+            "HDMI-A-1": [ 1,2,3,4,5 ],
+        },
+  },
+  "sway/window": {
+      "format": "{}",
+      "max-length": 30,
+      "tooltip": false
+  }
+}
+

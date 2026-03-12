@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+STYLE_NAME="${1:-}"
+
+# Pretty notification
+FORMATTED_NAME=$(echo "$1" | tr '-' ' ' | sed -E 's/\b(.)/\U\1/g')
+
+WAYBAR_DIR="${HOME}/.config/waybar"
+DASHBOARD_DIR="${HOME}/.config/dashboard"
+
+WAYBAR_STYLE="${WAYBAR_DIR}/styles/${STYLE_NAME}.css"
+WAYBAR_CONFIG="${WAYBAR_DIR}/configs/${STYLE_NAME}.jsonc"
+DASHBOARD_STYLE="${DASHBOARD_DIR}/styles/${STYLE_NAME}.qml"
+
+if [[ -z "${STYLE_NAME}" ]]; then
+  echo "Usage: waybar-style <style>"
+  exit 1
+fi
+
+if [[ ! -f "${WAYBAR_STYLE}" ]]; then
+  echo "Missing style file: ${WAYBAR_STYLE}"
+  exit 1
+fi
+
+if [[ ! -f "${WAYBAR_CONFIG}" ]]; then
+  echo "Missing config file: ${WAYBAR_CONFIG}"
+  exit 1
+fi
+
+if [[ ! -f "${DASHBOARD_STYLE}" ]]; then
+  echo "Missing dashboard style file: ${DASHBOARD_STYLE}"
+  exit 1
+fi
+
+ln -sfn "${WAYBAR_STYLE}" "${WAYBAR_DIR}/style.css"
+ln -sfn "${WAYBAR_CONFIG}" "${WAYBAR_DIR}/config.jsonc"
+ln -sfn "${DASHBOARD_STYLE}" "${DASHBOARD_DIR}/style.qml"
+
+# notify-send -t 5000 "Waybar" "Updated to ${FORMATTED_NAME}"

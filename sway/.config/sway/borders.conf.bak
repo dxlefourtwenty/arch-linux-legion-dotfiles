@@ -1,0 +1,11 @@
+# Focused (Mauve accent)
+client.focused          #cba6f7 #1e1e2e #cdd6f4 #cba6f7 #cba6f7
+
+# Unfocused
+client.unfocused        #313244 #1e1e2e #a6adc8 #313244 #313244
+
+# Focused but inactive
+client.focused_inactive #45475a #1e1e2e #bac2de #45475a #45475a
+
+# Urgent
+client.urgent           #f38ba8 #1e1e2e #1e1e2e #f38ba8 #f38ba8

@@ -1,0 +1,18 @@
+/* Matte Black */
+
+@define-color base        #121212;
+@define-color mantle      #121212;
+@define-color crust       #000000;
+
+@define-color surface0    #333333;
+@define-color surface1    #8a8a8d;
+@define-color surface2    #bebebe;
+
+@define-color text        #bebebe;
+@define-color subtext     #8a8a8d;
+
+@define-color accent      #e68e0d;
+@define-color blue        #e68e0d;
+@define-color green       #FFC107;
+@define-color red         #D35F5F;
+@define-color orange      #f59e0b;

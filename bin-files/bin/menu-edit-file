@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+SEARCH_DIR="$HOME"
+
+# If user selected a file → open it
+if [[ -n "$1" && "$1" != "Loading…" ]]; then
+    real_path="${1/#\~/$HOME}"
+    notify-send -t 5000 "Files" "Editing $1"
+    exec "$SCRIPT_DIR/launch-terminal" nvim "$real_path"
+fi
+
+# If not inside rofi yet → launch it
+if [[ -z "$ROFI_RETV" ]]; then
+    fd --type f --hidden --follow \
+        --exclude .git \
+        --exclude dotfiles \
+        --exclude .pub-cache \
+        --exclude .cache \
+        --exclude .pki \
+        --exclude .nvm \
+        --exclude go \
+        --exclude 'Code Cache' \
+        --exclude Cache \
+        --exclude 'Local Cache' \
+        --exclude 'Local Storage' \
+        --exclude cache \
+        --exclude .cargo \
+        --exclude '.local/state' \
+        --exclude node_modules \
+        --exclude 'Service Worker' \
+        --exclude lua-language-server \
+        . "$SEARCH_DIR" \
+    | sed "s|^$HOME|~|" \
+    | rofi -dmenu -i \
+        -p "" \
+        -async-pre-read 1 \
+        -theme-str '
+            window { width: 1300px; }
+            entry { placeholder: "Edit file…"; }
+            element {
+                orientation: horizontal;
+                children: [ element-text ];
+                spacing: 0px;
+                padding: 8px 10px;
+            }
+            element-text {
+                font: "JetBrainsMono Nerd Font 14";
+                horizontal-align: 0.0;
+                padding-left: 0px;
+            }
+        ' \
+    | xargs -r "$SCRIPT_DIR/menu-edit-file"
+    exit
+fi

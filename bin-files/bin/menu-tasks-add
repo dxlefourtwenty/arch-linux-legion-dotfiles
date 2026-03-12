@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+THEME='
+window { width: 900px; }
+inputbar {
+    children: [ entry ];
+}
+entry { placeholder: "Add Task…"; }
+element {
+    orientation: horizontal;
+    children: [ element-text ];
+    spacing: 0px;
+    padding: 8px 10px;
+}
+element-text {
+    horizontal-align: 0.0;
+    padding-left: 0px;
+}
+'
+
+dashboard_cmd="dashboard"
+
+# ---------------------------
+# task text
+# ---------------------------
+task=$(rofi -dmenu -p "" \
+    -theme-str "$THEME" \
+    -theme-str 'entry { placeholder: "Add Task…"; }')
+
+[[ -z "$task" ]] && exit 0
+
+# ---------------------------
+# recurrence type
+# ---------------------------
+recurrence=$(printf "Daily\nWeekly\nDate" | \
+    rofi -dmenu -p "" \
+    -theme-str "$THEME" \
+    -theme-str 'window { width: 220px; } entry { placeholder: "Recurrence…"; }')
+
+[[ -z "$recurrence" ]] && exit 0
+
+case "$recurrence" in
+    Daily)
+        $dashboard_cmd add-task "$task" --daily
+        ;;
+
+    Weekly)
+        days=$(rofi -dmenu -p "" \
+            -theme-str "$THEME" \
+            -theme-str 'window { width: 320px; } entry { placeholder: "Mon,Tue,…"; }')
+
+        [[ -z "$days" ]] && exit 0
+        $dashboard_cmd add-task "$task" --weekly "$days"
+        ;;
+
+    Date)
+        date=$(rofi -dmenu -p "" \
+            -theme-str "$THEME" \
+            -theme-str 'window { width: 260px; } entry { placeholder: "MM-DD[-YYYY]"; }')
+
+        [[ -z "$date" ]] && exit 0
+        $dashboard_cmd add-task "$task" --date "$date"
+        ;;
+esac
+
+notify-send "Tasks" "Added: $task"

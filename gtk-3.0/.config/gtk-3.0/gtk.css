@@ -1,0 +1,114 @@
+@import url("colors.css");
+
+/* ===============================
+   Main Window
+================================= */
+.nemo-window {
+    background: @base;
+    color: @text;
+}
+
+/* Header Bar */
+.nemo-window headerbar {
+    background: @mantle;
+    color: @text;
+    border-bottom: 1px solid @surface1;
+}
+
+.nemo-window headerbar button:hover {
+    background: @surface0;
+}
+
+/* Toolbar */
+.nemo-window toolbar {
+    background: @mantle;
+    border-bottom: 1px solid @surface1;
+}
+
+/* Sidebar */
+.nemo-window .sidebar {
+    background: @crust;
+    color: @subtext;
+}
+
+.nemo-window .sidebar row:hover {
+    background: @surface0;
+}
+
+.nemo-window .sidebar row:selected {
+    background: @accent;
+    color: @crust;
+}
+
+/* File View */
+.nemo-window .view {
+    background: @base;
+    color: @text;
+}
+
+.nemo-window .view:selected {
+    background: @accent;
+    color: @crust;
+}
+
+/* List Headers */
+.nemo-window treeview header button {
+    background: @mantle;
+    color: @subtext;
+}
+
+/* Pathbar */
+.nemo-window .path-bar button {
+    background: @surface0;
+    color: @text;
+}
+
+.nemo-window .path-bar button:checked {
+    background: @accent;
+    color: @crust;
+}
+
+/* Status Bar */
+.nemo-window statusbar {
+    background: @mantle;
+    color: @subtext;
+    border-top: 1px solid @surface1;
+}
+
+/* Menus */
+menu,
+popover {
+    background: @mantle;
+    color: @text;
+}
+
+menuitem:hover {
+    background: @surface0;
+}
+
+menuitem:selected {
+    background: @accent;
+    color: @crust;
+}
+
+/* Scrollbars */
+scrollbar slider {
+    background: @surface1;
+    border-radius: 6px;
+}
+
+scrollbar slider:hover {
+    background: @accent;
+}
+
+/* Entry */
+entry {
+    background: @surface0;
+    color: @text;
+    border: 1px solid @surface1;
+}
+
+entry:focus {
+    border: 1px solid @accent;
+}
+

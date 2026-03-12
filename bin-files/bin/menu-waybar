@@ -1,0 +1,94 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
+WAYBAR_STYLES_DIR="${HOME}/.config/waybar/styles"
+WAYBAR_CONFIGS_DIR="${HOME}/.config/waybar/configs"
+DASHBOARD_STYLES_DIR="${HOME}/.config/dashboard/styles"
+CURRENT_WAYBAR_STYLE="$(
+  basename "$(readlink -f "${HOME}/.config/waybar/style.css" 2>/dev/null || true)" .css
+)"
+
+mapfile -t styles < <(
+  for css_file in "${WAYBAR_STYLES_DIR}"/*.css; do
+    [[ -e "${css_file}" ]] || continue
+    style_name="$(basename "${css_file}" .css)"
+    [[ -f "${WAYBAR_CONFIGS_DIR}/${style_name}.jsonc" ]] || continue
+    [[ -f "${DASHBOARD_STYLES_DIR}/${style_name}.qml" ]] || continue
+    printf '%s\n' "${style_name}"
+  done | sort -u
+)
+
+if [[ ${#styles[@]} -eq 0 ]]; then
+  notify-send "Waybar" "No valid shared styles found."
+  exit 1
+fi
+
+format_style_display() {
+  local style_name="$1"
+  printf '%s\n' "${style_name}" |
+    sed -E 's/[-_]+/ /g; s/(^|[[:space:]])([[:alpha:]])/\1\U\2/g'
+}
+
+mapfile -t display_styles < <(
+  for style_name in "${styles[@]}"; do
+    pretty_style="$(format_style_display "${style_name}")"
+    if [[ -n "${CURRENT_WAYBAR_STYLE}" ]] && [[ "${style_name}" == "${CURRENT_WAYBAR_STYLE}" ]]; then
+      printf '<i>%s</i>\n' "${pretty_style}"
+    else
+      printf '%s\n' "${pretty_style}"
+    fi
+  done
+)
+
+chosen_index="$(
+  printf '%s\n' "${display_styles[@]}" | rofi -dmenu -i -markup-rows -format i \
+    -p "" \
+    -theme-str '
+        window { width: 230px; }
+        entry { placeholder: "Waybar…"; }
+        element {
+            orientation: horizontal;
+            children: [ element-text ];
+            spacing: 0px;
+            padding: 8px 8px;
+        }
+        element-text {
+            horizontal-align: 0.0;
+            padding-left: 0px;
+        }
+    '
+)"
+
+[[ -n "${chosen_index}" ]] || exit 0
+
+chosen="${styles[chosen_index]}"
+
+if [[ -z "${chosen}" ]]; then
+  exit 0
+fi
+
+# Resolve selected style without case sensitivity.
+chosen_lower="$(printf '%s' "${chosen}" | tr '[:upper:]' '[:lower:]')"
+resolved_chosen=""
+for style_name in "${styles[@]}"; do
+  style_lower="$(printf '%s' "${style_name}" | tr '[:upper:]' '[:lower:]')"
+  if [[ "${style_lower}" == "${chosen_lower}" ]]; then
+    resolved_chosen="${style_name}"
+    break
+  fi
+done
+
+[[ -n "${resolved_chosen}" ]] || exit 1
+
+
+
+"$SCRIPT_DIR/waybar-style" "${resolved_chosen}" && "$SCRIPT_DIR/reload-waybar" && "$SCRIPT_DIR/reload-dashboard"
+
+# Pretty notification
+FORMATTED_NAME="$(format_style_display "${resolved_chosen}")"
+
+sleep 0.5
+notify-send -t 5000 "Waybar" "Updated to ${FORMATTED_NAME}"

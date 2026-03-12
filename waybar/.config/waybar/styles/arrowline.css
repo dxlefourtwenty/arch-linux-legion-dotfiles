@@ -1,0 +1,178 @@
+@import url("arrowline-widgets.css");
+@import url("theme.css");
+
+* {
+	border: none;
+	border-radius: 0;
+	min-height: 0;
+	margin: 0;
+	padding: 0;
+	box-shadow: none;
+	text-shadow: none;
+	icon-shadow: none;
+}
+
+#waybar {
+	background: @background-alpha;
+	color: @background;
+	font-family: SpaceMono Nerd Font, "JetBrainsMono Nerd Font", "Symbols Nerd Font Mono";;
+	font-size: 14pt;
+}
+
+tooltip {
+  background: @background-gray;
+  border: 1px solid @foreground;
+  border-radius: 12px;
+}
+
+tooltip label {
+  color: @foreground;
+  padding: 6px;
+}
+
+#battery,
+#clock,
+#network,
+#wireplumber,
+#temperature,
+#custom-wallpapers,
+#custom-menu,
+#custom-power,
+#custom-bluetooth,
+#tray {
+	padding-left: 12pt;
+	padding-right: 12pt;
+}
+
+#workspaces {
+  padding-right: 5pt;
+  background: @background;
+}
+
+#workspaces button {
+	padding-left: 11pt;
+	padding-right: 11pt;
+  font-size: 13pt;
+	color: @foreground;
+	background: @background;
+}
+
+#workspaces button.active {
+  color: @foreground;
+}
+
+#workspaces button.empty {
+	color: @muted;
+}
+
+
+#window {
+	margin-right: 12pt;
+	margin-left: 12pt;
+	color: @foreground;
+}
+
+#wireplumber {
+	background: @sound;
+}
+
+#network {
+	background: @network;
+}
+
+#battery {
+  background: @battery;
+}
+
+#custom-wallpapers {
+	background: @wallpaper;
+}
+
+
+#tray {
+	background: @date;
+}
+
+#clock.date {
+	background: @date;
+	color: @background;
+}
+
+#clock.time {
+	background: @time;
+	color: @background;
+}
+
+#custom-arrow1 {
+	font-size: 15pt;
+	color: @menu;
+	background: @wallpaper;
+}
+
+#custom-arrow2 {
+	font-size: 15pt;
+	color: @wallpaper;
+	background: @time;
+}
+
+#custom-arrow3 {
+	font-size: 15pt;
+	color: @time;
+	background: @battery;
+}
+
+#custom-arrow4 {
+	font-size: 15pt;
+	color: @battery;
+	background: @network;
+}
+
+#custom-arrow5 {
+	font-size: 15pt;
+	color: @network;
+	background: @sound;
+}
+
+#custom-arrow6 {
+	font-size: 15pt;
+	color: @sound;
+	background: @bluetooth;
+}
+
+#custom-arrow7 {
+	font-size: 15pt;
+	color: @bluetooth;
+	background: transparent;
+}
+
+#custom-arrow10 {
+	font-size: 15pt;
+	color: @background-alt;
+	background: @foreground;
+}
+
+#custom-arrow11 {
+	font-size: 15pt;
+	color: @foreground;
+	background: transparent;
+}
+
+#custom-arrow0 {
+  font-size: 15pt;
+  color: @power;
+  background: @menu;
+}
+
+#custom-menu {
+  background: @menu;
+}
+
+#custom-power {
+  background: @power;
+}
+
+#custom-bluetooth {
+  background: @bluetooth;
+  padding-right: 6pt;
+}
+

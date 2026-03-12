@@ -1,0 +1,40 @@
+general.live_config_reload = true
+general.ipc_socket = true
+
+[window]
+opacity = 0.92
+
+[window.padding]
+x = 10
+y = 10
+
+[font]
+size = 14.0
+
+[font.normal]
+family = "JetBrainsMono Nerd Font"
+
+[colors.primary]
+background = "#172035" # app background
+foreground = "#F4F6FA" # text
+
+[colors.normal]
+black   = "#2B2F3A" # crust
+red     = "#F2A7C4" # pink
+green   = "#8FAED9" # frost blue
+yellow  = "#F4F6FA" # snow highlight
+blue    = "#3A4F7A" # slate blue
+magenta = "#C7B7E2" # lavender
+cyan    = "#8FAED9" # frost blue
+white   = "#E8EBF2" # subtext1
+
+[colors.bright]
+black   = "#2F3E60" # surface1
+red     = "#F2A7C4"
+green   = "#8FAED9"
+yellow  = "#F2A7C4"
+blue    = "#3A4F7A"
+magenta = "#C7B7E2"
+cyan    = "#8FAED9"
+white   = "#F4F6FA"
+

@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+chromium --no-startup-window --refresh-platform-policy &
+
+if pgrep -x brave >/dev/null; then
+  brave --nostartup-window --refresh-platform-policy &
+fi

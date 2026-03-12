@@ -1,0 +1,2 @@
+touch ~/.config/alacritty/alacritty.toml
+killall -SIGUSR1 kitty

@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+set -e
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+THEME_DIR="$HOME/.config/themes"
+CURRENT_LINK="$THEME_DIR/current"
+
+[ -z "$1" ] && {
+    echo "Usage: theme <theme-name>"
+    exit 1
+}
+
+NEW_THEME="$THEME_DIR/$1"
+
+[ ! -d "$NEW_THEME" ] && {
+    echo "Theme '$1' does not exist in $THEME_DIR"
+    exit 1
+}
+
+# Atomic theme switch (IMPORTANT)
+ln -sfn "$NEW_THEME" "$CURRENT_LINK"
+
+"$SCRIPT_DIR/reload-browsers" || true
+"$SCRIPT_DIR/bg-refresh-current" || true
+
+"$SCRIPT_DIR/reload-borders" || true
+"$SCRIPT_DIR/reload-terminal" || true
+"$SCRIPT_DIR/reload-waybar" || true
+
+"$SCRIPT_DIR/reload-btop" || true
+"$SCRIPT_DIR/reload-mako" || true
+"$SCRIPT_DIR/reload-dashboard" || true
+"$SCRIPT_DIR/reload-discord" || true
+"$SCRIPT_DIR/reload-nemo" || true
+"$SCRIPT_DIR/reload-swayosd" || true
+"$SCRIPT_DIR/cursor-set" "$1"
+
+
+# # wallpaper AFTER reload (prevents flicker)
+# swww img "$CURRENT_LINK/wallpaper.png" \
+#     --transition-type fade \
+#     --transition-duration 1
+
+# Pretty notification
+FORMATTED_NAME=$(echo "$1" | tr '-' ' ' | sed -E 's/\b(.)/\U\1/g')
+
+# Wait until mako is alive
+for i in {1..20}; do
+    pgrep -x mako >/dev/null && break
+    sleep 0.1
+done
+
+sleep 0.5
+notify-send -t 5000 "Theme" "Updated to $FORMATTED_NAME."

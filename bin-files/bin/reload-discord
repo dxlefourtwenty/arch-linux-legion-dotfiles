@@ -1,0 +1,7 @@
+if pgrep -x Discord >/dev/null; then
+    pkill -SIGUSR2 Discord 
+fi
+
+
+
+

@@ -1,0 +1,158 @@
+@import "theme.css";
+
+
+* {
+	font-family: "Azeret Mono SemiBold", "JetBrainsMono Nerd Font", "Symbols Nerd Font Mono";
+	font-variant: small-caps;
+}
+
+window#waybar {
+	background: @background-gray;
+	color: @foreground;
+	font-size: 13pt;
+}
+
+tooltip {
+  background: @background-gray;
+  border: 1px solid @foreground;
+  border-radius: 12px;
+}
+
+tooltip label {
+  color: @foreground;
+  padding: 6px;
+}
+
+#custom-right-arrow-dark,
+#custom-left-arrow-dark {
+	color: @background;
+  background: transparent;
+	font-size: 16pt;
+  margin-right: 0;
+  margin-left: 0;
+}
+
+#custom-right-arrow-light,
+#custom-left-arrow-light {
+	color: @background-gray;
+	background: @background;
+	font-size: 16pt;
+  padding-right: 0;
+  padding-left: 0;
+  margin-right: 0;
+  margin-left: 0;
+}
+
+#clock.1,
+#clock.2,
+#clock.3,
+#wireplumber,
+#memory,
+#cpu,
+#battery,
+#network,
+#tray {
+	background: @background;
+	padding: 0 12px;
+}
+
+#workspaces {
+  background: @background;
+  padding: 0 8px;
+}
+
+#workspaces button {
+	padding: 0 8px;
+  font-size: 13pt;
+	color: @foreground;
+}
+
+#workspaces button:hover {
+	box-shadow: inherit;
+	text-shadow: inherit;
+}
+
+#workspaces button:hover {
+	background: @background;
+	border: @background;
+}
+
+#workspaces button.empty {
+	color: @muted;
+}
+
+#wireplumber {
+	color: @blue;
+}
+
+#battery {
+	color: @green;
+}
+
+#network {
+	color: @orange;
+}
+
+#clock,
+#pulseaudio,
+#memory,
+#cpu,
+#battery,
+#network {
+	padding: 0 10px;
+}
+
+
+#workspaces button:hover {
+	background: @background;
+	border: @background;
+}
+
+#wireplumber {
+	color: @blue;
+}
+
+#battery {
+	color: @green;
+}
+
+#network {
+	color: @orange;
+}
+
+#clock,
+#pulseaudio,
+#memory,
+#cpu,
+#battery,
+#network {
+	padding: 0 10px;
+}
+
+#custom-bluetooth,
+#custom-menu,
+#custom-wallpapers,
+#custom-power {
+  background: @background;
+  color: @foreground;
+  padding-right: 5px;
+  padding-left: 5px;
+  margin-right: 0;
+  margin-left: 0;
+}
+
+#custom-bluetooth {
+  padding-left: 10px;
+}
+
+#custom-power {
+  padding-right: 15px;
+}
+
+#custom-wallpapers {
+  padding-left: 15px;
+}
+
+#custom-menu {
+  padding-right: 5px;
+}

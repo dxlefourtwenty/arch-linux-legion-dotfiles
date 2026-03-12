@@ -1,0 +1,18 @@
+/* Nord Palette */
+
+@define-color base        #2e3440; /* Polar Night */
+@define-color mantle      #3b4252;
+@define-color crust       #2e3440;
+
+@define-color surface0    #434c5e;
+@define-color surface1    #4c566a;
+@define-color surface2    #5e81ac;
+
+@define-color text        #d8dee9;
+@define-color subtext     #a3b1c6;
+
+@define-color accent      #88c0d0; /* Frost 2 */
+@define-color blue        #81a1c1;
+@define-color green       #a3be8c;
+@define-color red         #bf616a;
+@define-color yellow      #ebcb8b;

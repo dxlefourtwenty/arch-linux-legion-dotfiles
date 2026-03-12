@@ -1,0 +1,171 @@
+h | Move Left
+j | Move Down
+k | Move Up
+l | Move Right
+<Left> | Move Left
+<Down> | Move Down
+<Up> | Move Up
+<Right> | Move Right
+w | Next Word Start
+W | Next WORD
+b | Previous Word Start
+B | Previous WORD
+e | End of Word
+
+i | Insert Mode Before Char
+I | Insert Mode at the Beginning of Line
+a | Insert Mode After Char
+A | Insert Mode at the End of Line
+o | Open New Line Below and Insert
+O | Open New Line Above and Insert
+ea | Insert Mode at the End of the Word
+<C-h>, [i] | Delete the Character Before the Cursor 
+<C-w>, [i] | Delete the Word Before the Cursor
+<C-j>, [i] | Add a Line Break Under the Cursor
+<C-t>, [i] | Indent Line 
+<C-d>, [i] | De-indent Line
+<C-n>, [i] | Insert Next Match Before the Cursor
+<C-p>, [i] | Insert Prev Match Before the Cursor
+<C-rx>, [i] | Insert Register x Contents
+<C-ox>, [i] | Execute Normal Mode Command x
+
+dd | Delete, Cut Line
+2dd | Delete, Cut 2 Lines
+dw | Delete Under Until Next Word Start
+diw | Delete Word
+daw | Delete Word and Surrounding Spaces
+:3, 5d | Delete Lines From 3 to 5
+:g /{pattern}/d | Delete All Lines Containing Pattern
+:g!/{pattern}/d | Delete All Lines Not Containing Pattern 
+d$/D | Delete to End of Line 
+x | Delete, Cut Character
+xp | Swap Two Adjacent Letters
+
+r | Replace a Single Character
+R | Replace Characters Until ESC
+J | Join Line Below to Current Line, Space Between
+gJ | Join Line Below to Current Line, No Space
+gwip | Reflow Paragraph
+g~ | Swtich Case Up to Motion
+gu | Change to Lowercase Up to Motion
+gU | Change to Uppercase Up to Motion
+gUB | Capitalize From Cursor to Start of Word
+guB | Lowercase From Cursor to Start of Word
+~ | Toggle Char Lower/Uppercase Under Cursor/Marked
+
+u | Undo
+U | Restore Last Changed Line
+<C-r> | Redo
+. | Repeat Last Command
+
+v | Toggle Visual Mode
+V | Toggle Linewise Visual Mode
+<C-v> | Toggle Visual Block Mode
+aw, [v] | Mark a Word
+ab, [v] | Mark a Block With ()
+at, [v] | Mark a Block With <> Tags
+ib, [v] | Mark Inner Block With ()
+iB, [v] | Mark Inner Block With {}
+it, [v] | Mark Inner Block with <> Tags
+>, [v] | Shift Marked Text Right
+<, [v] | Shift Marked Text Left
+y, [v] | Yank Marked Text
+d, [v] | Delete Marked Text
+u, [v] | Change Marked Text to Lowercase
+U, [v] | Change Marked Text to Uppercase
+
+qa | Record Macro a
+q | Stop Recording Macro
+@a | Run Macro a
+@@ | Rerun Last Run Macro
+
+:reg | Show Registers Content
+"xy | Yank Into Register x
+"xp | Paste Contents of Register x
+"+y | Yank Into the System Clipboard Register
+"+p | Paste From the System Clipboard Register
+q | Quit Register Menu
+
+cc | Change Entire Line
+c$/C | Change to End of Line
+ciw | Change Entire Word
+cw/ce | Change to the End of Word
+ci' | Change in ''
+ci" | Change in ""
+ci[ | Change in []
+ci{ | Change in {}
+ci( | Change in ()
+ci< | Change in <>
+
+gg | Go to Top of File
+G | Go to bottom of File
+<C-d> | Half Page Down
+<C-u> | Half Page Up
+<C-f> | Full Page Down
+<C-b> | Full Page Up
+
+yy | Yank Line
+2yy | Yank 2 Lines
+yw | Yank Until Next Word Start
+yiw | Yank Word Under Cursor
+yaw | Yank Word Under Cursor and Surrrounding Spaces
+y$/Y | Yank to End of Line
+
+p | Paste After Cursor
+P | Paste Before Cursor
+gp | Paste After Cursor, Position After
+gP | Paste Before Cursor, Position After
+
+H | Top of Screen
+M | Middle of Screen
+L | Bottom of Screen
+
+f{char} | Jump to Character on Line
+t{char} | Jump Before Character
+; | Repeat Last f/t
+, | Repeat Last f/t Backwards
+
+/text | Search Forward
+?text | Search Backward
+n | Next Search Match
+N | Previous Search Match
+
+% | Jump to Matching Bracket
+* | Search Word Under Cursor Forward
+# | Search Word Under Cursor Backward
+
+<leader>t | Toggle Floating Terminal
+
+>> | Indent Line One Shiftwidth
+<< | De-indent Line One Shiftwidth
+>% | Indent a Block With () or {} (Cursor on Brace)
+<% | De-indent a Block With () or {} (Cursor on Brace)
+>ib | Indent Inner Block With ()
+>at | Indent a Block With <> Tags
+3== | Re-indent 3 lines
+=% | Re-indent a Block With () or {} (Cursor on Brace)
+=iB | Re-indent a Block With {}
+gg=G | Re-indent Entire Buffer
+]p | Paste and Adjust Indent to Current Line
+
+:w | Save File, No Exit
+:w !sudo tee % | Write Out Current File, Sudo'd
+:wq/:x/ZZ | Save and Quit
+:q | Quit (Fails on Unsaved Changes)
+:q!/ZQ | Quit and Don't Save Changes
+:wqa | Save and Quit on All Tabs
+
+/pattern | Search for Pattern
+?pattern | Search Backwards for Pattern
+\vpattern | Non-escaping Pattern for Non-alphanumeric Chars
+n, pattern | Next Instance of Pattern
+N, pattern | Prev Instance of Pattern
+:%s/old/new/g | Replace All Old With New in File
+:%s/old/new/gc | Replace All Old With New in File, Confirmations
+:noh[lsearch] | Remove Highlighting of Search Matches
+
+gt | Move to Next Tab
+gT | Move to Prev Tab
+#gt | Move to Tab Number #
+
+f: w | Jump to : Then Next Word Start

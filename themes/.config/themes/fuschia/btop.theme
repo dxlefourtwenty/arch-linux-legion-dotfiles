@@ -1,0 +1,104 @@
+# -------------------------------------------------
+# Petal btop theme
+# Pastel / frost / night-sky aesthetic
+# -------------------------------------------------
+
+# Main background (deep night blue)
+theme[main_bg]="#1E2A44"
+
+# Main foreground text (snow white)
+theme[main_fg]="#F4F6FA"
+
+# Titles / box headers
+theme[title]="#F4F6FA"
+
+# Highlight (PRIMARY ACCENT – petal pink)
+theme[hi_fg]="#F2A7C4"
+
+# Selected process background (raised slate)
+theme[selected_bg]="#2F3E60"
+
+# Selected process foreground
+theme[selected_fg]="#F2A7C4"
+
+# Inactive / dimmed text
+theme[inactive_fg]="#C7CEDA"
+
+# Text drawn on top of graphs
+theme[graph_text]="#F4F6FA"
+
+# Meter backgrounds
+theme[meter_bg]="#2F3E60"
+
+# Process misc text
+theme[proc_misc]="#E8EBF2"
+
+# -------------------------------------------------
+# Box outlines (soft pastel hierarchy)
+# -------------------------------------------------
+theme[cpu_box]="#F2A7C4"   # petal pink (primary)
+theme[mem_box]="#C7B7E2"   # lavender
+theme[net_box]="#8FAED9"   # frost blue
+theme[proc_box]="#3A4F7A"  # slate blue
+
+# Divider lines
+theme[div_line]="#3A4F7A"
+
+# -------------------------------------------------
+# Temperature graph (Frost → Light → Petal)
+# -------------------------------------------------
+theme[temp_start]="#8FAED9"
+theme[temp_mid]="#F4F6FA"
+theme[temp_end]="#F2A7C4"
+
+# -------------------------------------------------
+# CPU graph (Frost blue → Sky → Slate)
+# -------------------------------------------------
+theme[cpu_start]="#8FAED9"
+theme[cpu_mid]="#7FA0D4"
+theme[cpu_end]="#3A4F7A"
+
+# -------------------------------------------------
+# Memory / Disk meters
+# -------------------------------------------------
+
+# Free (Lavender → Frost)
+theme[free_start]="#C7B7E2"
+theme[free_mid]="#8FAED9"
+theme[free_end]="#7FA0D4"
+
+# Cached (Frost → Slate)
+theme[cached_start]="#8FAED9"
+theme[cached_mid]="#7FA0D4"
+theme[cached_end]="#3A4F7A"
+
+# Available (Snow → Petal)
+theme[available_start]="#F4F6FA"
+theme[available_mid]="#E8EBF2"
+theme[available_end]="#F2A7C4"
+
+# Used (Frost → Sky)
+theme[used_start]="#8FAED9"
+theme[used_mid]="#7FA0D4"
+theme[used_end]="#5B78B0"
+
+# -------------------------------------------------
+# Network graphs
+# -------------------------------------------------
+
+# Download (Lavender → Petal)
+theme[download_start]="#C7B7E2"
+theme[download_mid]="#F2A7C4"
+theme[download_end]="#F2A7C4"
+
+# Upload (Frost → Sky)
+theme[upload_start]="#8FAED9"
+theme[upload_mid]="#7FA0D4"
+theme[upload_end]="#5B78B0"
+
+# -------------------------------------------------
+# Process usage gradients
+# -------------------------------------------------
+theme[process_start]="#F2A7C4"
+theme[process_mid]="#C7B7E2"
+theme[process_end]="#8FAED9"

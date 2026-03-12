@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+LIST="$HOME/.config/apps.list"
+
+selection=$(
+awk -F'|' '{
+    name=$3
+    icon=$2
+    printf "%s\0icon\x1f%s\n", name, icon
+}' "$LIST" |
+rofi -dmenu -i -show-icons \
+    -p "" \
+    -theme-str '
+        window { width: 300px; }
+        entry { placeholder: "Launch…"; }
+        element {
+            orientation: horizontal;
+            children: [ element-icon, element-text ];
+            spacing: 8px;
+            padding: 8px 8px;
+        }
+        element-icon { 
+            size: 26px; 
+        }
+        element-text {
+            horizontal-align: 0.0;
+            padding: 0px 6px;
+        }
+    '
+)
+
+[[ -z "$selection" ]] && exit 0
+
+desktop=$(
+awk -F'|' -v name="$selection" '$3==name {print $1; exit}' "$LIST"
+)
+
+[[ -z "$desktop" ]] && exit 0
+
+setsid gtk-launch "${desktop%.desktop}" >/dev/null 2>&1 &

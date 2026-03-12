@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+IMAGE_VIEWER="xdg-open"
+
+# Exit if nothing was passed
+[ -z "$1" ] && exit 1
+
+# Launch detached so it does not occupy the current terminal.
+nohup "$IMAGE_VIEWER" "$@" >/dev/null 2>&1 &
+
+

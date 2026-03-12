@@ -1,0 +1,10 @@
+pragma Singleton
+import QtQuick
+
+QtObject {
+    property color bg:        "#2b3339"
+    property color fg:        "#d3c6aa"
+    property color muted:     "#3d484d"
+    property color accent:    "#a7c080"
+    property color border:    "#dbbc7f"
+}

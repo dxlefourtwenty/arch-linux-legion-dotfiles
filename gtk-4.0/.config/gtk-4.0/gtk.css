@@ -1,0 +1,382 @@
+@import url("colors.css");
+
+/* main window */
+window {
+    background: @base;
+    color: @text;
+}
+
+/* tabs */
+tabbar tabbox tab {
+    background: @surface0;
+    color: @subtext;
+}
+
+tabbar tabbox tab:selected {
+    background: @accent;
+    color: @crust;
+}
+
+/* sliders */
+scale trough {
+    background: @surface1;
+    border-radius: 8px;
+}
+
+scale highlight {
+    background: @accent;
+}
+
+scale slider {
+    background: @surface2;
+}
+
+/* buttons */
+button {
+    background: @surface0;
+    color: @text;
+}
+
+button:hover {
+    background: @surface1;
+}
+
+/* device rows */
+listview row {
+    background: transparent;
+}
+
+listview row:hover {
+    background: @surface0;
+}
+
+listview row:selected {
+    background: @accent;
+    color: @crust;
+}
+
+/* audio meters */
+levelbar block.filled {
+    background: @green;
+}
+
+levelbar trough {
+    background: @surface1;
+}
+
+/* main background */
+window {
+    background: @base;
+    color: @text;
+}
+
+/* libadwaita cards (this is the white block) */
+card {
+    background: @surface0;
+    border-radius: 10px;
+    border: 1px solid @surface1;
+}
+
+/* some versions use preferencesgroup instead */
+preferencesgroup {
+    background: @surface0;
+}
+
+/* internal container */
+box {
+    background: transparent;
+}
+
+/* dropdown buttons (like "Port: Microphone") */
+dropdown button {
+    background: @surface1;
+    color: @text;
+}
+
+/* sliders */
+scale trough {
+    background: @surface1;
+}
+
+scale highlight {
+    background: @accent;
+}
+
+scale slider {
+    background: @surface2;
+}
+
+/* level meters */
+levelbar block.filled {
+    background: @green;
+}
+
+levelbar trough {
+    background: @surface1;
+}
+
+/* rows (this is the white block) */
+row {
+    background: @surface0;
+    border-radius: 10px;
+}
+
+/* list container */
+listbox {
+    background: transparent;
+}
+
+/* hover state */
+row:hover {
+    background: @surface1;
+}
+
+/* active/selected */
+row:selected {
+    background: @accent;
+    color: @crust;
+}
+
+/* VU meter container */
+.vumeter {
+    background: @surface1;
+    border-radius: 6px;
+}
+
+/* the actual signal bar */
+.vumeter progress {
+    background: @green;
+}
+
+/* clipping / loud sections */
+.vumeter progress.warning {
+    background: @orange;
+}
+
+.vumeter progress.error {
+    background: @red;
+}
+
+/* card container (the white block) */
+.boxed-list {
+    background: @mantle;
+    border-radius: 12px;
+    border: 1px solid @surface1;
+    padding: 6px;
+}
+
+/* list background */
+.boxed-list list {
+    background: transparent;
+}
+
+/* rows inside card */
+.boxed-list row {
+    background: @surface0;
+    border-radius: 10px;
+    margin: 4px;
+}
+
+.boxed-list row:hover {
+    background: @surface1;
+}
+
+/* row separators */
+.boxed-list separator {
+    background: @surface1;
+    min-height: 1px;
+}
+
+/* device selector button */
+dropdown button {
+    background: @surface1;
+    color: @text;
+    border-radius: 8px;
+}
+
+/* dropdown menu */
+popover {
+    background: @mantle;
+    border: 1px solid @surface1;
+}
+
+/* dropdown rows */
+popover listview row {
+    background: transparent;
+}
+
+popover listview row:hover {
+    background: @surface0;
+}
+
+/* remove libadwaita white surfaces */
+.background {
+    background: @base;
+}
+
+/* container around the device list */
+clamp {
+    background: transparent;
+}
+
+/* card list */
+.boxed-list {
+    background: @mantle;
+    border-radius: 12px;
+    border: 1px solid @surface1;
+}
+
+/* rows inside */
+.boxed-list row {
+    background: @surface0;
+    border-radius: 10px;
+    margin: 4px;
+}
+
+.boxed-list row:hover {
+    background: @surface1;
+}
+
+listview,
+list,
+box {
+    background: transparent;
+}
+
+/* main pavucontrol background */
+window {
+    background: @base;
+}
+
+/* main vertical container (sinksVBox) */
+box.vertical {
+    background: @base;
+}
+
+/* tab bar container */
+tabs {
+    background: @mantle;
+    border-bottom: 1px solid @surface1;
+}
+
+/* individual tabs */
+tabs tab {
+    background: @surface0;
+    color: @subtext;
+    padding: 6px 12px;
+    border-radius: 6px 6px 0 0;
+}
+
+/* hover */
+tabs tab:hover {
+    background: @surface1;
+}
+
+/* active tab */
+tabs tab:checked {
+    background: @accent;
+    color: @crust;
+}
+
+/* editable text fields */
+text {
+    background: @surface0;
+    color: @text;
+    border: 1px solid @surface1;
+    border-radius: 6px;
+}
+
+/* focused state */
+text:focus {
+    border: 1px solid @accent;
+}
+
+/* dropdown menu background */
+popover {
+    background: @mantle;
+    border: 1px solid @surface1;
+    border-radius: 8px;
+}
+
+/* container inside popover */
+popover box {
+    background: @mantle;
+}
+
+/* menu items */
+menuitem {
+    background: transparent;
+    color: @text;
+    padding: 6px 10px;
+}
+
+/* hover state */
+menuitem:hover {
+    background: @surface0;
+}
+
+/* selected item */
+menuitem:selected {
+    background: @accent;
+    color: @crust;
+}
+
+/* separators */
+separator {
+    background: @surface1;
+    min-height: 1px;
+}
+
+/* the popup container */
+popover {
+    background: @mantle;
+    border: 1px solid @surface1;
+}
+
+/* popover content */
+popover box {
+    background: @mantle;
+}
+
+/* scrolling container */
+popover scrolledwindow {
+    background: @mantle;
+}
+
+/* THIS is usually the white layer */
+popover viewport {
+    background: @mantle;
+}
+
+/* dropdown rows */
+modelbutton {
+    background: transparent;
+    color: @text;
+}
+
+modelbutton:hover {
+    background: @surface0;
+}
+
+popover,
+popover box,
+popover scrolledwindow,
+popover viewport,
+treepopover {
+    background: @mantle;
+}
+
+scale trough {
+    background: @surface1;
+    border-radius: 6px;
+}
+
+scale highlight {
+    background: @accent;
+    border-radius: 6px;
+}
+
+scale slider {
+    background: @surface2;
+    border-radius: 50%;
+}

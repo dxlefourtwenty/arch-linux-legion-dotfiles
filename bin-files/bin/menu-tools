@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
+options="󰸌  Color Converter
+  Tasks
+  Files
+󰝁  Trigger"
+
+HOME_DIR="/home/dxle"
+
+chosen=$(echo -e "$options" | rofi -dmenu -i \
+    -p "" \
+    -theme-str '
+        window { width: 325px; }
+        entry { placeholder: "Tools…"; }
+        element { 
+            orientation: horizontal;
+            children: [ element-text ];
+            spacing: 0px;
+            padding: 8px 2px;
+        }
+        element-text { 
+            horizontal-align: 0.0;
+            padding-left: 0px;
+        }
+    ')
+
+label="${chosen#*  }"   # remove up to the double-space after the icon
+
+case "$label" in
+  "Color Converter")
+    "$SCRIPT_DIR/menu-color-converter"
+    ;;
+  "Tasks")
+    "$SCRIPT_DIR/menu-tasks"
+    ;;
+  "Files") 
+    "$SCRIPT_DIR/menu-files"
+    ;;
+  "Trigger")
+    "$SCRIPT_DIR/menu-trigger"
+    ;;
+esac

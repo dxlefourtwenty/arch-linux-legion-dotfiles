@@ -1,0 +1,64 @@
+@define-color foreground #f8f8f2;
+@define-color background #282a36;
+@define-color primary #bd93f9;
+@define-color muted #44475a;
+@define-color border #8be9fd;
+
+
+
+@define-color black #21222c;
+@define-color blue #bd93f9;
+@define-color bright-black #6272a4;
+@define-color bright-blue #d6acff;
+@define-color bright-cyan #a4ffff;
+@define-color bright-green #69ff94;
+@define-color bright-magenta #ff92df;
+@define-color bright-red #ff6e6e;
+@define-color bright-white #ffffff;
+@define-color bright-yellow #ffffa5;
+@define-color cyan #8be9fd;
+@define-color dim-black #21222c;
+@define-color dim-blue #bd93f9;
+@define-color dim-cyan #8be9fd;
+@define-color dim-green #50fa7b;
+@define-color dim-magenta #ff79c6;
+@define-color dim-red #ff5555;
+@define-color dim-white #f8f8f2;
+@define-color dim-yellow #f1fa8c;
+@define-color green #50fa7b;
+@define-color magenta #ff79c6;
+@define-color red #ff5555;
+@define-color white #f8f8f2;
+@define-color yellow #f1fa8c;
+@define-color background-alpha rgba(33, 34, 44, 0.87);
+@define-color background-alt @background;
+@define-color foreground-inactive #ffffff;
+
+/* >>> terminal-24 >>> */
+@define-color black #21222c;
+@define-color red #ff5555;
+@define-color green #50fa7b;
+@define-color yellow #f1fa8c;
+@define-color blue #bd93f9;
+@define-color magenta #ff79c6;
+@define-color cyan #8be9fd;
+@define-color white #f8f8f2;
+@define-color bright-black #6272a4;
+@define-color bright-red #ff6e6e;
+@define-color bright-green #69ff94;
+@define-color bright-yellow #ffffa5;
+@define-color bright-blue #d6acff;
+@define-color bright-magenta #ff92df;
+@define-color bright-cyan #a4ffff;
+@define-color bright-white #ffffff;
+@define-color dim-black #313244;
+@define-color dim-red #eba0ac;
+@define-color dim-green #a6e3a1;
+@define-color dim-yellow #f9e2af;
+@define-color dim-blue #74c7ec;
+@define-color dim-magenta #f5c2e7;
+@define-color dim-cyan #94e2d5;
+@define-color dim-white #7f849c;
+/* <<< terminal-24 <<< */
+
+@define-color background-gray #3f4254;

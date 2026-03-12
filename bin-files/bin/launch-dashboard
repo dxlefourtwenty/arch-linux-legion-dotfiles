@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+nohup ~/dev/dashboard/build/topdash >/dev/null 2>&1 &

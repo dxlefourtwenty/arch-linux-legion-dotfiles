@@ -1,0 +1,6 @@
+<RCC>
+  <qresource prefix="/qt/qml/LivePaper/">
+    <file alias="qml/qmldir">/home/dxle/builds/livepaper/build/LivePaper/qml/qmldir</file>
+  </qresource>
+</RCC>
+

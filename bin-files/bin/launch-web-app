@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+
+set -e
+
+if [ -z "$1" ]; then
+    echo "Usage: launch-web-app <url>"
+    exit 1
+fi
+
+URL="$1"
+
+# Normalize URL (force https if missing)
+if [[ "$URL" != http* ]]; then
+    URL="https://$URL"
+fi
+
+# Strip protocol
+CLEAN_URL="${URL#http://}"
+CLEAN_URL="${CLEAN_URL#https://}"
+
+# Extract domain only
+DOMAIN="${CLEAN_URL%%/*}"
+
+# Create safe class name
+CLASS_NAME="$(echo "$DOMAIN" | sed 's/[^a-zA-Z0-9]//g')WebApp"
+
+# Persistent profile directory
+PROFILE_DIR="$HOME/.config/chromium-webapps/$DOMAIN"
+
+# Ensure profile directory exists
+mkdir -p "$PROFILE_DIR"
+
+# Read flags safely (preserve spacing, no xargs)
+FLAGS_FILE="$HOME/.config/themes/current/chromium-flags.conf"
+
+EXTRA_FLAGS=()
+if [ -f "$FLAGS_FILE" ]; then
+    while IFS= read -r line; do
+        [[ "$line" =~ ^[[:space:]]*# ]] && continue
+        [[ -z "$line" ]] && continue
+        EXTRA_FLAGS+=("$line")
+    done < "$FLAGS_FILE"
+fi
+
+exec chromium \
+    --user-data-dir="$PROFILE_DIR" \
+    --class="$CLASS_NAME" \
+    --app="$URL" \
+    "${EXTRA_FLAGS[@]}"

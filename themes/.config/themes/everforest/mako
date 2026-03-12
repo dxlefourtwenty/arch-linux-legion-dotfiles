@@ -1,0 +1,20 @@
+# Position
+anchor=top-right
+margin=30
+
+# Style
+background-color=#2b3339D9
+text-color=#d3c6aa
+border-color=#dbbc7f
+
+border-size=2
+border-radius=0
+padding=12
+width=300
+
+# Font
+font=Liberation Sans 11
+
+# Timing
+default-timeout=5000
+ignore-timeout=0

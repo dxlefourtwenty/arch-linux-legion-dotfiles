@@ -1,0 +1,270 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+TASKS_FILE="${HOME}/.config/dashboard/tasks.json"
+
+usage() {
+  cat <<'USAGE'
+Usage:
+  dashboard add-task <task> --daily
+  dashboard add-task <task> --weekly <Mon|Tue|Wed|Thu|Fri|Sat|Sun>[,<...>] ...
+  dashboard add-task <task> --date <MM-DD[-YYYY]>
+  dashboard remove-task <task|task-#>
+  dashboard list-tasks
+USAGE
+}
+
+ensure_storage() {
+  mkdir -p "$(dirname "$TASKS_FILE")"
+  if [[ ! -f "$TASKS_FILE" ]]; then
+    printf '[]\n' > "$TASKS_FILE"
+    return
+  fi
+
+  if ! jq empty "$TASKS_FILE" >/dev/null 2>&1; then
+    printf '[]\n' > "$TASKS_FILE"
+  fi
+}
+
+require_jq() {
+  if ! command -v jq >/dev/null 2>&1; then
+    echo "Error: jq is required but not installed." >&2
+    exit 1
+  fi
+}
+
+is_valid_weekday() {
+  case "$1" in
+    Mon|Tue|Wed|Thu|Fri|Sat|Sun) return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+normalize_weekdays() {
+  local raw="$*"
+  local token
+  local -a days=()
+  local normalized=""
+
+  raw="${raw//,/ }"
+
+  declare -A seen=()
+  for token in $raw; do
+    if ! is_valid_weekday "$token"; then
+      return 1
+    fi
+
+    if [[ -z "${seen[$token]+x}" ]]; then
+      seen[$token]=1
+      days+=("$token")
+    fi
+  done
+
+  if [[ ${#days[@]} -eq 0 ]]; then
+    return 1
+  fi
+
+  local IFS=,
+  normalized="${days[*]}"
+  echo "$normalized"
+}
+
+compute_next_date() {
+  local input="$1"
+  local mm dd yyyy
+  local current_year date_this_year date_next_year
+
+  if [[ "$input" =~ ^([0-9]{2})-([0-9]{2})-([0-9]{4})$ ]]; then
+    mm="${BASH_REMATCH[1]}"
+    dd="${BASH_REMATCH[2]}"
+    yyyy="${BASH_REMATCH[3]}"
+    date -d "${yyyy}-${mm}-${dd}" +%F >/dev/null 2>&1 || return 1
+    echo "${yyyy}-${mm}-${dd}"
+    return 0
+  fi
+
+  if [[ "$input" =~ ^([0-9]{2})-([0-9]{2})$ ]]; then
+    mm="${BASH_REMATCH[1]}"
+    dd="${BASH_REMATCH[2]}"
+    current_year="$(date +%Y)"
+
+    if date_this_year="$(date -d "${current_year}-${mm}-${dd}" +%F 2>/dev/null)"; then
+      if [[ "$(date -d "$date_this_year" +%s)" -ge "$(date -d "$(date +%F)" +%s)" ]]; then
+        echo "$date_this_year"
+        return 0
+      fi
+    fi
+
+    date_next_year="$(date -d "$((current_year + 1))-${mm}-${dd}" +%F 2>/dev/null)" || return 1
+    echo "$date_next_year"
+    return 0
+  fi
+
+  return 1
+}
+
+add_task() {
+  local recurrence_type recurrence_value created_at
+  local task=""
+  local flag_idx=-1
+  local i arg
+
+  if [[ $# -lt 2 ]]; then
+    usage
+    exit 1
+  fi
+
+  for ((i=1; i<=$#; i++)); do
+    arg="${!i}"
+    if [[ "$arg" == --* ]]; then
+      flag_idx=$i
+      break
+    fi
+  done
+
+  if [[ $flag_idx -le 1 ]]; then
+    echo "Error: task text must come before recurrence flag." >&2
+    usage
+    exit 1
+  fi
+
+  local -a task_parts=()
+  for ((i=1; i<flag_idx; i++)); do
+    task_parts+=("${!i}")
+  done
+  task="${task_parts[*]}"
+
+  local flag="${!flag_idx}"
+  local -a tail=()
+  for ((i=flag_idx+1; i<=$#; i++)); do
+    tail+=("${!i}")
+  done
+
+  case "$flag" in
+    --daily)
+      if [[ ${#tail[@]} -ne 0 ]]; then
+        echo "Error: --daily does not take extra arguments." >&2
+        usage
+        exit 1
+      fi
+      recurrence_type="daily"
+      recurrence_value="daily"
+      ;;
+    --weekly)
+      if [[ ${#tail[@]} -lt 1 ]]; then
+        echo "Error: weekly tasks require one or more weekdays." >&2
+        usage
+        exit 1
+      fi
+      recurrence_type="weekly"
+      recurrence_value="$(normalize_weekdays "${tail[@]}")" || {
+        echo "Error: --weekly must use Mon/Tue/Wed/Thu/Fri/Sat/Sun, separated by commas and/or spaces." >&2
+        exit 1
+      }
+      ;;
+    --date)
+      if [[ ${#tail[@]} -ne 1 ]]; then
+        echo "Error: date tasks require MM-DD or MM-DD-YYYY." >&2
+        usage
+        exit 1
+      fi
+      recurrence_type="date"
+      recurrence_value="$(compute_next_date "${tail[0]}")" || {
+        echo "Error: invalid --date format. Use MM-DD or MM-DD-YYYY." >&2
+        exit 1
+      }
+      ;;
+    *)
+      echo "Error: one of --daily, --weekly, or --date is required." >&2
+      usage
+      exit 1
+      ;;
+  esac
+
+  created_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+
+  local tmp
+  tmp="$(mktemp)"
+  jq --arg task "$task" \
+     --arg rtype "$recurrence_type" \
+     --arg rval "$recurrence_value" \
+     --arg created_at "$created_at" \
+     '. + [{task: $task, recurrence_type: $rtype, recurrence_value: $rval, created_at: $created_at}] | sort_by(.created_at)' \
+     "$TASKS_FILE" > "$tmp"
+  mv "$tmp" "$TASKS_FILE"
+
+  echo "Added task: $task"
+}
+
+remove_task() {
+  local selector idx
+
+  if [[ $# -lt 1 ]]; then
+    usage
+    exit 1
+  fi
+
+  selector="$*"
+
+  idx=""
+  if [[ $# -eq 1 && "$1" =~ ^task-([0-9]+)$ ]]; then
+    idx="${BASH_REMATCH[1]}"
+  elif [[ $# -eq 1 && "$1" =~ ^[0-9]+$ ]]; then
+    idx="$1"
+  fi
+
+  local tmp
+  tmp="$(mktemp)"
+
+  if [[ -n "$idx" ]]; then
+    if ! jq -e --argjson i "$idx" '($i >= 1) and ($i <= length)' "$TASKS_FILE" >/dev/null; then
+      echo "Error: task number '$idx' not found." >&2
+      rm -f "$tmp"
+      exit 1
+    fi
+
+    jq --argjson i "$idx" 'to_entries | map(select(.key != ($i - 1))) | map(.value)' "$TASKS_FILE" > "$tmp"
+    mv "$tmp" "$TASKS_FILE"
+    echo "Removed task-$idx"
+    return
+  fi
+
+  if ! jq -e --arg task "$selector" 'any(.[]; .task == $task)' "$TASKS_FILE" >/dev/null; then
+    echo "Error: task '$selector' not found." >&2
+    rm -f "$tmp"
+    exit 1
+  fi
+
+  jq --arg task "$selector" '[.[] | select(.task != $task)]' "$TASKS_FILE" > "$tmp"
+  mv "$tmp" "$TASKS_FILE"
+  echo "Removed task: $selector"
+}
+
+list_tasks() {
+  jq -r 'to_entries[] | "task-\(.key + 1): \(.value.task) [\(.value.recurrence_type): \(.value.recurrence_value)]"' "$TASKS_FILE"
+}
+
+main() {
+  require_jq
+  ensure_storage
+
+  if [[ $# -lt 1 ]]; then
+    usage
+    exit 1
+  fi
+
+  local cmd="$1"
+  shift
+
+  case "$cmd" in
+    add-task) add_task "$@" ;;
+    remove-task) remove_task "$@" ;;
+    list-tasks) list_tasks "$@" ;;
+    *)
+      usage
+      exit 1
+      ;;
+  esac
+}
+
+main "$@"

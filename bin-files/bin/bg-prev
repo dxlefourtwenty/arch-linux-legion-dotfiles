@@ -1,0 +1,46 @@
+#!/usr/bin/env bash
+
+WALL_DIR="$HOME/.config/themes/current/wallpapers"
+CURRENT_LINK="$HOME/.config/themes/current/wallpaper.png"
+
+# Ensure directory exists
+[ -d "$WALL_DIR" ] || exit 1
+
+# Get current filename
+CURRENT_FILE=$(basename "$(readlink -f "$CURRENT_LINK")")
+
+# Extract leading number
+CURRENT_NUM=$(echo "$CURRENT_FILE" | grep -o '^[0-9]\+')
+
+# Build sorted numeric list
+mapfile -t FILES < <(
+    find "$WALL_DIR" -maxdepth 1 -type f \( -iname "*.png" -o -iname "*.jpg" -o -iname "*.jpeg" \) \
+    -printf "%f\n" \
+    | sort -n
+)
+
+[ ${#FILES[@]} -eq 0 ] && exit 1
+
+# Default to last (wrap case)
+PREV_FILE="${FILES[-1]}"
+
+# Walk forward and remember last valid lower
+for FILE in "${FILES[@]}"; do
+    NUM=$(echo "$FILE" | grep -o '^[0-9]\+')
+    if [[ "$NUM" -lt "$CURRENT_NUM" ]]; then
+        PREV_FILE="$FILE"
+    fi
+done
+
+FULL_PATH="$WALL_DIR/$PREV_FILE"
+
+# Set wallpaper
+swww img "$FULL_PATH" \
+    --transition-type wipe \
+    --transition-angle 225 \
+    --transition-duration 2
+
+# Update symlink
+ln -sf "$FULL_PATH" "$CURRENT_LINK"
+
+notify-send -t 2500 "Background" "Updated to previous."

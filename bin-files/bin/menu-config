@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
+options="󰸌  Themes
+  Background
+  Audio
+  WiFi
+  Bluetooth
+  Hyprland
+  Waybar
+󰮫  Rofi
+  Mako
+  Kitty
+  Alacritty"
+
+HOME_DIR="/home/dxle"
+
+chosen=$(echo -e "$options" | rofi -dmenu -i \
+    -p "" \
+    -theme-str '
+        window { width: 250px; }
+        entry { placeholder: "Config…"; }
+        element { 
+            orientation: horizontal;
+            children: [ element-text ];
+            spacing: 0px;
+            padding: 8px 2px;
+        }
+        element-text { 
+            horizontal-align: 0.0;
+            padding-left: 0px;
+        }
+    ')
+
+case "$chosen" in
+  *Themes)
+    "$SCRIPT_DIR/launch-terminal" nvim ~/.config/themes/
+    ;;
+  *Background)
+    "$SCRIPT_DIR/launch-file-explorer" ~/.config/themes/current/wallpapers/
+    ;;
+  *Audio)
+    "$SCRIPT_DIR/menu-audio"
+    ;;
+  *WiFi)
+    "$SCRIPT_DIR/launch-terminal" nmtui
+    ;;
+  *Bluetooth)
+    "$SCRIPT_DIR/launch-terminal" bluetuith
+    ;;
+  *Hyprland)
+    "$SCRIPT_DIR/launch-terminal" nvim ~/.config/hypr/ &
+    notify-send -t 3000 "Config" "Editing $HOME_DIR/.config/hypr/"
+    ;;
+  *Waybar)
+    "$SCRIPT_DIR/launch-terminal" nvim ~/.config/waybar/config.jsonc &
+    notify-send -t 3000 "Config" "Editing $HOME_DIR/.config/waybar/config.jsonc"
+    ;;
+  *Rofi)
+    "$SCRIPT_DIR/launch-terminal" nvim ~/.config/rofi &
+    notify-send -t 3000 "Config" "Editing $HOME_DIR/.config/rofi"
+    ;;
+  *Mako)
+    "$SCRIPT_DIR/launch-terminal" nvim ~/.config/mako/config &
+    notify-send -t 3000 "Config" "Editing $HOME_DIR/.config/mako/config"
+    ;;
+  *Kitty)
+    "$SCRIPT_DIR/launch-terminal" nvim ~/.config/kitty/kitty.conf &
+    notify-send -t 3000 "Config" "Editing $HOME_DIR/.config/kitty/kitty.conf"
+    ;;
+  *Alacritty)
+    "$SCRIPT_DIR/launch-terminal" nvim ~/.config/alacritty/alacritty.toml &
+    notify-send -t 3000 "Config" "Editing $HOME_DIR/.config/alacritty/alacritty.toml"
+    ;;
+esac
