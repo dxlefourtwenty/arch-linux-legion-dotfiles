@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+hyprctl reload
+
+notify-send -t 3000 "Hyprland" "Reloaded successfully."
