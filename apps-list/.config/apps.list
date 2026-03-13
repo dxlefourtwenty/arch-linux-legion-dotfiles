@@ -10,6 +10,6 @@ youtube-webapp.desktop|/home/dxle/.local/share/icons/YouTube.png|YouTube
 instagram-webapp.desktop|/home/dxle/.local/share/icons/Instagram.png|Instagram
 github-webapp.desktop|/home/dxle/.local/share/icons/GitHub.png|GitHub
 localsend.desktop|/home/dxle/.local/share/icons/localsend.png|LocalSend
-nemo.desktop|/usr/share/icons/AdwaitaLegacy/22x22/legacy/system-file-manager.png|Files
-org.pulseaudio.pavucontrol.desktop|/usr/share/icons/hicolor/scalable/apps/org.pulseaudio.pavucontrol.svg|Volume
+nemo.desktop|/home/dxle/.local/share/icons/file.png|Files
+org.pulseaudio.pavucontrol.desktop|/home/dxle/.local/share/icons/volume.png|Volume
 Alacritty.desktop|/home/dxle/.local/share/icons/alacritty.png|Alacritty
