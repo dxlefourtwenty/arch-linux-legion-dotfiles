@@ -1,0 +1,238 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+OUTPUT_DIR="${HOME}/Pictures/Screenshots"
+
+notify_missing_dep() {
+    local dep="$1"
+    if command -v notify-send >/dev/null 2>&1; then
+        notify-send -t 5000 "Screenshot" "Missing dependency: $dep"
+    else
+        printf 'menu-screenshot: missing dependency: %s\n' "$dep" >&2
+    fi
+}
+
+notify_message() {
+    local title="$1"
+    local body="$2"
+    if command -v notify-send >/dev/null 2>&1; then
+        notify-send -t 3000 "$title" "$body"
+    fi
+}
+
+for cmd in rofi hyprshot hyprctl jq grim satty wl-copy hyprpicker slurp; do
+    if ! command -v "$cmd" >/dev/null 2>&1; then
+        notify_missing_dep "$cmd"
+        exit 1
+    fi
+done
+
+mkdir -p "$OUTPUT_DIR"
+
+focused_monitor_name="$(
+    hyprctl -j monitors | jq -r '.[] | select(.focused == true) | .name' | head -n1
+)"
+active_window_geometry="$(
+    hyprctl -j activewindow | jq -r 'if (.at and .size and (.at | length) == 2 and (.size | length) == 2) then "\(.at[0]),\(.at[1]) \(.size[0])x\(.size[1])" else "" end'
+)"
+
+THEME='
+element {
+    orientation: horizontal;
+    children: [ element-text ];
+    spacing: 0px;
+    padding: 8px 8px;
+}
+element-text {
+    horizontal-align: 0.0;
+    padding-left: 0px;
+}
+'
+
+capture_options="󰆞  Region
+󰹑  Window
+󰍹  Monitor
+󰘳  Active Window
+󰍹  Active Monitor"
+
+capture_choice="$(
+    printf '%b\n' "$capture_options" | rofi -dmenu -i \
+        -p "" \
+        -theme-str '
+            window { width: 300px; }
+            entry { placeholder: "Screenshot…"; }
+        ' \
+        -theme-str "$THEME"
+)"
+
+[[ -n "$capture_choice" ]] || exit 0
+
+target_options="󰄀  Save + Copy
+  Clipboard Only"
+
+target_choice="$(
+    printf '%b\n' "$target_options" | rofi -dmenu -i \
+        -p "" \
+        -theme-str '
+            window { width: 300px; }
+            entry { placeholder: "Target…"; }
+        ' \
+        -theme-str "$THEME"
+)"
+
+[[ -n "$target_choice" ]] || exit 0
+
+capture_label="${capture_choice#*  }"
+target_label="${target_choice#*  }"
+
+sleep 0.2
+
+tmp_dir="$(mktemp -d /tmp/menu-screenshot-XXXXXX)" || exit 1
+tmp_input="${tmp_dir}/capture.png"
+output_file="${OUTPUT_DIR}/screenshot-$(date +%Y-%m-%d_%H-%M-%S).png"
+
+cleanup() {
+    rm -rf "$tmp_dir"
+}
+trap cleanup EXIT INT TERM
+
+capture_with_hyprshot() {
+    hyprshot "$@" -s -o "$tmp_dir" -f "capture.png"
+}
+
+capture_with_grim() {
+    local geometry="$1"
+    [[ -n "$geometry" ]] || return 1
+    grim -g "$geometry" "$tmp_input"
+}
+
+capture_region() {
+    local picker_pid geometry
+
+    hyprpicker -r -z >/dev/null 2>&1 &
+    picker_pid=$!
+    sleep 0.1
+
+    geometry="$(slurp 2>/dev/null || true)"
+    kill "$picker_pid" 2>/dev/null || true
+
+    [[ -n "$geometry" ]] || return 1
+    capture_with_grim "$geometry"
+}
+
+get_workspace_rectangles() {
+    hyprctl -j clients | jq -r --argjson workspaces "$(hyprctl -j monitors | jq '[.[].activeWorkspace.id]')" '
+        .[] |
+        .workspace.id as $id |
+        select(($workspaces | index($id)) != null) |
+        "\(.at[0]),\(.at[1]) \(.size[0])x\(.size[1])"
+    '
+}
+
+capture_window() {
+    local picker_pid geometry rectangles
+
+    rectangles="$(get_workspace_rectangles)"
+    [[ -n "$rectangles" ]] || return 1
+
+    hyprpicker -r -z >/dev/null 2>&1 &
+    picker_pid=$!
+    sleep 0.1
+
+    geometry="$(printf '%s\n' "$rectangles" | slurp -r 2>/dev/null || true)"
+    kill "$picker_pid" 2>/dev/null || true
+
+    [[ -n "$geometry" ]] || return 1
+    capture_with_grim "$geometry"
+}
+
+wait_for_capture_file() {
+    local attempts=40
+
+    while (( attempts > 0 )); do
+        if [[ -s "$tmp_input" ]]; then
+            return 0
+        fi
+
+        sleep 0.05
+        ((attempts -= 1))
+    done
+
+    return 1
+}
+
+case "$capture_label" in
+    "Region")
+        if ! capture_region; then
+            notify_message "Screenshot" "Capture failed."
+            exit 1
+        fi
+        ;;
+    "Window")
+        if ! capture_window; then
+            notify_message "Screenshot" "Capture failed."
+            exit 1
+        fi
+        ;;
+    "Monitor")
+        if ! capture_with_hyprshot -m output -z; then
+            notify_message "Screenshot" "Capture failed."
+            exit 1
+        fi
+        ;;
+    "Active Window")
+        if ! capture_with_grim "$active_window_geometry"; then
+            notify_message "Screenshot" "Active window capture failed."
+            exit 1
+        fi
+        ;;
+    "Active Monitor")
+        if [[ -z "$focused_monitor_name" ]]; then
+            notify_message "Screenshot" "Active monitor capture failed."
+            exit 1
+        fi
+        if ! capture_with_hyprshot -m output -m "$focused_monitor_name"; then
+            notify_message "Screenshot" "Active monitor capture failed."
+            exit 1
+        fi
+        ;;
+    *)
+        exit 0
+        ;;
+esac
+
+if ! wait_for_capture_file; then
+    notify_message "Screenshot" "Capture was empty."
+    exit 1
+fi
+
+case "$target_label" in
+    "Save + Copy")
+        satty \
+            --filename "$tmp_input" \
+            --output-filename "$output_file" \
+            --actions-on-enter save-to-clipboard \
+            --save-after-copy \
+            --copy-command 'wl-copy' \
+            --disable-notifications \
+            --floating-hack \
+            --resize 1200x800 \
+            --early-exit || true
+
+        if [[ -s "$output_file" ]]; then
+            notify_message "Screenshot" "${capture_label} saved and copied."
+        fi
+        ;;
+    "Clipboard Only")
+        satty \
+            --filename "$tmp_input" \
+            --actions-on-enter save-to-clipboard \
+            --copy-command 'wl-copy' \
+            --disable-notifications \
+            --floating-hack \
+            --resize 1200x800 \
+            --early-exit || true
+
+        notify_message "Clipboard" "Screenshot appended."
+        ;;
+esac
