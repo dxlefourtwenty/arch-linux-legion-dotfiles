@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+start_watcher() {
+    local pattern="$1"
+    local type="$2"
+
+    if pgrep -f "$pattern" >/dev/null 2>&1; then
+        return 0
+    fi
+
+    nohup sh -c "wl-paste --type $type --watch cliphist store" >/dev/null 2>&1 &
+}
+
+start_watcher "wl-paste --type text --watch cliphist store" "text"
+start_watcher "wl-paste --type image --watch cliphist store" "image"
