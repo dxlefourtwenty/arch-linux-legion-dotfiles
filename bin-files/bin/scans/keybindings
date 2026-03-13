@@ -1,5 +1,5 @@
-SUPER + ALT + SPACE | Menu
-SUPER + SPACE | App Launcher
+SUPER + SPACE | Menu
+SUPER + ALT + SPACE | App Launcher
 SUPER + RETURN | Open Terminal
 SUPER + SHIFT + RETURN | Open Main Tmux
 SUPER + CTRL + ALT + SPACE | Open Background Gallery
@@ -23,13 +23,6 @@ SUPER + H | Focus Left
 SUPER + L | Focus Right 
 SUPER + K | Focus Up
 SUPER + J | Focus Down
-SUPER + B | Toggle Window Split Horizontal
-SUPER + V | Toggle Window Split Vertical
-SUPER + S | Toggle Layout To Stacked
-SUPER + W | Toggle Layout To Tabbed 
-SUPER + E | Toggle Layout To Split 
-SUPER + A | Toggle Focus To Parent Container
-SUPER + D | Toggle Focus To Floating Window
 SUPER + F | Toggle Fullscreen
 SUPER + D | Focus Recent Workspace
 SUPER + S | Focus Recent Workspace
@@ -63,7 +56,6 @@ SUPER + O | Enlarge Window Height
 SUPER + T | Toggle Tiling State
 SUPER + SHIFT + R | Reload WM Config
 SUPER + SHIFT + E | Exit WM
-SUPER + SHIFT + W | Redraw Windows
 SUPER + ENTER | Open Terminal
 SUPER + SHIFT + C | Launch Color Picker
 SUPER + SHIFT + S | Capture Screen 

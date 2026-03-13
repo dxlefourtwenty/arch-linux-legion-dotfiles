@@ -2,6 +2,7 @@
 set -euo pipefail
 
 MAX_THUMBNAILS=24
+CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/menu-clipboard"
 
 THEME='
 window { width: 900px; }
@@ -25,6 +26,93 @@ element-text {
 }
 '
 
+cache_key_for_entry() {
+    printf '%s' "$1" | sha256sum | awk '{print $1}'
+}
+
+cache_entry_status() {
+    local cache_key="$1"
+    local status_file="$CACHE_DIR/$cache_key.status"
+
+    if [[ -f "$status_file" ]]; then
+        cat "$status_file"
+    fi
+}
+
+build_image_label() {
+    local image_path="$1"
+    local mime_type="$2"
+    local dimensions bytes human_bytes
+
+    dimensions="$(identify -format '%wx%h' "$image_path" 2>/dev/null || true)"
+    bytes="$(stat -c '%s' "$image_path" 2>/dev/null || echo 0)"
+    human_bytes="$(numfmt --to=iec-i --suffix=B "$bytes" 2>/dev/null || echo "${bytes} B")"
+
+    printf '%s' "${mime_type} -- size: ${dimensions:-unknown}, ${human_bytes}"
+}
+
+cache_image_thumbnail() {
+    local entry="$1"
+    local cache_key="$2"
+    local decode_file="$3"
+    local mime_type extension image_path label_path status_path
+
+    mime_type="$(file --mime-type -b "$decode_file" 2>/dev/null || true)"
+    status_path="$CACHE_DIR/$cache_key.status"
+
+    if [[ "$mime_type" != image/* ]]; then
+        printf 'not-image' >"$status_path"
+        return 1
+    fi
+
+    extension="${mime_type#image/}"
+    image_path="$CACHE_DIR/$cache_key.$extension"
+    label_path="$CACHE_DIR/$cache_key.label"
+
+    cp "$decode_file" "$image_path"
+    build_image_label "$image_path" "$mime_type" >"$label_path"
+    printf '%s\n%s\n' 'image' "$image_path" >"$status_path"
+    return 0
+}
+
+append_menu_entry() {
+    local preview="$1"
+    local entry="$2"
+    local decode_file="$3"
+    local menu_input="$4"
+    local cache_key status_file status image_path label_path label
+
+    cache_key="$(cache_key_for_entry "$entry")"
+    status_file="$CACHE_DIR/$cache_key.status"
+    status="$(cache_entry_status "$cache_key")"
+
+    if [[ "$status" == image* ]]; then
+        image_path="$(sed -n '2p' "$status_file" 2>/dev/null || true)"
+        label_path="$CACHE_DIR/$cache_key.label"
+
+        if [[ -f "$image_path" && -f "$label_path" ]]; then
+            label="$(cat "$label_path")"
+            printf '%s\0icon\x1f%s\n' "$label" "$image_path" >>"$menu_input"
+            return 0
+        fi
+    elif [[ "$status" == "not-image" ]]; then
+        printf '%s\n' "$preview" >>"$menu_input"
+        return 1
+    fi
+
+    if printf '%s\n' "$entry" | cliphist decode >"$decode_file" 2>/dev/null; then
+        if cache_image_thumbnail "$entry" "$cache_key" "$decode_file"; then
+            image_path="$(sed -n '2p' "$status_file" 2>/dev/null || true)"
+            label="$(cat "$CACHE_DIR/$cache_key.label" 2>/dev/null || true)"
+            printf '%s\0icon\x1f%s\n' "$label" "$image_path" >>"$menu_input"
+            return 0
+        fi
+    fi
+
+    printf '%s\n' "$preview" >>"$menu_input"
+    return 1
+}
+
 if ! history="$(cliphist list 2>/dev/null)"; then
     history=""
 fi
@@ -33,6 +121,9 @@ if [[ -z "$history" ]]; then
     notify-send "Clipboard" "No clipboard history found"
     exit 0
 fi
+
+mkdir -p "$CACHE_DIR"
+find "$CACHE_DIR" -type f -mtime +14 -delete 2>/dev/null || true
 
 tmp_dir="$(mktemp -d)"
 trap 'rm -rf "$tmp_dir"' EXIT
@@ -50,24 +141,10 @@ while IFS=$'\t' read -r _ preview; do
         entry="$(printf '%s\n' "$history" | sed -n "$((row_index + 1))p")"
 
         if [[ -n "$entry" ]]; then
-            if printf '%s\n' "$entry" | cliphist decode >"$decode_file" 2>/dev/null; then
-                mime_type="$(file --mime-type -b "$decode_file" 2>/dev/null || true)"
-
-                if [[ "$mime_type" == image/* ]]; then
-                    dimensions="$(identify -format '%wx%h' "$decode_file" 2>/dev/null || true)"
-                    bytes="$(stat -c '%s' "$decode_file" 2>/dev/null || echo 0)"
-                    human_bytes="$(numfmt --to=iec-i --suffix=B "$bytes" 2>/dev/null || echo "${bytes} B")"
-                    display_label="${mime_type} -- size: ${dimensions:-unknown}, ${human_bytes}"
-                    extension="${mime_type#image/}"
-                    thumb_path="$tmp_dir/thumb-$row_index.$extension"
-                    cp "$decode_file" "$thumb_path"
-                    printf '%s\0icon\x1f%s\n' "$display_label" "$thumb_path" >>"$menu_input"
-                    ((thumbnail_count += 1))
-                else
-                    printf '%s\n' "$preview" >>"$menu_input"
-                fi
+            if append_menu_entry "$preview" "$entry" "$decode_file" "$menu_input"; then
+                ((thumbnail_count += 1))
             else
-                printf '%s\n' "$preview" >>"$menu_input"
+                :
             fi
         else
             printf '%s\n' "$preview" >>"$menu_input"

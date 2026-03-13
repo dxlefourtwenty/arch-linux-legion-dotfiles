@@ -50,21 +50,27 @@ tooltip label {
 }
 
 #workspaces button {
-	padding-left: 11pt;
-	padding-right: 11pt;
-  font-size: 13pt;
-	color: @foreground;
+  margin: 4px 10px;
+  font-size: 8pt;
+	color: transparent;
+  border-radius: 20pt;
 	background: @background;
+  border: 2px solid @primary;
   transition: all 0.3s ease-in-out;
 }
 
 #workspaces button.active {
-  color: @foreground;
+  color: transparent;
+  border: 2px solid @primary; 
+  border-radius: 20pt;
+  min-width: 40px;
   transition: all 0.3s ease-in-out;
+	background: linear-gradient(135deg, @blue 5%, @magenta 50%, red 100%);
 }
 
 #workspaces button.empty {
-	color: @muted;
+	color: transparent;
+  border: 2px solid @muted;
 }
 
 
