@@ -29,6 +29,8 @@ if [[ -f "$PIDFILE" ]]; then
     rm -f "$PIDFILE"
 fi
 
+sleep 0.2
+
 setsid bash -c '
 set -euo pipefail
 PIDFILE="/tmp/launch-colorpicker.pid"

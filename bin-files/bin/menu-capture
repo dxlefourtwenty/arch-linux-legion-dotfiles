@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
+options="  Screenshot
+  Screenrecord
+  Color"
+
+chosen=$(printf '%b\n' "$options" | rofi -dmenu -i \
+    -p "" \
+    -theme-str '
+        window { width: 320px; }
+        entry { placeholder: "Capture…"; }
+        element { 
+            orientation: horizontal;
+            children: [ element-text ];
+            spacing: 0px;
+            padding: 8px 10px;
+        }
+        element-text { 
+            horizontal-align: 0.0;
+            padding-left: 0px;
+        }
+    ')
+
+label="${chosen#*  }"
+
+case "$label" in
+  "Screenshot")
+    "$SCRIPT_DIR/menu-screenshot"
+    ;;
+  "Screenrecord")
+    "$SCRIPT_DIR/menu-screenrecord"
+    notify-send -t 5000 "Error" "Not implemented yet."
+    ;;
+  "Color")
+    "$SCRIPT_DIR/launch-colorpicker"
+    ;;
+esac

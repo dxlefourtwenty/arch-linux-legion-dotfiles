@@ -2,8 +2,7 @@
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 
-options="  Capture
-󰴱  Color Picker"
+options="  Capture"
 
 HOME_DIR="/home/dxle"
 
@@ -28,9 +27,6 @@ label="${chosen#*  }"   # remove up to the double-space after the icon
 
 case "$label" in
   "Capture")
-    "$SCRIPT_DIR/menu-screenshot"
-    ;;
-  "Color Picker")
-    "$SCRIPT_DIR/launch-colorpicker"
+    "$SCRIPT_DIR/menu-capture"
     ;;
 esac
