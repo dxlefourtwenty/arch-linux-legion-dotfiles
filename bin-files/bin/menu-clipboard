@@ -1,0 +1,107 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+MAX_THUMBNAILS=24
+
+THEME='
+window { width: 900px; }
+inputbar {
+    children: [ entry ];
+}
+entry { placeholder: "Clipboard…"; }
+element {
+    orientation: horizontal;
+    children: [ element-text, element-icon ];
+    spacing: 8px;
+    padding: 8px 10px;
+}
+element-icon {
+    size: 2.2em;
+    margin: -10px 0px 0px 0px;
+}
+element-text {
+    horizontal-align: 0.0;
+    padding-left: 0px;
+}
+'
+
+if ! history="$(cliphist list 2>/dev/null)"; then
+    history=""
+fi
+
+if [[ -z "$history" ]]; then
+    notify-send "Clipboard" "No clipboard history found"
+    exit 0
+fi
+
+tmp_dir="$(mktemp -d)"
+trap 'rm -rf "$tmp_dir"' EXIT
+
+menu_input="$tmp_dir/menu-input"
+decode_file="$tmp_dir/decode"
+
+thumbnail_count=0
+row_index=0
+
+while IFS=$'\t' read -r _ preview; do
+    [[ -z "${preview:-}" ]] && preview="[empty]"
+
+    if (( thumbnail_count < MAX_THUMBNAILS )); then
+        entry="$(printf '%s\n' "$history" | sed -n "$((row_index + 1))p")"
+
+        if [[ -n "$entry" ]]; then
+            if printf '%s\n' "$entry" | cliphist decode >"$decode_file" 2>/dev/null; then
+                mime_type="$(file --mime-type -b "$decode_file" 2>/dev/null || true)"
+
+                if [[ "$mime_type" == image/* ]]; then
+                    dimensions="$(identify -format '%wx%h' "$decode_file" 2>/dev/null || true)"
+                    bytes="$(stat -c '%s' "$decode_file" 2>/dev/null || echo 0)"
+                    human_bytes="$(numfmt --to=iec-i --suffix=B "$bytes" 2>/dev/null || echo "${bytes} B")"
+                    display_label="${mime_type} -- size: ${dimensions:-unknown}, ${human_bytes}"
+                    extension="${mime_type#image/}"
+                    thumb_path="$tmp_dir/thumb-$row_index.$extension"
+                    cp "$decode_file" "$thumb_path"
+                    printf '%s\0icon\x1f%s\n' "$display_label" "$thumb_path" >>"$menu_input"
+                    ((thumbnail_count += 1))
+                else
+                    printf '%s\n' "$preview" >>"$menu_input"
+                fi
+            else
+                printf '%s\n' "$preview" >>"$menu_input"
+            fi
+        else
+            printf '%s\n' "$preview" >>"$menu_input"
+        fi
+    else
+        printf '%s\n' "$preview" >>"$menu_input"
+    fi
+
+    ((row_index += 1))
+done <<< "$history"
+
+chosen_index="$(rofi -dmenu -i \
+    -p "" \
+    -format i \
+    -no-custom \
+    -show-icons \
+    -theme-str "$THEME" \
+    <"$menu_input")"
+
+[[ -z "$chosen_index" ]] && exit 0
+
+chosen="$(printf '%s\n' "$history" | sed -n "$((chosen_index + 1))p")"
+[[ -z "$chosen" ]] && exit 0
+
+tmp="$tmp_dir/selected"
+
+printf '%s\n' "$chosen" | cliphist decode >"$tmp"
+
+mime_type="$(file --mime-type -b "$tmp")"
+
+if [[ "$mime_type" == image/* ]]; then
+    wl-copy --type "$mime_type" <"$tmp"
+    notify-send "Clipboard" "Copied image from history"
+else
+    wl-copy --type "$mime_type" <"$tmp"
+    notify-send "Clipboard" "Copied selection from history"
+fi

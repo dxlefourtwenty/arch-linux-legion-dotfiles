@@ -2,7 +2,7 @@
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 
-options="󱐋  Power Profile\n󰐥  Shutdown\n󰤁  Reboot\n  Lock\n󰍃  Logout\n󰤄  Suspend"
+options="󱐋  Power Profile\n󰐥  Shutdown\n󰤁  Reboot\n  Lock"
 
 chosen=$(echo -e "$options" | rofi -dmenu -i \
     -p "" \
@@ -34,13 +34,5 @@ case "$chosen" in
   *Lock)
     sleep 0.1
     ~/bin/launch-lock-screen
-    ;;
-  *Logout)
-    swaymsg exit
-    ;;
-  *Suspend)
-    ~/bin/launch-lock-screen
-    sleep 1
-    loginctl suspend
     ;;
 esac

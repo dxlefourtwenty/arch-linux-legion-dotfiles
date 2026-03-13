@@ -3,6 +3,7 @@
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 
 options="󰸌  Color Converter
+  Clipboard
   Tasks
   Files
 󰝁  Trigger"
@@ -31,6 +32,9 @@ label="${chosen#*  }"   # remove up to the double-space after the icon
 case "$label" in
   "Color Converter")
     "$SCRIPT_DIR/menu-color-converter"
+    ;;
+  "Clipboard")
+    "$SCRIPT_DIR/menu-clipboard"
     ;;
   "Tasks")
     "$SCRIPT_DIR/menu-tasks"
