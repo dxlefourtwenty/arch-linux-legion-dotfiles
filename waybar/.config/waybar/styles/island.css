@@ -73,8 +73,6 @@ button {
     padding: 0;
     background-color: transparent;
     margin: 0 10px 0 10px;
-    border: none;
-    box-shadow: none;
 }
 
 #workspaces button {

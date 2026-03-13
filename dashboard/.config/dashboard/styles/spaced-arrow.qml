@@ -9,7 +9,8 @@ QtObject {
     property bool borderTop: true
     property bool borderBottom: true
     property int radius: 0
-    property int barHeight: 50
+    property int barHeight: 0
+    property int finalPosition: 50
 
     property string font: "JetBrainsMono Nerd Font"
     property int fontSize: 16
