@@ -159,7 +159,7 @@
         "cursor": false,
         // "interface": "nmtui", // (Optional) To force the use of this interface
         "format-wifi": "",
-        "on-click": "launch-terminal nmtui",
+        "on-click": "~/bin/launch-terminal nmtui",
         "format-ethernet": "{ipaddr}/{cidr}",
         "tooltip-format": "{ifname}: {ipaddr}/{cidr} {essid}",
         "format-linked": "{ifname} (No IP)",
