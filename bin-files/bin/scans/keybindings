@@ -1,6 +1,7 @@
 SUPER + SPACE | Menu
 SUPER + ALT + SPACE | App Launcher
 SUPER + RETURN | Open Terminal
+SUPER + SHIFT + A | Activity
 SUPER + SHIFT + RETURN | Open Main Tmux
 SUPER + CTRL + ALT + SPACE | Open Background Gallery
 SUPER + CTRL + ALT + M | Open Live Background Gallery
@@ -11,23 +12,12 @@ SUPER + SHIFT + LEFT | Move Window Left
 SUPER + SHIFT + RIGHT | Move Window Right
 SUPER + SHIFT + UP | Move Window Up
 SUPER + SHIFT + DOWN | Move Window Down
-SUPER + SHIFT + H | Move Window Left
-SUPER + SHIFT + L| Move Window Right
-SUPER + SHIFT + K | Move Window Up
-SUPER + SHIFT + J | Move Window Down
 SUPER + LEFT | Focus Left
 SUPER + RIGHT | Focus Right
 SUPER + UP | Focus Up
 SUPER + DOWN | Focus Down
-SUPER + H | Focus Left
-SUPER + L | Focus Right 
-SUPER + K | Focus Up
-SUPER + J | Focus Down
 SUPER + F | Toggle Fullscreen
-SUPER + D | Focus Recent Workspace
-SUPER + S | Focus Recent Workspace
-SUPER + A | Focus Previous Workspace
-SHIFT + SUPER + SPACE | Toggle Floating Window 
+SHIFT + SUPER + F | Toggle Floating Window 
 SUPER + 1 | Focus Workspace 1
 SUPER + 2 | Focus Workspace 2
 SUPER + 3 | Focus Workspace 3
@@ -37,8 +27,7 @@ SUPER + 6 | Focus Workspace 6
 SUPER + 7 | Focus Workspace 7
 SUPER + 8 | Focus Workspace 8
 SUPER + 9 | Focus Workspace 9
-SUPER + SHIFT + A | Move Workspace Left
-SUPER + SHIFT + F | Move Workspace Right
+SUPER + 0 | Focus Workspace 0
 SUPER + SHIFT + 1 | Move To Workspace 1
 SUPER + SHIFT + 2 | Move To Workspace 2
 SUPER + SHIFT + 3 | Move To Workspace 3
@@ -48,21 +37,19 @@ SUPER + SHIFT + 6 | Move To Workspace 6
 SUPER + SHIFT + 7 | Move To Workspace 7
 SUPER + SHIFT + 8 | Move To Workspace 8
 SUPER + SHIFT + 9 | Move To Workspace 9
+SUPER + SHIFT + 0 | Move To Workspace 0
 SUPER + SHIFT + Q | Close Window
-SUPER + U | Shrink Window Width
-SUPER + P | Enlarge Window Width
-SUPER + I | Shrink Window Height
-SUPER + O | Enlarge Window Height
-SUPER + T | Toggle Tiling State
-SUPER + SHIFT + R | Reload WM Config
-SUPER + SHIFT + E | Exit WM
-SUPER + ENTER | Open Terminal
+SUPER + Q | Close Window
+SUPER + RMB | Resize Window
+SUPER + LMB | Move Window
+SUPER + SHIFT + ALT + R | Reload WM Config
 SUPER + SHIFT + C | Launch Color Picker
-SUPER + SHIFT + S | Capture Screen 
+SUPER + ALT + S | Take Screenshot
+SUPER + SHIFT + ALT + S | Capture Menu
 SUPER + SHIFT + D | Toggle Dashboard
-CTRL + ALT + LEFT | Close Terminal Pane
-CTRL + ALT + RIGHT | Split Terminal Right
-CTRL + ALT + DOWN | Split Terminal Down 
+[TMUX] CTRL + ALT + LEFT | Close Terminal Pane
+[TMUX] CTRL + ALT + RIGHT | Split Terminal Right
+[TMUX] CTRL + ALT + DOWN | Split Terminal Down 
 [TMUX] CTRL + A | <PREFIX>
 [TMUX] <PREFIX> + C | New Terminal Window (Cwd)
 [TMUX] <PREFIX> + [#] | Focus Terminal Window [#]
