@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+# kill any existing hypridle instances
+pkill -x hypridle 2>/dev/null
+
+# start hypridle as a daemon
+hypridle >/dev/null 2>&1 &
+disown
