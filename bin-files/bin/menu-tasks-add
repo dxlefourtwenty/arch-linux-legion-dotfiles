@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
 THEME='
 window { width: 900px; }
 inputbar {
@@ -19,7 +21,7 @@ element-text {
 }
 '
 
-dashboard_cmd="dashboard"
+dashboard_cmd="${SCRIPT_DIR}/dashboard"
 
 # ---------------------------
 # task text
@@ -42,7 +44,10 @@ recurrence=$(printf "Daily\nWeekly\nDate" | \
 
 case "$recurrence" in
     Daily)
-        $dashboard_cmd add-task "$task" --daily
+        if ! output="$("$dashboard_cmd" add-task "$task" --daily 2>&1)"; then
+            notify-send "Tasks" "$output"
+            exit 1
+        fi
         ;;
 
     Weekly)
@@ -51,7 +56,10 @@ case "$recurrence" in
             -theme-str 'window { width: 320px; } entry { placeholder: "Mon,Tue,…"; }')
 
         [[ -z "$days" ]] && exit 0
-        $dashboard_cmd add-task "$task" --weekly "$days"
+        if ! output="$("$dashboard_cmd" add-task "$task" --weekly "$days" 2>&1)"; then
+            notify-send "Tasks" "$output"
+            exit 1
+        fi
         ;;
 
     Date)
@@ -60,8 +68,11 @@ case "$recurrence" in
             -theme-str 'window { width: 260px; } entry { placeholder: "MM-DD[-YYYY]"; }')
 
         [[ -z "$date" ]] && exit 0
-        $dashboard_cmd add-task "$task" --date "$date"
+        if ! output="$("$dashboard_cmd" add-task "$task" --date "$date" 2>&1)"; then
+            notify-send "Tasks" "$output"
+            exit 1
+        fi
         ;;
 esac
 
-notify-send "Tasks" "Added: $task"
+notify-send "Tasks" "${output:-Added: $task}"

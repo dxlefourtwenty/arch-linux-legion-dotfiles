@@ -26,6 +26,10 @@ ensure_storage() {
   fi
 }
 
+make_tmp_file() {
+  mktemp "$(dirname "$TASKS_FILE")/.tasks.json.tmp.XXXXXX"
+}
+
 require_jq() {
   if ! command -v jq >/dev/null 2>&1; then
     echo "Error: jq is required but not installed." >&2
@@ -184,7 +188,7 @@ add_task() {
   created_at="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 
   local tmp
-  tmp="$(mktemp)"
+  tmp="$(make_tmp_file)"
   jq --arg task "$task" \
      --arg rtype "$recurrence_type" \
      --arg rval "$recurrence_value" \
@@ -214,7 +218,7 @@ remove_task() {
   fi
 
   local tmp
-  tmp="$(mktemp)"
+  tmp="$(make_tmp_file)"
 
   if [[ -n "$idx" ]]; then
     if ! jq -e --argjson i "$idx" '($i >= 1) and ($i <= length)' "$TASKS_FILE" >/dev/null; then
