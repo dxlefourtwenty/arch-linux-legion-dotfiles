@@ -28,7 +28,7 @@ label="${chosen#*  }"   # remove up to the double-space after the icon
 
 case "$label" in
   "Capture")
-    "$SCRIPT_DIR/launch-screenshot-clipboard"
+    "$SCRIPT_DIR/menu-screenshot"
     ;;
   "Color Picker")
     "$SCRIPT_DIR/launch-colorpicker"
