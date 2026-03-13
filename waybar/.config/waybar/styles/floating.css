@@ -103,13 +103,13 @@ button:hover {
     background: @background;
 }
 
-#workspaces button.focused, #workspaces button.active {
+#workspaces button.active {
     background-color: transparent;
     color: @foreground;
 }
 
-#workspaces button.persistent {
-    color: @muted; 
+#workspaces button.empty {
+    color: @muted;
 }
 
 #workspaces button.urgent {

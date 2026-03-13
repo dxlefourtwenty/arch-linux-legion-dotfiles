@@ -192,7 +192,8 @@
             "car": " ",
             "default": ["", " ", " "]
         },
-        "on-click": "pavucontrol"
+        "on-click": "~/bin/menu-audio",
+        "on-click-right": "pavucontrol"
     },
     "custom/media": {
         "format": "{icon} {text}",
