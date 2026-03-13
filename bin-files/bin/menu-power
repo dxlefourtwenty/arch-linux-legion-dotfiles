@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
 
-options="󰐥  Shutdown\n󰤁  Reboot\n  Lock\n󰍃  Logout\n󰤄  Suspend"
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
+options="󱐋  Power Profile\n󰐥  Shutdown\n󰤁  Reboot\n  Lock\n󰍃  Logout\n󰤄  Suspend"
 
 chosen=$(echo -e "$options" | rofi -dmenu -i \
     -p "" \
     -theme-str '
-        window { width: 260px; }
+        window { width: 300px; }
         entry { placeholder: "Power…"; }
         element { 
             orientation: horizontal;
@@ -20,6 +22,9 @@ chosen=$(echo -e "$options" | rofi -dmenu -i \
     ')
 
 case "$chosen" in
+  *Power\ Profile)
+    "$SCRIPT_DIR/menu-power-profile"
+    ;;
   *Shutdown)
     systemctl poweroff
     ;;
@@ -28,13 +33,13 @@ case "$chosen" in
     ;;
   *Lock)
     sleep 0.1
-    ~/.config/swaylock/lock.sh
+    ~/bin/launch-lock-screen
     ;;
   *Logout)
     swaymsg exit
     ;;
   *Suspend)
-    ~/.config/swaylock/lock.sh
+    ~/bin/launch-lock-screen
     sleep 1
     loginctl suspend
     ;;

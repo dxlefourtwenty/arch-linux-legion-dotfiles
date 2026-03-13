@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+
 source ~/.config/swaylock/colors.sh
 
 swaylock \
@@ -7,10 +8,10 @@ swaylock \
   --screenshots \
   --effect-blur 8x6 \
   --clock \
-  --grace 2 \
   --indicator \
   --indicator-radius 110 \
   --indicator-thickness 10 \
+  --grace 2 \
   --inside-color "$COLOR_BG" \
   --ring-color "$COLOR_ACCENT" \
   --line-color "$COLOR_ACCENT" \
