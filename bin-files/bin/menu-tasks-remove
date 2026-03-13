@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
 THEME='
 window { width: 1000; }
 entry { placeholder: "Remove Task…"; }
@@ -16,24 +18,27 @@ element-text {
 }
 '
 
-dashboard_cmd="dashboard"
+dashboard_cmd="${SCRIPT_DIR}/dashboard"
 
-tasks=$($dashboard_cmd list-tasks)
+tasks="$("$dashboard_cmd" list-tasks)"
 
 [[ -z "$tasks" ]] && {
     notify-send "Tasks" "No tasks found"
     exit 0
 }
 
-chosen=$(echo "$tasks" | rofi -dmenu -i \
+chosen=$(printf '%s\n' "$tasks" | rofi -dmenu -i \
     -p "" \
     -theme-str "$THEME" \
     -theme-str 'entry { placeholder: "Remove Task…"; }')
 
 [[ -z "$chosen" ]] && exit 0
 
-task_id=$(echo "$chosen" | awk -F':' '{print $1}')
+task_id=$(printf '%s\n' "$chosen" | awk -F':' '{print $1}')
 
-$dashboard_cmd remove-task "$task_id"
+if ! output="$("$dashboard_cmd" remove-task "$task_id" 2>&1)"; then
+    notify-send "Tasks" "$output"
+    exit 1
+fi
 
-notify-send "Tasks" "Removed $task_id"
+notify-send "Tasks" "$output"
