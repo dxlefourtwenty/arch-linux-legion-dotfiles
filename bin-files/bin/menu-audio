@@ -2,8 +2,11 @@
 
 # Get sinks
 sinks=$(pactl list sinks short)
+current_sink=$(pactl get-default-sink 2>/dev/null)
 
-options=""
+options=()
+labels=()
+ids=()
 
 while read -r id name driver format channels rate state; do
     # Pretty names
@@ -17,10 +20,18 @@ while read -r id name driver format channels rate state; do
         label="󰕾  Audio"
     fi
 
-    options+="$label|$id\n"
+    display_label="$label"
+    if [[ "$name" == "$current_sink" ]]; then
+        display_label="<i>$label</i>"
+    fi
+
+    options+=("$display_label")
+    labels+=("$label")
+    ids+=("$id")
 done <<< "$sinks"
 
-chosen=$(echo -e "$options" | cut -d'|' -f1 | rofi -dmenu -i \
+chosen=$(printf '%s\n' "${options[@]}" | rofi -dmenu -i \
+    -markup-rows \
     -p "" \
     -theme-str '
         window { width: 260px; }
@@ -37,7 +48,15 @@ chosen=$(echo -e "$options" | cut -d'|' -f1 | rofi -dmenu -i \
         }
     ')
 
-sink_id=$(echo -e "$options" | grep "$chosen" | cut -d'|' -f2)
+chosen_plain=$(printf '%s' "$chosen" | sed -E 's/<[^>]+>//g')
+sink_id=""
+
+for i in "${!labels[@]}"; do
+    if [[ "${labels[$i]}" == "$chosen_plain" ]]; then
+        sink_id="${ids[$i]}"
+        break
+    fi
+done
 
 if [ -n "$sink_id" ]; then
     pactl set-default-sink "$sink_id"
