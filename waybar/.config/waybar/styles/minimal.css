@@ -78,6 +78,7 @@ button:hover {
     padding: 0 5px;
     background-color: transparent;
     color: @foreground;
+    transition: all 0.3s ease-in-out;
 }
 
 
@@ -88,6 +89,7 @@ button:hover {
 #workspaces button.active {
     background-color: transparent;
     color: @foreground;
+    transition: all 0.3s ease-in-out;
 }
 
 #workspaces button.urgent {

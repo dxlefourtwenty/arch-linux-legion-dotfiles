@@ -55,10 +55,12 @@ tooltip label {
   font-size: 13pt;
 	color: @foreground;
 	background: @background;
+  transition: all 0.3s ease-in-out;
 }
 
 #workspaces button.active {
   color: @foreground;
+  transition: all 0.3s ease-in-out;
 }
 
 #workspaces button.empty {
