@@ -1,4 +1,4 @@
 #!/usr/bin/env bash
 
 pkill -x topdash 2>/dev/null
-exec nohup /home/dxle/builds/dashboard/build/topdash &
+exec nohup /home/dxle/builds/dashboard/build/topdash >/dev/null 2>&1 &

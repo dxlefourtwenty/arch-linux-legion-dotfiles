@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+format_profile_display() {
+    printf '%s\n' "$1" |
+        sed -E 's/[-_]+/ /g; s/(^|[[:space:]])([[:alpha:]])/\1\U\2/g'
+}
+
+mapfile -t raw_profiles < <(
+    powerprofilesctl list | sed -nE 's/^[[:space:]]*(\*)?[[:space:]]*([[:alnum:]-]+):[[:space:]]*$/\1|\2/p'
+)
+
+if [[ ${#raw_profiles[@]} -eq 0 ]]; then
+    notify-send -t 4000 "Power Profile" "No power profiles were found."
+    exit 1
+fi
+
+profiles=()
+display_profiles=()
+current_profile=""
+
+for raw_profile in "${raw_profiles[@]}"; do
+    marker="${raw_profile%%|*}"
+    profile="${raw_profile#*|}"
+    pretty_profile="$(format_profile_display "${profile}")"
+
+    profiles+=("${profile}")
+
+    if [[ "${marker}" == "*" ]]; then
+        current_profile="${profile}"
+        display_profiles+=("<i>${pretty_profile}</i>")
+    else
+        display_profiles+=("${pretty_profile}")
+    fi
+done
+
+chosen_index="$(
+    printf '%s\n' "${display_profiles[@]}" | rofi -dmenu -i -markup-rows -format i \
+        -p "" \
+        -theme-str '
+            window { width: 240px; }
+            entry { placeholder: "Profile…"; }
+            element {
+                orientation: horizontal;
+                children: [ element-text ];
+                spacing: 0px;
+                padding: 8px 8px;
+            }
+            element-text {
+                horizontal-align: 0.0;
+                padding-left: 0px;
+            }
+        '
+)"
+
+[[ -n "${chosen_index}" ]] || exit 0
+
+chosen_profile="${profiles[chosen_index]}"
+
+if [[ -z "${chosen_profile}" ]] || [[ "${chosen_profile}" == "${current_profile}" ]]; then
+    exit 0
+fi
+
+powerprofilesctl set "${chosen_profile}"
+
+formatted_profile="$(format_profile_display "${chosen_profile}")"
+notify-send -t 4000 "Power Profile" "Switched to ${formatted_profile}"
