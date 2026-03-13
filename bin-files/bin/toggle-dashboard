@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-DASH="/home/dxle/dev/dashboard/build/topdash"
+DASH="/home/dxle/builds/dashboard/build/topdash"
 
 # If running: toggle
 if pgrep -x topdash >/dev/null; then
