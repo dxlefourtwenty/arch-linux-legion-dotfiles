@@ -106,6 +106,12 @@ capture_with_grim() {
     grim -g "$geometry" "$tmp_input"
 }
 
+capture_monitor_by_name() {
+    local monitor_name="$1"
+    [[ -n "$monitor_name" ]] || return 1
+    grim -o "$monitor_name" "$tmp_input"
+}
+
 capture_region() {
     local picker_pid geometry
 
@@ -114,6 +120,20 @@ capture_region() {
     sleep 0.1
 
     geometry="$(slurp 2>/dev/null || true)"
+    kill "$picker_pid" 2>/dev/null || true
+
+    [[ -n "$geometry" ]] || return 1
+    capture_with_grim "$geometry"
+}
+
+capture_monitor() {
+    local picker_pid geometry
+
+    hyprpicker -r -z >/dev/null 2>&1 &
+    picker_pid=$!
+    sleep 0.1
+
+    geometry="$(slurp -o 2>/dev/null || true)"
     kill "$picker_pid" 2>/dev/null || true
 
     [[ -n "$geometry" ]] || return 1
@@ -175,7 +195,7 @@ case "$capture_label" in
         fi
         ;;
     "Monitor")
-        if ! capture_with_hyprshot -m output -z; then
+        if ! capture_monitor; then
             notify_message "Screenshot" "Capture failed."
             exit 1
         fi
@@ -187,11 +207,7 @@ case "$capture_label" in
         fi
         ;;
     "Active Monitor")
-        if [[ -z "$focused_monitor_name" ]]; then
-            notify_message "Screenshot" "Active monitor capture failed."
-            exit 1
-        fi
-        if ! capture_with_hyprshot -m output -m "$focused_monitor_name"; then
+        if ! capture_monitor_by_name "$focused_monitor_name"; then
             notify_message "Screenshot" "Active monitor capture failed."
             exit 1
         fi
