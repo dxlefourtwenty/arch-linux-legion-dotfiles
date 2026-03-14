@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 if pgrep -x mako; then
     makoctl reload 
 fi

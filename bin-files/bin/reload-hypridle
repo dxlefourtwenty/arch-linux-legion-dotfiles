@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+# If hypridle is running, restart it. Otherwise start it.
+
+if pgrep -x hypridle > /dev/null; then
+    pkill -x hypridle
+    sleep 0.2
+fi
+
+nohup hypridle >/dev/null 2>&1 &

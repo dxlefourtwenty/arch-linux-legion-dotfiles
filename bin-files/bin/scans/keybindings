@@ -1,7 +1,8 @@
-SUPER + SPACE | Menu
-SUPER + ALT + SPACE | App Launcher
+SUPER + SPACE | App Launcher
+SUPER + ALT + SPACE | Menu
 SUPER + ALT + K | Keybindings
 SUPER + ALT + L | Learn
+SUPER + ALT + P | Power
 SUPER + RETURN | Open Terminal
 SUPER + SHIFT + RETURN | Open Main Tmux
 SUPER + SHIFT + A | Activity
@@ -12,7 +13,8 @@ CTRL + ALT + SHIFT + SPACE | Previous Background
 SUPER + ALT + T | Change Theme
 SUPER + SHIFT + B | Toggle Top Bar
 SUPER + ALT + F | Files Menu
-SUPER + ALT + S | Capture Menu
+SUPER + ALT + S | Screenshot
+SUPER + SHIFT + ALT + S | Capture Menu
 SUPER + ALT + C | Clipboard
 SUPER + SHIFT + ALT + C | Color Converter
 SUPER + SHIFT + LEFT | Move Window Left
