@@ -67,7 +67,7 @@ capture_choice="$(
 
 [[ -n "$capture_choice" ]] || exit 0
 
-target_options="󰄀  Save + Copy
+target_options="󰄀  Save + Edit
   Clipboard Only"
 
 target_choice="$(
@@ -207,7 +207,7 @@ if ! wait_for_capture_file; then
 fi
 
 case "$target_label" in
-    "Save + Copy")
+    "Save + Edit")
         satty \
             --filename "$tmp_input" \
             --output-filename "$output_file" \
@@ -224,15 +224,7 @@ case "$target_label" in
         fi
         ;;
     "Clipboard Only")
-        satty \
-            --filename "$tmp_input" \
-            --actions-on-enter save-to-clipboard \
-            --copy-command 'wl-copy' \
-            --disable-notifications \
-            --floating-hack \
-            --resize 1200x800 \
-            --early-exit || true
-
+        wl-copy --type image/png < "$tmp_input"
         notify_message "Clipboard" "Screenshot appended."
         ;;
 esac
