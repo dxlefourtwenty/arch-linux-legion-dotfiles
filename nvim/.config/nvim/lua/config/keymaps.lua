@@ -13,3 +13,5 @@ end, { desc = "Live Grep (Project Root)" })
 vim.keymap.set("n", "<leader>t", function()
   require("utils.floatterm").toggle()
 end, { desc = "Open floating terminal" })
+
+vim.keymap.set("n", "<leader>gg", "<cmd>LazyGit<cr>")
