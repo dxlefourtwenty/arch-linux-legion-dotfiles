@@ -10,6 +10,12 @@ window#waybar {
 	background: @background-gray;
 	color: @foreground;
 	font-size: 13pt;
+  transition: margin-top 2s cubic-bezier(.23,1,.32,1), opacity 2s ease;
+}
+
+window#waybar.hidden {
+    margin-top: -30px;
+    opacity: 0;
 }
 
 tooltip {

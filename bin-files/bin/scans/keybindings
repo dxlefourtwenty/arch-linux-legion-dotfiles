@@ -1,13 +1,20 @@
 SUPER + SPACE | Menu
 SUPER + ALT + SPACE | App Launcher
+SUPER + ALT + K | Keybindings
+SUPER + ALT + L | Learn
 SUPER + RETURN | Open Terminal
-SUPER + SHIFT + A | Activity
 SUPER + SHIFT + RETURN | Open Main Tmux
+SUPER + SHIFT + A | Activity
 SUPER + CTRL + ALT + SPACE | Open Background Gallery
 SUPER + CTRL + ALT + M | Open Live Background Gallery
 CTRL + ALT + SPACE | Next Background
 CTRL + ALT + SHIFT + SPACE | Previous Background
 SUPER + ALT + T | Change Theme
+SUPER + SHIFT + B | Toggle Top Bar
+SUPER + ALT + F | Files Menu
+SUPER + ALT + S | Capture Menu
+SUPER + ALT + C | Clipboard
+SUPER + SHIFT + ALT + C | Color Converter
 SUPER + SHIFT + LEFT | Move Window Left
 SUPER + SHIFT + RIGHT | Move Window Right
 SUPER + SHIFT + UP | Move Window Up
@@ -18,6 +25,7 @@ SUPER + UP | Focus Up
 SUPER + DOWN | Focus Down
 SUPER + F | Toggle Fullscreen
 SHIFT + SUPER + F | Toggle Floating Window 
+SUPER + P | Pin Window
 SUPER + 1 | Focus Workspace 1
 SUPER + 2 | Focus Workspace 2
 SUPER + 3 | Focus Workspace 3
@@ -38,6 +46,18 @@ SUPER + SHIFT + 7 | Move To Workspace 7
 SUPER + SHIFT + 8 | Move To Workspace 8
 SUPER + SHIFT + 9 | Move To Workspace 9
 SUPER + SHIFT + 0 | Move To Workspace 0
+SUPER + SHIFT + ALT + 1 | Move Window To Workspace 1
+SUPER + SHIFT + ALT + 2 | Move Window To Workspace 2
+SUPER + SHIFT + ALT + 3 | Move Window To Workspace 3
+SUPER + SHIFT + ALT + 4 | Move Window To Workspace 4
+SUPER + SHIFT + ALT + 5 | Move Window To Workspace 5
+SUPER + SHIFT + ALT + 6 | Move Window To Workspace 6
+SUPER + SHIFT + ALT + 7 | Move Window To Workspace 7
+SUPER + SHIFT + ALT + 8 | Move Window To Workspace 8
+SUPER + SHIFT + ALT + 9 | Move Window To Workspace 9
+SUPER + SHIFT + ALT + 0 | Move Window To Workspace 0
+SUPER + O | Toggle Special Workspace
+SUPER + SHIFT + O | Move To Special Workspace
 SUPER + SHIFT + Q | Close Window
 SUPER + Q | Close Window
 SUPER + RMB | Resize Window

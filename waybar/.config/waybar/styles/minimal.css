@@ -11,11 +11,16 @@ window#waybar {
     border: none;
     color: @foreground;
     transition-property: background-color;
-    transition-duration: .5s;
+    transition-duration: 2s;
+}
+
+window#waybar {
+    transition: margin-top 2s cubic-bezier(.23,1,.32,1), opacity 2s ease;
 }
 
 window#waybar.hidden {
-    opacity: 0.2;
+    margin-top: -30px;
+    opacity: 0;
 }
 
 tooltip {

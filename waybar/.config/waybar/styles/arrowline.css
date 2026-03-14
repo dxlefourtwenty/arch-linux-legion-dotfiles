@@ -19,6 +19,15 @@
 	font-size: 14pt;
 }
 
+window#waybar {
+    transition: margin-top 2s cubic-bezier(.23,1,.32,1), opacity 2s ease;
+}
+
+window#waybar.hidden {
+    margin-top: -30px;
+    opacity: 0;
+}
+
 tooltip {
   background: @background-gray;
   border: 1px solid @foreground;
