@@ -3,6 +3,8 @@
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 
 options="  Keybindings
+  Hyprland
+  Arch
   Neovim
 󰒲  Lazyvim
 󱆃  Bash
@@ -28,6 +30,12 @@ chosen=$(echo -e "$options" | rofi -dmenu -i \
 case "$chosen" in
   *Keybindings)
     "$SCRIPT_DIR/menu-keybindings"
+    ;;
+  *Hyprland)
+    "$SCRIPT_DIR/launch-web-app" https://wiki.hypr.land/Configuring
+    ;;
+  *Arch)
+    "$SCRIPT_DIR/launch-web-app" https://wiki.archlinux.org/title/Main_page
     ;;
   *Neovim)
     "$SCRIPT_DIR/menu-neovim-bindings"
