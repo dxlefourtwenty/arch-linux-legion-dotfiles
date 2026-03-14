@@ -2,11 +2,12 @@
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 
-options="󰸌  Color Converter
+options="  Capture
   Clipboard
+󰸌  Color Converter
   Tasks
   Files
-󰝁  Trigger"
+󱨥  Toggle"
 
 HOME_DIR="/home/dxle"
 
@@ -30,11 +31,14 @@ chosen=$(echo -e "$options" | rofi -dmenu -i \
 label="${chosen#*  }"   # remove up to the double-space after the icon
 
 case "$label" in
-  "Color Converter")
-    "$SCRIPT_DIR/menu-color-converter"
+  "Capture")
+    "$SCRIPT_DIR/menu-capture"
     ;;
   "Clipboard")
     "$SCRIPT_DIR/menu-clipboard"
+    ;;
+  "Color Converter")
+    "$SCRIPT_DIR/menu-color-converter"
     ;;
   "Tasks")
     "$SCRIPT_DIR/menu-tasks"
@@ -42,7 +46,7 @@ case "$label" in
   "Files") 
     "$SCRIPT_DIR/menu-files"
     ;;
-  "Trigger")
-    "$SCRIPT_DIR/menu-trigger"
+  "Toggle") 
+    "$SCRIPT_DIR/menu-toggle"
     ;;
 esac

@@ -7,7 +7,7 @@ SEARCH_DIR="$HOME"
 if [[ -n "$1" && "$1" != "Loading…" ]]; then
     real_path="${1/#\~/$HOME}"
     notify-send -t 5000 "Files" "Editing $1"
-    exec "$SCRIPT_DIR/launch-terminal" nvim "$real_path"
+    exec "$SCRIPT_DIR/launch-terminal-floating" 1400 800 nvim "$real_path"
 fi
 
 # If not inside rofi yet → launch it

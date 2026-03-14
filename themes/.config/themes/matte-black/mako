@@ -1,6 +1,7 @@
 # Position
 anchor=top-right
 margin=30
+output=HDMI-A-1
 
 # Style
 background-color=#121212D9

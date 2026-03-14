@@ -2,7 +2,8 @@
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 
-options="  Capture"
+options="  Top Bar
+󰨝  Dashboard"
 
 HOME_DIR="/home/dxle"
 
@@ -10,7 +11,7 @@ chosen=$(echo -e "$options" | rofi -dmenu -i \
     -p "" \
     -theme-str '
         window { width: 325px; }
-        entry { placeholder: "Trigger…"; }
+        entry { placeholder: "Tools…"; }
         element { 
             orientation: horizontal;
             children: [ element-text ];
@@ -26,7 +27,10 @@ chosen=$(echo -e "$options" | rofi -dmenu -i \
 label="${chosen#*  }"   # remove up to the double-space after the icon
 
 case "$label" in
-  "Capture")
-    "$SCRIPT_DIR/menu-capture"
+  "Top Bar")
+    "$SCRIPT_DIR/toggle-waybar"
+    ;;
+  "Dashboard")
+    "$SCRIPT_DIR/toggle-dashboard"
     ;;
 esac

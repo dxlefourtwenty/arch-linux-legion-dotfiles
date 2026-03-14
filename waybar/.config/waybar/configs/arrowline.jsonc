@@ -1,6 +1,7 @@
 {
 	"layer": "top",
 	"position": "top",
+  "hidden": false,
   "output": "HDMI-A-1",
     "reload_style_on_change": true,
 	"modules-left": [
