@@ -31,7 +31,13 @@ case "$label" in
     "$SCRIPT_DIR/menu-screenshot"
     ;;
   "Screenrecord")
-    obs >/dev/null 2>&1 &
+    if pgrep -x obs >/dev/null 2>&1; then
+      if ! hyprctl dispatch focuswindow 'class:^(obs)$' >/dev/null 2>&1; then
+        obs >/dev/null 2>&1 &
+      fi
+    else
+      obs >/dev/null 2>&1 &
+    fi
     ;;
   "Color")
     "$SCRIPT_DIR/launch-colorpicker"

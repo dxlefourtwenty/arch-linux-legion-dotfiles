@@ -2,21 +2,16 @@
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 
-options="  Install
-  Capture
-  Clipboard
-󰸌  Color Converter
-  Tasks
-  Files
-󱨥  Toggle"
+options="  Arch
+  AUR"
 
 HOME_DIR="/home/dxle"
 
 chosen=$(echo -e "$options" | rofi -dmenu -i \
     -p "" \
     -theme-str '
-        window { width: 325px; }
-        entry { placeholder: "Tools…"; }
+        window { width: 300px; }
+        entry { placeholder: "Install…"; }
         element { 
             orientation: horizontal;
             children: [ element-text ];
@@ -32,25 +27,10 @@ chosen=$(echo -e "$options" | rofi -dmenu -i \
 label="${chosen#*  }"   # remove up to the double-space after the icon
 
 case "$label" in
-  "Install")
-    "$SCRIPT_DIR/menu-install"
+  "Arch")
+    "$SCRIPT_DIR/launch-pacman-tui"
     ;;
-  "Capture")
-    "$SCRIPT_DIR/menu-capture"
-    ;;
-  "Clipboard")
-    "$SCRIPT_DIR/menu-clipboard"
-    ;;
-  "Color Converter")
-    "$SCRIPT_DIR/menu-color-converter"
-    ;;
-  "Tasks")
-    "$SCRIPT_DIR/menu-tasks"
-    ;;
-  "Files") 
-    "$SCRIPT_DIR/menu-files"
-    ;;
-  "Toggle") 
-    "$SCRIPT_DIR/menu-toggle"
+  "AUR")
+    "$SCRIPT_DIR/launch-pacman-aur-tui"
     ;;
 esac

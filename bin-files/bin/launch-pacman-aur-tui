@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
+"$SCRIPT_DIR/launch-terminal-floating" 1200 800 bash -c '
+pkg=$(yay -Slq | fzf \
+  --preview "yay -Si {}" \
+  --preview-window=right:60%,wrap)
+
+clear
+
+if [[ -n "$pkg" ]]; then
+  yay -S "$pkg"
+  echo
+  echo "Done. Press any key to close."
+  read -n 1 -s
+fi
+'

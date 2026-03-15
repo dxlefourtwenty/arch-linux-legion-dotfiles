@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
+"$SCRIPT_DIR/launch-terminal-floating" 1200 800 bash -c '
+pkg=$(pacman -Slq | fzf \
+  --preview "pacman -Si {}" \
+  --preview-window=right:60%,wrap)
+
+clear
+
+if [[ -n "$pkg" ]]; then
+  sudo pacman -S "$pkg"
+  echo
+  echo "Done. Press any key to close."
+  read -n 1 -s
+fi
+'
