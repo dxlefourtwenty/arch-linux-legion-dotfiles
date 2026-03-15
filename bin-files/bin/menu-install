@@ -10,7 +10,7 @@ HOME_DIR="/home/dxle"
 chosen=$(echo -e "$options" | rofi -dmenu -i \
     -p "" \
     -theme-str '
-        window { width: 300px; }
+        window { width: 240px; }
         entry { placeholder: "Install…"; }
         element { 
             orientation: horizontal;
