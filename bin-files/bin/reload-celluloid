@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+# Only reload if Nemo is running
+if pgrep -x celluloid > /dev/null; then
+    pkill celluloid
+    sleep 0.2
+    nohup celluloid >/dev/null 2>&1 &
+fi
+
+

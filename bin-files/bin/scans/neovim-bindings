@@ -169,3 +169,5 @@ gT | Move to Prev Tab
 #gt | Move to Tab Number #
 
 f: w | Jump to : Then Next Word Start
+
+<leader>gg | Open Lazygit

@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+program="$1"
+
+if [ -z "$program" ]; then
+    echo "Usage: reload-program <program>"
+    exit 1
+fi
+
+pkill "$program"
+setsid "$program" >/dev/null 2>&1 &

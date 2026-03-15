@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-VIDEO_PLAYER="mpv"
+VIDEO_PLAYER="celluloid"
 
 # Exit if nothing was passed
 [ -z "$1" ] && exit 1

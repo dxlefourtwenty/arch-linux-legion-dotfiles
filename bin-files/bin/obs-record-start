@@ -1,0 +1,27 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ -z "${OBS_WEBSOCKET_URL:-}" && -f "${HOME}/.bash_env" ]]; then
+    # shellcheck disable=SC1090
+    source "${HOME}/.bash_env"
+fi
+
+notify() {
+    local title="$1"
+    local body="$2"
+    if command -v notify-send >/dev/null 2>&1; then
+        notify-send -t 4000 "$title" "$body"
+    fi
+}
+
+if ! command -v obs-cmd >/dev/null 2>&1; then
+    notify "OBS" "Missing dependency: obs-cmd"
+    exit 1
+fi
+
+if ! output="$(OBS_WEBSOCKET_URL="${OBS_WEBSOCKET_URL:-}" obs-cmd recording start 2>&1)"; then
+    notify "OBS" "$output"
+    exit 1
+fi
+
+notify "OBS" "Recording started."

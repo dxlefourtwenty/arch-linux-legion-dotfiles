@@ -31,8 +31,7 @@ case "$label" in
     "$SCRIPT_DIR/menu-screenshot"
     ;;
   "Screenrecord")
-    "$SCRIPT_DIR/menu-screenrecord"
-    notify-send -t 5000 "Error" "Not implemented yet."
+    obs >/dev/null 2>&1 &
     ;;
   "Color")
     "$SCRIPT_DIR/launch-colorpicker"

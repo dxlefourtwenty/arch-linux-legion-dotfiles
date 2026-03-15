@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ -z "${OBS_WEBSOCKET_URL:-}" && -f "${HOME}/.bash_env" ]]; then
+    # shellcheck disable=SC1090
+    source "${HOME}/.bash_env"
+fi
+
+notify() {
+    local title="$1"
+    local body="$2"
+    if command -v notify-send >/dev/null 2>&1; then
+        notify-send -t 5000 "$title" "$body"
+    fi
+}
+
+if ! command -v obs-cmd >/dev/null 2>&1; then
+    notify "OBS" "Missing dependency: obs-cmd"
+    exit 1
+fi
+
+latest_recording_notice() {
+    local dir_output dir latest_file latest_name
+
+    dir_output="$(OBS_WEBSOCKET_URL="${OBS_WEBSOCKET_URL:-}" obs-cmd record-directory get 2>/dev/null || true)"
+    dir="$(printf '%s\n' "$dir_output" | sed -n 's/^Current record directory: //p' | tail -n1)"
+    [[ -n "$dir" && -d "$dir" ]] || return 0
+
+    latest_file="$(find "$dir" -maxdepth 1 -type f -printf '%T@ %p\n' 2>/dev/null | sort -nr | head -n1 | cut -d' ' -f2-)"
+    [[ -n "$latest_file" ]] || return 0
+
+    latest_name="$(basename "$latest_file")"
+    notify "OBS" "Saved: ${latest_name}"
+    notify "OBS" "Location: ${dir}"
+}
+
+if ! status_output="$(OBS_WEBSOCKET_URL="${OBS_WEBSOCKET_URL:-}" obs-cmd recording status 2>&1)"; then
+    notify "OBS" "$status_output"
+    exit 1
+fi
+
+if [[ "$status_output" == *"Active: true"* ]]; then
+    if ! output="$(OBS_WEBSOCKET_URL="${OBS_WEBSOCKET_URL:-}" obs-cmd recording stop 2>&1)"; then
+        notify "OBS" "$output"
+        exit 1
+    fi
+    notify "OBS" "Recording stopped."
+    latest_recording_notice
+else
+    if ! output="$(OBS_WEBSOCKET_URL="${OBS_WEBSOCKET_URL:-}" obs-cmd recording start 2>&1)"; then
+        notify "OBS" "$output"
+        exit 1
+    fi
+    notify "OBS" "Recording started."
+fi
