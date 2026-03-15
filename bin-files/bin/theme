@@ -20,6 +20,8 @@ NEW_THEME="$THEME_DIR/$1"
 # Atomic theme switch (IMPORTANT)
 ln -sfn "$NEW_THEME" "$CURRENT_LINK"
 
+sleep 0.3
+
 "$SCRIPT_DIR/reload-browsers" || true
 "$SCRIPT_DIR/bg-refresh-current" || true
 
