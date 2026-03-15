@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+notify() {
+    local timeout="$1"
+    local body="$2"
+    if command -v notify-send >/dev/null 2>&1; then
+        notify-send -t "$timeout" "OBS" "$body"
+    fi
+}
+
+latest_log() {
+    ls -1t "${HOME}/.config/obs-studio/logs/"*.txt 2>/dev/null | head -n1
+}
+
+handle_line() {
+    local line="$1"
+
+    case "$line" in
+        *"Starting recording due to hotkey"*)
+            notify 2000 "Recording started."
+            ;;
+        *"Stopping recording due to hotkey"*)
+            notify 2000 "Recording stopped."
+            if [[ -n "${CURRENT_FILE:-}" ]]; then
+                notify 5000 "Saved: $(basename "$CURRENT_FILE")"
+                notify 5000 "Location: $(dirname "$CURRENT_FILE")"
+                CURRENT_FILE=""
+            fi
+            ;;
+        *"Writing file '"*"'"*|*"Writing Hybrid MP4/MOV file '"*"'"*)
+            CURRENT_FILE="$(printf '%s\n' "$line" | sed -n "s/.*Writing[^']*'\\([^']*\\)'.*/\\1/p" | tail -n1)"
+            ;;
+        *"Pausing recording"*)
+            notify 2000 "Recording paused."
+            ;;
+        *"Unpausing recording"*|*"Resuming recording"*)
+            notify 2000 "Recording resumed."
+            ;;
+    esac
+}
+
+CURRENT_FILE=""
+ACTIVE_LOG=""
+
+while true; do
+    next_log="$(latest_log)"
+    if [[ -z "$next_log" ]]; then
+        sleep 2
+        continue
+    fi
+
+    if [[ "$next_log" != "$ACTIVE_LOG" ]]; then
+        ACTIVE_LOG="$next_log"
+    fi
+
+    while IFS= read -r line; do
+        handle_line "$line"
+
+        next_log="$(latest_log)"
+        if [[ -n "$next_log" && "$next_log" != "$ACTIVE_LOG" ]]; then
+            ACTIVE_LOG="$next_log"
+            break
+        fi
+    done < <(tail -Fn0 "$ACTIVE_LOG")
+
+    sleep 1
+done

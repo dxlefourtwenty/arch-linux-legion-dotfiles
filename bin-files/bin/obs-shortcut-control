@@ -1,0 +1,86 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+notify() {
+    local body="$1"
+    if command -v notify-send >/dev/null 2>&1; then
+        notify-send -t 4000 "OBS" "$body"
+    fi
+}
+
+current_profile_ini() {
+    local user_ini profile_dir
+
+    user_ini="${HOME}/.config/obs-studio/user.ini"
+    [[ -f "$user_ini" ]] || return 1
+
+    profile_dir="$(sed -n 's/^ProfileDir=//p' "$user_ini" | head -n1)"
+    [[ -n "$profile_dir" ]] || return 1
+
+    printf '%s\n' "${HOME}/.config/obs-studio/basic/profiles/${profile_dir}/basic.ini"
+}
+
+record_dir() {
+    local profile_ini mode dir
+
+    profile_ini="$(current_profile_ini)" || return 1
+    [[ -f "$profile_ini" ]] || return 1
+
+    mode="$(sed -n 's/^Mode=//p' "$profile_ini" | head -n1)"
+    if [[ "$mode" == "Advanced" ]]; then
+        dir="$(sed -n 's/^RecFilePath=//p' "$profile_ini" | head -n1)"
+    else
+        dir="$(sed -n 's/^FilePath=//p' "$profile_ini" | head -n1)"
+    fi
+
+    [[ -n "$dir" ]] || return 1
+    printf '%s\n' "$dir"
+}
+
+latest_recording_notice() {
+    local dir latest_file latest_name
+
+    dir="$(record_dir)" || return 0
+    [[ -d "$dir" ]] || return 0
+
+    latest_file="$(find "$dir" -maxdepth 1 -type f -printf '%T@ %p\n' 2>/dev/null | sort -nr | head -n1 | cut -d' ' -f2-)"
+    [[ -n "$latest_file" ]] || return 0
+
+    latest_name="$(basename "$latest_file")"
+    notify "Saved: ${latest_name}"
+    notify "Location: ${dir}"
+}
+
+send_shortcut() {
+    local modifiers="$1"
+    local key="$2"
+
+    hyprctl dispatch sendshortcut "$modifiers" "$key" 'class:^com\\.obsproject\\.Studio$' >/dev/null
+}
+
+action="${1:-}"
+
+case "$action" in
+    start)
+        send_shortcut "ALT" "F9"
+        notify "Recording started."
+        ;;
+    stop)
+        send_shortcut "ALT SHIFT" "F9"
+        notify "Recording stopped."
+        sleep 1
+        latest_recording_notice
+        ;;
+    pause)
+        send_shortcut "ALT" "F10"
+        notify "Recording paused."
+        ;;
+    unpause)
+        send_shortcut "ALT SHIFT" "F10"
+        notify "Recording resumed."
+        ;;
+    *)
+        notify "Unknown action: ${action}"
+        exit 1
+        ;;
+esac

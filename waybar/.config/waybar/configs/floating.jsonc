@@ -146,8 +146,9 @@
         "format-full": "{icon} ",
         "format-charging": "{icon} ",
         "format-plugged": "{icon} ",
-        "format-alt": "{time} - {capacity}% {icon} ",
-        "tooltip-format": "{capacity}%",
+        "format-alt": "{icon} ",
+        "tooltip-format": "{time}{capacity}%",
+        "on-click": "/home/dxle/bin/menu-power-profile",
         // "format-good": "", // An empty format will hide the module
         // "format-full": "",
         "format-icons": ["", "", "", "", ""]

@@ -1,0 +1,68 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ -z "${OBS_WEBSOCKET_URL:-}" && -f "${HOME}/.bash_env" ]]; then
+    # shellcheck disable=SC1090
+    source "${HOME}/.bash_env"
+fi
+
+notify() {
+    local title="$1"
+    local body="$2"
+    if command -v notify-send >/dev/null 2>&1; then
+        notify-send -t 4000 "$title" "$body"
+    fi
+}
+
+current_profile_ini() {
+    local user_ini profile_dir
+
+    user_ini="${HOME}/.config/obs-studio/user.ini"
+    [[ -f "$user_ini" ]] || return 1
+
+    profile_dir="$(sed -n 's/^ProfileDir=//p' "$user_ini" | head -n1)"
+    [[ -n "$profile_dir" ]] || return 1
+
+    printf '%s\n' "${HOME}/.config/obs-studio/basic/profiles/${profile_dir}/basic.ini"
+}
+
+if ! command -v obs-cmd >/dev/null 2>&1; then
+    notify "OBS" "Missing dependency: obs-cmd"
+    exit 1
+fi
+
+if ! status_output="$(OBS_WEBSOCKET_URL="${OBS_WEBSOCKET_URL:-}" obs-cmd recording status 2>&1)"; then
+    notify "OBS" "$status_output"
+    exit 1
+fi
+
+if [[ "$status_output" != *"Active: true"* ]]; then
+    notify "OBS" "Recording is not active."
+    exit 1
+fi
+
+if profile_ini="$(current_profile_ini)" && [[ -f "$profile_ini" ]]; then
+    if grep -q '^RecQuality=Stream$' "$profile_ini"; then
+        notify "OBS" "Pause is unsupported while Recording Quality is set to 'Same as stream'."
+        exit 1
+    fi
+
+    if grep -q '^RecFormat2=hybrid_mp4$' "$profile_ini"; then
+        notify "OBS" "Pause is unsupported while Recording Format is set to Hybrid MP4."
+        exit 1
+    fi
+fi
+
+if [[ "$status_output" == *"Paused: true"* ]]; then
+    if ! output="$(OBS_WEBSOCKET_URL="${OBS_WEBSOCKET_URL:-}" obs-cmd recording resume 2>&1)"; then
+        notify "OBS" "$output"
+        exit 1
+    fi
+    notify "OBS" "Recording resumed."
+else
+    if ! output="$(OBS_WEBSOCKET_URL="${OBS_WEBSOCKET_URL:-}" obs-cmd recording pause 2>&1)"; then
+        notify "OBS" "$output"
+        exit 1
+    fi
+    notify "OBS" "Recording paused."
+fi

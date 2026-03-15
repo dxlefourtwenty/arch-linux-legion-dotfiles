@@ -40,14 +40,14 @@ if ! status_output="$(OBS_WEBSOCKET_URL="${OBS_WEBSOCKET_URL:-}" obs-cmd recordi
 fi
 
 if [[ "$status_output" == *"Active: true"* ]]; then
-    if ! output="$(OBS_WEBSOCKET_URL="${OBS_WEBSOCKET_URL:-}" obs-cmd recording stop 2>&1)"; then
+    if ! output="$(OBS_WEBSOCKET_URL="${OBS_WEBSOCKET_URL:-}" obs-cmd trigger-hotkey OBSBasic.StopRecording 2>&1)"; then
         notify "OBS" "$output"
         exit 1
     fi
     notify "OBS" "Recording stopped."
     latest_recording_notice
 else
-    if ! output="$(OBS_WEBSOCKET_URL="${OBS_WEBSOCKET_URL:-}" obs-cmd recording start 2>&1)"; then
+    if ! output="$(OBS_WEBSOCKET_URL="${OBS_WEBSOCKET_URL:-}" obs-cmd trigger-hotkey OBSBasic.StartRecording 2>&1)"; then
         notify "OBS" "$output"
         exit 1
     fi

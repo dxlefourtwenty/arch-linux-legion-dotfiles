@@ -34,7 +34,7 @@ latest_recording_notice() {
     notify "OBS" "Location: ${dir}"
 }
 
-if ! output="$(OBS_WEBSOCKET_URL="${OBS_WEBSOCKET_URL:-}" obs-cmd recording stop 2>&1)"; then
+if ! output="$(OBS_WEBSOCKET_URL="${OBS_WEBSOCKET_URL:-}" obs-cmd trigger-hotkey OBSBasic.StopRecording 2>&1)"; then
     notify "OBS" "$output"
     exit 1
 fi

@@ -19,7 +19,7 @@ if ! command -v obs-cmd >/dev/null 2>&1; then
     exit 1
 fi
 
-if ! output="$(OBS_WEBSOCKET_URL="${OBS_WEBSOCKET_URL:-}" obs-cmd recording start 2>&1)"; then
+if ! output="$(OBS_WEBSOCKET_URL="${OBS_WEBSOCKET_URL:-}" obs-cmd trigger-hotkey OBSBasic.StartRecording 2>&1)"; then
     notify "OBS" "$output"
     exit 1
 fi

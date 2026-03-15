@@ -69,6 +69,9 @@ SUPER + SHIFT + C | Launch Color Picker
 SUPER + ALT + S | Take Screenshot
 SUPER + SHIFT + ALT + S | Capture Menu
 SUPER + SHIFT + D | Toggle Dashboard
+SUPER + F9 | Toggle OBS Recording Play/Stop
+SUPER + SHIFT + F9 | Start OBS Recording
+SUPER + CTRL + F9 | Stop OBS Recording
 [TMUX] CTRL + ALT + LEFT | Close Terminal Pane
 [TMUX] CTRL + ALT + RIGHT | Split Terminal Right
 [TMUX] CTRL + ALT + DOWN | Split Terminal Down 
