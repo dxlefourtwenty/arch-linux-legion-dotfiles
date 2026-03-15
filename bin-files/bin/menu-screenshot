@@ -85,7 +85,7 @@ target_choice="$(
 capture_label="${capture_choice#*  }"
 target_label="${target_choice#*  }"
 
-sleep 0.2
+sleep 0.3
 
 tmp_dir="$(mktemp -d /tmp/menu-screenshot-XXXXXX)" || exit 1
 tmp_input="${tmp_dir}/capture.png"

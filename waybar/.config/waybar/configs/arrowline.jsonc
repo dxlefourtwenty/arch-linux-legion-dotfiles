@@ -84,7 +84,10 @@
   "hyprland/window": {
       "format": "{}",
       "max-length": 70,
-      "tooltip": false
+      "tooltip": false,
+      "rewrite": {
+          "(.*)Hellpaper(.*)": "Select Background",
+      },
   },
 
 	"tray": {

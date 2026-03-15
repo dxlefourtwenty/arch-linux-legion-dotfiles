@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 
 WALLPAPER_DIR="$HOME/.config/themes/current/wallpapers"
-FLAGS="--transition-type=grow --transition-duration 2"
+FLAGS="--transition-type=grow --transition-duration 3.2"
 
 # Get current theme from symlink
 THEME_PATH=$(readlink -f "$HOME/.config/themes/current")

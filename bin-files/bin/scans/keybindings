@@ -12,6 +12,7 @@ CTRL + ALT + SPACE | Next Background
 CTRL + ALT + SHIFT + SPACE | Previous Background
 SUPER + ALT + T | Change Theme
 SUPER + SHIFT + B | Toggle Top Bar
+SUPER + ALT + B | Change Top Bar Style
 SUPER + ALT + F | Files Menu
 SUPER + ALT + S | Screenshot
 SUPER + SHIFT + ALT + S | Capture Menu
@@ -25,6 +26,10 @@ SUPER + LEFT | Focus Left
 SUPER + RIGHT | Focus Right
 SUPER + UP | Focus Up
 SUPER + DOWN | Focus Down
+SUPER + SHIFT + CTRL + LEFT | Swap Window Left 
+SUPER + SHIFT + CTRL + RIGHT | Swap Window Right 
+SUPER + SHIFT + CTRL + UP | Swap Window Up 
+SUPER + SHIFT + CTRL + DOWN | Swap Window Down 
 SUPER + F | Toggle Fullscreen
 SHIFT + SUPER + F | Toggle Floating Window 
 SUPER + P | Pin Window
@@ -69,9 +74,12 @@ SUPER + SHIFT + C | Launch Color Picker
 SUPER + ALT + S | Take Screenshot
 SUPER + SHIFT + ALT + S | Capture Menu
 SUPER + SHIFT + D | Toggle Dashboard
-SUPER + F9 | Toggle OBS Recording Play/Stop
-SUPER + SHIFT + F9 | Start OBS Recording
-SUPER + CTRL + F9 | Stop OBS Recording
+SUPER + ALT + V | Audio Menu
+Hold Knob | Audio Menu
+ALT + F9 | Start OBS Recording
+SHIFT + ALT + F9 | Stop OBS Recording
+ALT + F10 | Pause OBS Recording
+SHIFT + ALT + F10 | Resume OBS Recording
 [TMUX] CTRL + ALT + LEFT | Close Terminal Pane
 [TMUX] CTRL + ALT + RIGHT | Split Terminal Right
 [TMUX] CTRL + ALT + DOWN | Split Terminal Down 

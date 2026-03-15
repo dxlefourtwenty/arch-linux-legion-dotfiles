@@ -38,7 +38,7 @@ FULL_PATH="$WALL_DIR/$PREV_FILE"
 swww img "$FULL_PATH" \
     --transition-type wipe \
     --transition-angle 225 \
-    --transition-duration 2
+    --transition-duration 3.2
 
 # Update symlink
 ln -sf "$FULL_PATH" "$CURRENT_LINK"
