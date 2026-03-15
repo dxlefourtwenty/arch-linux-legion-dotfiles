@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+hold_time=0.3
+pressed_file="/tmp/knob_pressed"
+
+touch "$pressed_file"
+
+(
+    sleep "$hold_time"
+    if [ -f "$pressed_file" ]; then
+        rm "$pressed_file"
+        ~/bin/menu-audio
+    fi
+) &
+
+wait_pid=$!
+wait $wait_pid
