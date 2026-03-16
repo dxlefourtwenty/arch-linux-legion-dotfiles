@@ -2,8 +2,7 @@
 
 * {
     /* `otf-font-awesome` is required to be installed for icons */
-    font-family: "CaskaydiaMono Nerd Font", "Font Awesome 6 Free", sans-serif;
-    font-size: 14px;
+    font-family: "JetBrainsMono Nerd Font", "JetBrainsMono Nerd Font", "Font Awesome 6 Free", sans-serif;
 }
 
 window#waybar {
@@ -12,6 +11,7 @@ window#waybar {
     color: @foreground;
     transition-property: background-color;
     transition-duration: 2s;
+    font-size: 14px;
 }
 
 window#waybar {
@@ -79,6 +79,10 @@ button:hover {
     color: @muted; 
 }
 
+#workspaces button.active {
+    font-size: 14px;
+}
+
 #workspaces button {
     padding: 0 5px;
     background-color: transparent;
@@ -127,6 +131,10 @@ button:hover {
 #mpd {
     padding: 0 10px;
     color: @foreground;
+}
+
+#network {
+    padding-left: 5px;
 }
 
 #window,
@@ -203,12 +211,13 @@ label:focus {
 #cpu {
     background-color: transparent;
     color: @foreground;
-    padding-left: 0;
+    padding-left: 2px;
 }
 
 #memory {
     background-color: transparent;
-    padding-left: 5px;
+    padding-left: 8px;
+    padding-right: 15px;
 }
 
 #disk {
@@ -230,7 +239,8 @@ label:focus {
 #pulseaudio {
     background-color: transparent;
     color: @foreground;
-    padding-right: 0;
+    padding-right: 2px;
+    padding-left: 10px;
 }
 
 #pulseaudio.muted {
@@ -263,7 +273,7 @@ label:focus {
 
 #temperature {
     background-color: transparent;
-    padding-left: 4px;
+    padding-left: 2px;
 }
 
 #temperature.critical {

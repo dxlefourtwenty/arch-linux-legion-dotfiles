@@ -7,7 +7,8 @@ options="  Screenshot
   Screenrecord
   Color"
 
-chosen=$(printf '%b\n' "$options" | rofi -dmenu -i \
+chosen=$(printf '%b\n' "$options" | "$SCRIPT_DIR/rofi-nerd-markup" | rofi -dmenu -i \
+    -markup-rows \
     -p "" \
     -theme-str '
         window { width: 320px; }

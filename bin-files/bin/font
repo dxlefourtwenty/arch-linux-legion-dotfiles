@@ -54,18 +54,31 @@ set_waybar_font() {
     FONT_FAMILY="$family" perl -0pi -e 's/font-family:\s*[^;]+;/font-family: $ENV{FONT_FAMILY};/' "$file"
 }
 
+waybar_font_stack() {
+    local include_font_awesome="${1:-0}"
+    local include_symbols="${2:-0}"
+
+    if [[ "$include_font_awesome" -eq 1 ]]; then
+        printf '"%s", "Font Awesome 6 Free", sans-serif' "$FONT_NAME"
+    elif [[ "$include_symbols" -eq 1 ]]; then
+        printf '"%s", "JetBrainsMono Nerd Font", "Symbols Nerd Font Mono"' "$FONT_NAME"
+    else
+        printf '"%s"' "$FONT_NAME"
+    fi
+}
+
 for file in "$WAYBAR_DIR"/styles/*.css; do
     [[ -f "$file" ]] || continue
 
     case "$(basename "$file")" in
         minimal.css)
-            set_waybar_font "$file" "\"Symbols Nerd Font Mono\", \"$FONT_NAME\", \"Font Awesome 6 Free\", sans-serif"
+            set_waybar_font "$file" "$(waybar_font_stack 1 0)"
             ;;
         spaced-arrow.css|arrowline.css)
-            set_waybar_font "$file" "\"Symbols Nerd Font Mono\", \"$FONT_NAME\""
+            set_waybar_font "$file" "$(waybar_font_stack 0 1)"
             ;;
         *)
-            set_waybar_font "$file" "\"Symbols Nerd Font Mono\", \"$FONT_NAME\""
+            set_waybar_font "$file" "$(waybar_font_stack 0 0)"
             ;;
     esac
 done

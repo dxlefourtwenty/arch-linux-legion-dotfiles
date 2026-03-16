@@ -12,6 +12,6 @@ QtObject {
     property int barHeight: 0
     property int finalPosition: 60
 
-    property string font: "CaskaydiaMono Nerd Font"
+    property string font: "JetBrainsMono Nerd Font"
     property int fontSize: 16
 }

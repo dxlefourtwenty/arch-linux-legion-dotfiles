@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
 OUTPUT_DIR="${HOME}/files/pictures/screenshots"
 NOTIFICATION_ICON="/usr/share/icons/hicolor/scalable/apps/satty.svg"
 
@@ -57,7 +59,8 @@ capture_options="󰆞  Region
 󰍹  Active Monitor"
 
 capture_choice="$(
-    printf '%b\n' "$capture_options" | rofi -dmenu -i \
+    printf '%b\n' "$capture_options" | "$SCRIPT_DIR/rofi-nerd-markup" | rofi -dmenu -i \
+        -markup-rows \
         -p "" \
         -theme-str '
             window { width: 300px; }
@@ -72,7 +75,8 @@ target_options="󰄀  Save + Edit
   Clipboard Only"
 
 target_choice="$(
-    printf '%b\n' "$target_options" | rofi -dmenu -i \
+    printf '%b\n' "$target_options" | "$SCRIPT_DIR/rofi-nerd-markup" | rofi -dmenu -i \
+        -markup-rows \
         -p "" \
         -theme-str '
             window { width: 300px; }

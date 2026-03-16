@@ -15,7 +15,7 @@
 #waybar {
 	background: @background-alpha;
 	color: @background;
-	font-family: "CaskaydiaMono Nerd Font", "Symbols Nerd Font Mono";;
+	font-family: "JetBrainsMono Nerd Font", "JetBrainsMono Nerd Font";
 	font-size: 14pt;
 }
 
@@ -200,4 +200,3 @@ tooltip label {
   background: @bluetooth;
   padding-right: 6pt;
 }
-

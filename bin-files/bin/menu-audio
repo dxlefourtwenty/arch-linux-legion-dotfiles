@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
 # Get sinks
 sinks=$(pactl list sinks short)
 current_sink=$(pactl get-default-sink 2>/dev/null)
@@ -20,9 +22,9 @@ while read -r id name driver format channels rate state; do
         label="󰕾  Audio"
     fi
 
-    display_label="$label"
+    display_label="$(printf '%s\n' "$label" | "$SCRIPT_DIR/rofi-nerd-markup")"
     if [[ "$name" == "$current_sink" ]]; then
-        display_label="<i>$label</i>"
+        display_label="<i>$display_label</i>"
     fi
 
     options+=("$display_label")

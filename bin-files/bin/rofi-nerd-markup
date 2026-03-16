@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+perl -pe 's{^(\s*)(\S+)(\s{2,})}{$1<span font_desc="JetBrainsMono Nerd Font 16">$2</span>$3}'

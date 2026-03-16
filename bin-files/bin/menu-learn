@@ -10,7 +10,8 @@ options="  Keybindings
 󱆃  Bash
   Git"
 
-chosen=$(echo -e "$options" | rofi -dmenu -i \
+chosen=$(printf '%b\n' "$options" | "$SCRIPT_DIR/rofi-nerd-markup" | rofi -dmenu -i \
+    -markup-rows \
     -p "" \
     -theme-str '
         window { width: 260px; }
