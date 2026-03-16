@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
+"$SCRIPT_DIR/launch-terminal-floating" 1200 800 bash -c '
+set -e
+
+comment="pre update $(date +"%Y-%m-%d %H:%M:%S")"
+sudo timeshift --create --comments "$comment"
+sudo pacman -Syu
+
+echo
+echo "Done. Press any key to close."
+read -n 1 -s
+'
