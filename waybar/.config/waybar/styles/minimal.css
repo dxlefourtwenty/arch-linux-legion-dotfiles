@@ -2,7 +2,7 @@
 
 * {
     /* `otf-font-awesome` is required to be installed for icons */
-    font-family: "JetBrainsMono Nerd Font", "JetBrainsMono Nerd Font", "Font Awesome 6 Free", sans-serif;
+    font-family: "CaskaydiaMono Nerd Font", "Font Awesome 6 Free", sans-serif;
 }
 
 window#waybar {
@@ -383,4 +383,8 @@ label:focus {
 
 #custom-bluetooth {
     padding-right: 5px; 
+}
+
+#custom-wallpapers {
+    padding-right: 3px;
 }

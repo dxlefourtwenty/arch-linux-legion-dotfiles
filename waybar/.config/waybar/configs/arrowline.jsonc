@@ -63,7 +63,7 @@
       "all-outputs": false,
       "warp-on-scroll": false,
       "show-special": true,
-      "format": "{icon}",
+      "format": "<span font_desc=\"JetBrainsMono Nerd Font\">{icon}</span>",
       "format-icons": {
           "1": "",
           "2": "",
@@ -99,7 +99,7 @@
     "battery": {
         "bat": "BAT0",
         "interval": 60,
-        "format": "{icon} {capacity}%",
+        "format": "<span font_desc=\"JetBrainsMono Nerd Font\">{icon}</span> {capacity}%",
         "format-icons": ["󰂎", "󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"],
         "on-click": "/home/dxle/bin/menu-power-profile",
         "tooltip-format": "{capacity}%",
@@ -108,7 +108,7 @@
 	"temperature": {
 		"critical-threshold": 90,
 		"interval": 5,
-		"format": "{icon} {temperatureC}°",
+		"format": "<span font_desc=\"JetBrainsMono Nerd Font\">{icon}</span> {temperatureC}°",
 		"format-icons": [ "","","","",""],
 	},
 	
@@ -116,7 +116,7 @@
       "format": "",
       "on-click": "~/bin/launch-terminal-floating 1000 800 nmtui",
       "format-ethernet": "",
-      "format-wifi": "{icon} {signalStrength}%",
+      "format-wifi": "<span font_desc=\"JetBrainsMono Nerd Font\">{icon}</span> {signalStrength}%",
       "format-disconnected": "󰞃 no signal",
       "format-icons": ["󰢿 ", "󰢼 ", "󰢽 ", "󰢾 "],
       "tooltip-format-wifi": "{essid} ({signalStrength}%)",
@@ -125,14 +125,14 @@
   },
 
   "wireplumber": {
-      "format": "{icon} {volume}%",
+      "format": "<span font_desc=\"JetBrainsMono Nerd Font\">{icon}</span> {volume}%",
   "format-muted": "󰝟  {volume}%",
   "format-icons": ["󰖀 ", "󰕾 "],        
       "on-click": "~/bin/menu-audio",
       "on-click-right": "~/bin/launch-window-floating 1000 800 pavucontrol",
       "max-volume": 150,
       "scroll-step": 2,
-      "tooltip-format": "{icon}  {volume}%",
+      "tooltip-format": "<span font_desc=\"JetBrainsMono Nerd Font\">{icon}</span>  {volume}%",
   },
     
 	"niri/window": {

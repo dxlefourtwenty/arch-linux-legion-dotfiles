@@ -89,7 +89,7 @@
 	"temperature": {
 		"critical-threshold": 90,
 		"interval": 5,
-		"format": "{icon} {temperatureC}°",
+		"format": "<span font_desc=\"JetBrainsMono Nerd Font\">{icon}</span> {temperatureC}°",
 		"format-icons": [ "","","","",""],
 	},
 	
@@ -113,7 +113,7 @@
       "on-click-right": "~/bin/launch-window-floating 1000 800 pavucontrol",
       "max-volume": 150,
       "scroll-step": 2,
-      "tooltip-format": "{icon}  {volume}%",
+      "tooltip-format": "<span font_desc=\"JetBrainsMono Nerd Font\">{icon}</span>  {volume}%",
   },
     
 	"niri/window": {
@@ -184,7 +184,7 @@
         "all-outputs": false,
         "show-special": true,
         "warp-on-scroll": false,
-        "format": "{icon}",
+        "format": "<span font_desc=\"JetBrainsMono Nerd Font\">{icon}</span>",
         "format-icons": {
             "default": "",
             "special": "",
