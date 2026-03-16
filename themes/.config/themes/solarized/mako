@@ -1,21 +1,4 @@
-# Position
-anchor=top-right
-margin=30
-output=HDMI-A-1
-
-# Style
 background-color=#002b36D9
 text-color=#839496
 border-color=#268bd2
 
-border-size=2
-border-radius=0
-padding=12
-width=300
-
-# Font
-font=Liberation Sans 11
-
-# Timing
-default-timeout=5000
-ignore-timeout=0
