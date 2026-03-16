@@ -40,9 +40,7 @@
             "America/Los_Angeles",
             "America/Los_Angeles",
         ],
-        "actions":  {
-            "on-click": "tz_up",
-        }
+        "on-click": "~/bin/toggle-dashboard",
     },
     
 	"clock#date": {

@@ -6,6 +6,7 @@ SUPER + ALT + P | Power
 SUPER + RETURN | Open Terminal
 SUPER + SHIFT + RETURN | Open Main Tmux
 SUPER + SHIFT + A | Activity
+SUPER + SHIFT + P | Displays
 SUPER + CTRL + ALT + SPACE | Open Background Gallery
 SUPER + CTRL + ALT + M | Open Live Background Gallery
 CTRL + ALT + SPACE | Next Background
