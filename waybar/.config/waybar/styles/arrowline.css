@@ -15,7 +15,7 @@
 #waybar {
 	background: @background-alpha;
 	color: @background;
-	font-family: SpaceMono Nerd Font, "JetBrainsMono Nerd Font", "Symbols Nerd Font Mono";;
+	font-family: "CaskaydiaMono Nerd Font", "Symbols Nerd Font Mono";;
 	font-size: 14pt;
 }
 

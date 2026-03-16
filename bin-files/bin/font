@@ -1,0 +1,93 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+INCLUDE_MAKO=0
+
+usage() {
+    echo "Usage: font [--include-mako|-m] <font-name>"
+    exit 1
+}
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --include-mako|-m)
+            INCLUDE_MAKO=1
+            shift
+            ;;
+        --help|-h)
+            usage
+            ;;
+        --)
+            shift
+            break
+            ;;
+        -*)
+            echo "Unknown option: $1"
+            usage
+            ;;
+        *)
+            break
+            ;;
+    esac
+done
+
+[[ $# -eq 0 ]] && usage
+
+FONT_NAME="$*"
+
+if ! fc-list : family | awk -F',' '{print $1}' | sed '/^$/d' | grep -Fvi 'Emoji' | sort -u | grep -Fxq "$FONT_NAME"; then
+    echo "Font not found: $FONT_NAME"
+    exit 1
+fi
+
+WAYBAR_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/waybar"
+DASHBOARD_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/dashboard"
+KITTY_CONF="${XDG_CONFIG_HOME:-$HOME/.config}/kitty/kitty.conf"
+ROFI_THEME="${XDG_CONFIG_HOME:-$HOME/.config}/rofi/theme.rasi"
+MAKO_CONF="${XDG_CONFIG_HOME:-$HOME/.config}/mako/config"
+
+set_waybar_font() {
+    local file="$1"
+    local family="$2"
+
+    FONT_FAMILY="$family" perl -0pi -e 's/font-family:\s*[^;]+;/font-family: $ENV{FONT_FAMILY};/' "$file"
+}
+
+for file in "$WAYBAR_DIR"/styles/*.css; do
+    [[ -f "$file" ]] || continue
+
+    case "$(basename "$file")" in
+        minimal.css)
+            set_waybar_font "$file" "\"Symbols Nerd Font Mono\", \"$FONT_NAME\", \"Font Awesome 6 Free\", sans-serif"
+            ;;
+        spaced-arrow.css|arrowline.css)
+            set_waybar_font "$file" "\"Symbols Nerd Font Mono\", \"$FONT_NAME\""
+            ;;
+        *)
+            set_waybar_font "$file" "\"Symbols Nerd Font Mono\", \"$FONT_NAME\""
+            ;;
+    esac
+done
+
+for file in "$DASHBOARD_DIR"/styles/*.qml; do
+    [[ -f "$file" ]] || continue
+    FONT_NAME="$FONT_NAME" perl -0pi -e 's/property string font: "[^"]*"/property string font: "$ENV{FONT_NAME}"/' "$file"
+done
+
+FONT_NAME="$FONT_NAME" perl -0pi -e 's/^font_family\s+.*/font_family $ENV{FONT_NAME}/m' "$KITTY_CONF"
+FONT_NAME="$FONT_NAME" perl -0pi -e 's/font:\s*"[^"]*?(\s+\d+(?:\.\d+)?)";/font: "$ENV{FONT_NAME}$1";/' "$ROFI_THEME"
+
+if [[ "$INCLUDE_MAKO" -eq 1 && -f "$MAKO_CONF" ]]; then
+    FONT_NAME="$FONT_NAME" perl -0pi -e 's/^font=.*?(\s+\d+(?:\.\d+)?)$/font=$ENV{FONT_NAME}$1/m' "$MAKO_CONF"
+fi
+
+"$SCRIPT_DIR/reload-terminal" || true
+"$SCRIPT_DIR/reload-waybar" || true
+"$SCRIPT_DIR/reload-dashboard" || true
+
+if [[ "$INCLUDE_MAKO" -eq 1 ]]; then
+    "$SCRIPT_DIR/reload-mako" || true
+fi
+
+notify-send -t 5000 "Font" "Updated to $FONT_NAME." >/dev/null 2>&1 || true

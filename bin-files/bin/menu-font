@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+KITTY_CONF="${XDG_CONFIG_HOME:-$HOME/.config}/kitty/kitty.conf"
+
+CURRENT_FONT="$(sed -n 's/^font_family[[:space:]]\+//p' "$KITTY_CONF" | head -n 1)"
+
+FONTS="$(fc-list : family | awk -F',' '{print $1}' | sed '/^$/d' | grep -Fvi 'Emoji' | sort -u)"
+
+escape_markup() {
+    sed -e 's/&/\&amp;/g' -e 's/</\&lt;/g' -e 's/>/\&gt;/g'
+}
+
+DISPLAY=""
+
+while IFS= read -r font; do
+    [[ -n "$font" ]] || continue
+    pretty="$(printf '%s' "$font" | escape_markup)"
+
+    if [[ "$font" = "$CURRENT_FONT" ]]; then
+        pretty="<i>$pretty</i>"
+    fi
+
+    DISPLAY+="$pretty\n"
+done <<< "$FONTS"
+
+DISPLAY="${DISPLAY%\\n}"
+SELECTED_DISPLAY="$(printf '%b' "$DISPLAY" | rofi -dmenu -i \
+    -markup-rows \
+    -p "" \
+    -theme-str '
+        window { width: 500px; }
+        entry { placeholder: "Font…"; }
+        element {
+            orientation: horizontal;
+            children: [ element-text ];
+            spacing: 0px;
+            padding: 8px 8px;
+        }
+        element-text {
+            horizontal-align: 0.0;
+            padding-left: 0px;
+            margin: 0 2px;
+        }
+    ')"
+
+[[ -z "$SELECTED_DISPLAY" ]] && exit 0
+
+SELECTED="$(printf '%s' "$SELECTED_DISPLAY" | sed -E 's/<[^>]+>//g; s/&lt;/</g; s/&gt;/>/g; s/&amp;/\&/g')"
+
+"$SCRIPT_DIR/font" "$@" "$SELECTED"

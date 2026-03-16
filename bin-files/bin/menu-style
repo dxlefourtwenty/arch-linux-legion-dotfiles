@@ -3,6 +3,7 @@
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 
 options="󰸌  Theme
+󰛖  Font
   Background
 󱢈  Live Gallery
 󰍜  Waybar"
@@ -29,6 +30,9 @@ label="${chosen#*  }"   # remove up to the double-space after the icon
 case "$label" in
   "Theme")
     "$SCRIPT_DIR/menu-theme"
+    ;;
+  "Font")
+    "$SCRIPT_DIR/menu-font"
     ;;
   "Background")
     "$SCRIPT_DIR/bg-set"
