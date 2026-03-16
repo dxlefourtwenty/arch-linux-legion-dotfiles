@@ -1,1 +1,18 @@
-/home/dxle/.config/themes/current/mako
+include=~/.config/themes/current/mako
+
+# Position
+anchor=top-right
+margin=30
+output=HDMI-A-1
+
+border-size=2
+border-radius=0
+padding=12
+width=300
+
+# Font
+font=Liberation Sans 11
+
+# Timing
+default-timeout=5000
+ignore-timeout=0
