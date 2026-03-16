@@ -44,7 +44,6 @@
 	// Modules
 	"clock#1": {
 		"format": "{:%a}",
-        "cursor": false,
         "justify": "right",
         "tooltip-format": "{:%I:%M %p ~  %a. %d.%m }",
         "timezones": [
@@ -55,7 +54,6 @@
 	},
 	"clock#2": {
         "format": "{:%I:%M %p}",
-        "cursor": false,
         "justify": "right",
         "tooltip-format": "{:%I:%M %p ~  %a. %d.%m }",
         "timezones": [
@@ -66,7 +64,6 @@
     
 	"clock#3": {
 		"format": "{:%m/%d}",
-        "cursor": false,
         "justify": "right",
         "tooltip-format": "{:%I:%M %p ~  %a. %d.%m }",
         "timezones": [
@@ -98,8 +95,7 @@
 	
   "network": {
       "format": "",
-      "cursor": false,
-      "on-click": "~/bin/launch-terminal nmtui",
+      "on-click": "~/bin/launch-terminal-floating 1000 800 nmtui",
       "format-ethernet": "",
       "format-wifi": "net:  {signalStrength}%",
       "format-disconnected": "net:  no signal",
@@ -111,11 +107,10 @@
 
   "wireplumber": {
       "format": "vol:  {volume}%",
-      "cursor": false,
-  "format-muted": "󰝟",
+  "format-muted": "vol: muted",
   "format-icons": ["󰖀 ", "󰕾 "],        
       "on-click": "~/bin/menu-audio",        
-      "on-click-right": "pavucontrol",
+      "on-click-right": "~/bin/launch-window-floating 1000 800 pavucontrol",
       "max-volume": 150,
       "scroll-step": 2,
       "tooltip-format": "{icon}  {volume}%",
@@ -165,36 +160,34 @@
     "format": " ",
     "on-click": "~/bin/menu-power",
     "tooltip": false,
-    "cursor": false
   },
   "custom/menu": {
     "format": "󰣇 ",
     "on-click": "~/bin/menu",
     "tooltip": false,
-    "cursor": false
   },
   "custom/wallpapers": {
     "format": " ",  
     "on-click": "~/bin/bg-set",
     "tooltip": false,
-    "cursor": false
   },
 
   "custom/bluetooth": {
         "format": " ",  
-        "on-click": "~/bin/launch-terminal bluetuith",
+        "on-click": "~/bin/launch-terminal-floating 1000 800 bluetuith",
         "tooltip": false,
-        "cursor": false
   },
 
   // Modules configuration
   "hyprland/workspaces": {
         "disable-scroll": true,
         "all-outputs": false,
+        "show-special": true,
         "warp-on-scroll": false,
         "format": "{icon}",
         "format-icons": {
             "default": "",
+            "special": "",
             "active": ""
         },
         "persistent-workspaces": {

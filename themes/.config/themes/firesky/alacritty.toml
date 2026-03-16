@@ -1,9 +1,6 @@
 general.live_config_reload = true
 general.ipc_socket = true
 
-[window]
-opacity = 0.92
-
 [window.padding]
 x = 10
 y = 10
@@ -41,10 +38,6 @@ white   = "#f0e8e0"
 [colors.cursor]
 cursor = '#e66a4d'   # Slightly muted sun orange
 text = '#1a1a1a'     # Lighter dark text
-
-[colors.primary]
-background = '#0f0f0f'
-foreground = '#e0d8d0'
 
 [colors.selection]
 background = '#4d5a5a' # Slightly darker selection

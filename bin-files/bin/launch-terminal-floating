@@ -8,24 +8,22 @@ term_bin="${TERMINAL%% *}"
 WIDTH="${1:-1200}"
 HEIGHT="${2:-800}"
 
-# Remove them from argument list if they were used
+# Remove width/height args if provided
 if [[ "$1" =~ ^[0-9]+$ && "$2" =~ ^[0-9]+$ ]]; then
     shift 2
 fi
 
+# Fallback if terminal missing
 if ! command -v "$term_bin" >/dev/null 2>&1; then
-    TERMINAL=kitty
     term_bin=kitty
 fi
 
 launch_terminal() {
-    "$@" &
-    sleep 0.12
-
-    hyprctl dispatch togglefloating
-    hyprctl dispatch resizeactive exact "$WIDTH" "$HEIGHT"
-    hyprctl dispatch centerwindow
-    hyprctl dispatch pin
+    RULES="[workspace special:floating; float; size $WIDTH $HEIGHT; center; tag:scratchterm]"
+    local command=""
+    printf -v command '%q ' "$@"
+    command="${command% }"
+    hyprctl dispatch exec "$RULES $command"
 }
 
 case "$term_bin" in

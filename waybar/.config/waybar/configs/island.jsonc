@@ -22,6 +22,7 @@
     "hyprland/workspaces": {
         "disable-scroll": true,
         "all-outputs": false,
+        "show-special": true,
         "warp-on-scroll": false,
         "format": "{icon}",
         "format-icons": {
@@ -34,7 +35,8 @@
             "7": "7",
             "8": "8",
             "9": "9",
-            "10": ""
+            "10": "0",
+            "special": "+"
         },
         "persistent-workspaces": {
             "HDMI-A-1": [ 1,2,3,4,5 ],
@@ -107,7 +109,6 @@
         "format-alt": "{:%H:%M}",
         "tooltip": false,
         "on-click": "/home/dxle/bin/toggle-dashboard",
-        "cursor": false
     },
     "cpu": {
         "format": "",
@@ -125,7 +126,6 @@
         "format-icons": [""]
     },
     "battery": {
-        "cursor": false,
         "states": {
             // "good": 95,
             "warning": 30,
@@ -135,7 +135,7 @@
         "format-full": "{icon} ",
         "format-charging": "{icon} ",
         "format-plugged": "{icon} ",
-        "format-alt": "{time} - {capacity}% {icon} ",
+        "format-alt": "{icon} ",
         "tooltip-format": "{capacity}%",
         "on-click": "/home/dxle/bin/menu-power-profile",
         // "format-good": "", // An empty format will hide the module
@@ -157,10 +157,9 @@
       }
     },
     "network": {
-        "cursor": false,
         // "interface": "nmtui", // (Optional) To force the use of this interface
         "format-wifi": "",
-        "on-click": "~/bin/launch-terminal nmtui",
+        "on-click": "~/bin/launch-terminal-floating 1000 800 nmtui",
         "format-ethernet": "{ipaddr}/{cidr}",
         "tooltip-format": "{ifname}: {ipaddr}/{cidr} {essid}",
         "format-linked": "{ifname} (No IP)",
@@ -168,7 +167,6 @@
         "format-alt": ""
     },
     "pulseaudio": {
-        "cursor": false,
         // "scroll-step": 1, // %, can be a float
         "format": "{icon}",
         "format-bluetooth": "{icon}",
@@ -185,7 +183,8 @@
             "car": " ",
             "default": ["", " ", " "]
         },
-        "on-click-right": "pavucontrol",
+        "tooltip-format": "{volume}%",
+        "on-click-right": "~/bin/launch-window-floating 1000 800 pavucontrol",
         "on-click": "/home/dxle/bin/menu-audio"
     },
     "custom/media": {
@@ -204,24 +203,20 @@
         "format": " ",
         "on-click": "~/bin/menu-power",
         "tooltip": false,
-        "cursor": false
     },
     "custom/menu": {
         "format": "󰣇",
         "on-click": "~/bin/menu",
         "tooltip": false,
-        "cursor": false
     },
     "custom/wallpapers": {
         "format": " ",  
         "on-click": "bg-set",
         "tooltip": false,
-        "cursor": false
     },
     "custom/bluetooth": {
         "format": " ",  
-        "on-click": "~/bin/launch-terminal bluetuith",
+        "on-click": "~/bin/launch-terminal-floating 1000 800 bluetuith",
         "tooltip": false,
-        "cursor": false
     }
 }

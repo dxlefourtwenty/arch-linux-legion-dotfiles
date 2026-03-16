@@ -29,6 +29,7 @@
     "hyprland/workspaces": {
         "disable-scroll": true,
         "all-outputs": false,
+        "show-special": true,
         "warp-on-scroll": false,
         "format": "{icon}",
         "format-icons": {
@@ -41,7 +42,8 @@
             "7": "7",
             "8": "8",
             "9": "9",
-            "10": "",
+            "10": "0",
+            "special": "+",
             "active": "󱓻"
         },
         "persistent-workspaces": {
@@ -115,7 +117,6 @@
         "format-alt": "{:%A %H:%M}",
         "tooltip": false,
         "on-click": "/home/dxle/bin/toggle-dashboard",
-        "cursor": false
     },
     "cpu": {
         "format": "",
@@ -133,7 +134,6 @@
         "format-icons": [""]
     },
     "battery": {
-        "cursor": false,
         "states": {
             // "good": 95,
             "warning": 30,
@@ -165,10 +165,9 @@
       }
     },
     "network": {
-        "cursor": false,
         // "interface": "nmtui", // (Optional) To force the use of this interface
         "format-wifi": "",
-        "on-click": "~/bin/launch-terminal nmtui",
+        "on-click": "~/bin/launch-terminal-floating 1000 800 nmtui",
         "format-ethernet": "{ipaddr}/{cidr}",
         "tooltip-format": "{ifname}: {ipaddr}/{cidr} {essid}",
         "format-linked": "{ifname} (No IP)",
@@ -176,7 +175,6 @@
         "format-alt": ""
     },
     "pulseaudio": {
-        "cursor": false,
         // "scroll-step": 1, // %, can be a float
         "format": "{icon}",
         "format-bluetooth": "{icon}",
@@ -193,8 +191,9 @@
             "car": " ",
             "default": ["", " ", " "]
         },
+        "tooltip-format": "{volume}%",
         "on-click": "~/bin/menu-audio",
-        "on-click-right": "pavucontrol"
+        "on-click-right": "~/bin/launch-window-floating 1000 800 pavucontrol",
     },
     "custom/media": {
         "format": "{icon} {text}",
@@ -212,24 +211,20 @@
         "format": " ",
         "on-click": "~/bin/menu-power",
         "tooltip": false,
-        "cursor": false
     },
     "custom/menu": {
         "format": "󰣇",
         "on-click": "~/bin/menu",
         "tooltip": false,
-        "cursor": false
     },
     "custom/wallpapers": {
         "format": " ",  
         "on-click": "~/bin/bg-set",
         "tooltip": false,
-        "cursor": false
     },
     "custom/bluetooth": {
         "format": " ",  
-        "on-click": "~/bin/launch-terminal bluetuith",
+        "on-click": "~/bin/launch-terminal-floating 1000 800 bluetuith",
         "tooltip": false,
-        "cursor": false
     }
 }

@@ -82,6 +82,14 @@ tooltip label {
   border: 2px solid @muted;
 }
 
+#workspaces button.special {
+  color: @foreground;
+}
+
+#workspaces button.special.active {
+  color: transparent;
+  transition: all 0.3s ease-in-out;
+}
 
 #window {
 	margin-right: 12pt;

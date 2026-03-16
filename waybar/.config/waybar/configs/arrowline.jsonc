@@ -34,7 +34,6 @@
 	"clock#time": {
         "format": "󱑍  {:%H:%M}",
         "align": 1,
-        "cursor": false,
         "justify": "right",
         "tooltip-format": "{:%I:%M %p ~  %a. %d.%m }",
         "timezones": [
@@ -63,6 +62,7 @@
       "disable-scroll": true,
       "all-outputs": false,
       "warp-on-scroll": false,
+      "show-special": true,
       "format": "{icon}",
       "format-icons": {
           "1": "",
@@ -75,6 +75,7 @@
           "8": "",
           "9": "",
           "10": "",
+          "special": "+",
           "active": "",
       },
       "persistent-workspaces": {
@@ -113,8 +114,7 @@
 	
   "network": {
       "format": "",
-      "cursor": false,
-      "on-click": "~/bin/launch-terminal nmtui",
+      "on-click": "~/bin/launch-terminal-floating 1000 800 nmtui",
       "format-ethernet": "",
       "format-wifi": "{icon} {signalStrength}%",
       "format-disconnected": "󰞃 no signal",
@@ -126,11 +126,10 @@
 
   "wireplumber": {
       "format": "{icon} {volume}%",
-      "cursor": false,
-  "format-muted": "󰝟",
+  "format-muted": "󰝟  {volume}%",
   "format-icons": ["󰖀 ", "󰕾 "],        
       "on-click": "~/bin/menu-audio",
-      "on-click-right": "pavucontrol",        
+      "on-click-right": "~/bin/launch-window-floating 1000 800 pavucontrol",
       "max-volume": 150,
       "scroll-step": 2,
       "tooltip-format": "{icon}  {volume}%",
@@ -222,26 +221,22 @@
     "format": " ",
     "on-click": "~/bin/menu-power",
     "tooltip": false,
-    "cursor": false
   },
   "custom/menu": {
     "format": "󰣇 ",
     "on-click": "~/bin/menu",
     "tooltip": false,
-    "cursor": false
   },
   "custom/wallpapers": {
     "format": " ",  
     "on-click": "~/bin/bg-set",
     "tooltip": false,
-    "cursor": false
   },
 
   "custom/bluetooth": {
         "format": " ",  
-        "on-click": "~/bin/launch-terminal bluetuith",
+        "on-click": "~/bin/launch-terminal-floating 1000 800 bluetuith",
         "tooltip": false,
-        "cursor": false
   },
 
   

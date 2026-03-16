@@ -63,8 +63,9 @@ SUPER + SHIFT + ALT + 7 | Move Window To Workspace 7
 SUPER + SHIFT + ALT + 8 | Move Window To Workspace 8
 SUPER + SHIFT + ALT + 9 | Move Window To Workspace 9
 SUPER + SHIFT + ALT + 0 | Move Window To Workspace 0
-SUPER + O | Toggle Scratchpad
-SUPER + SHIFT + O | Move Window To Scratchpad
+SUPER + O | Toggle Window Opacity
+SUPER + EQUAL | Toggle Scratchpad
+SUPER + SHIFT + EQUAL | Move Window To Scratchpad
 SUPER + SHIFT + Q | Close Window
 SUPER + Q | Close Window
 SUPER + RMB | Resize Window

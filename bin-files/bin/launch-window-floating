@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+
+# Default size
+WIDTH="${1:-1200}"
+HEIGHT="${2:-800}"
+
+# Remove width/height args if provided
+if [[ "$1" =~ ^[0-9]+$ && "$2" =~ ^[0-9]+$ ]]; then
+    shift 2
+fi
+
+if [ "$#" -eq 0 ]; then
+    echo "Usage: $(basename "$0") [width height] command [args...]" >&2
+    exit 1
+fi
+
+launch_window() {
+    local rules="[workspace special:floating; float; size $WIDTH $HEIGHT; center; tag:scratchwindow]"
+    local command=""
+    printf -v command '%q ' "$@"
+    command="${command% }"
+    hyprctl dispatch exec "$rules $command"
+}
+
+launch_window "$@"
