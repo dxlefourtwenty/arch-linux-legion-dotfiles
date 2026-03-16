@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-OUTPUT_DIR="${HOME}/Pictures/Screenshots"
+OUTPUT_DIR="${HOME}/files/pictures/screenshots"
+NOTIFICATION_ICON="/usr/share/icons/hicolor/scalable/apps/satty.svg"
 
 notify_missing_dep() {
     local dep="$1"
     if command -v notify-send >/dev/null 2>&1; then
-        notify-send -t 5000 "Screenshot" "Missing dependency: $dep"
+        notify-send -i "$NOTIFICATION_ICON" -t 5000 "Screenshot" "Missing dependency: $dep"
     else
         printf 'menu-screenshot: missing dependency: %s\n' "$dep" >&2
     fi
@@ -16,7 +17,7 @@ notify_message() {
     local title="$1"
     local body="$2"
     if command -v notify-send >/dev/null 2>&1; then
-        notify-send -t 3000 "$title" "$body"
+        notify-send -i "$NOTIFICATION_ICON" -t 3000 "$title" "$body"
     fi
 }
 

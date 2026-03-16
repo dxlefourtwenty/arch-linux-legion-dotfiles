@@ -23,7 +23,7 @@ cleanup() {
 }
 trap cleanup EXIT INT TERM
 
-DIR="$HOME/Pictures/Screenshots"
+DIR="$HOME/files/pictures/screenshots"
 mkdir -p "$DIR"
 
 tmp=$(mktemp /tmp/satty-XXXXXX.png) || exit 1

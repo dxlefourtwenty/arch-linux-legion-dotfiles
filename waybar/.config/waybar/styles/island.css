@@ -141,12 +141,14 @@ button {
 }
 
 #battery {
+    padding-left: 3px;
     background-color: transparent;
     color: @cyan;
 }
 
 #battery.charging, #battery.plugged {
     color: @cyan;
+    padding-left: 3px;
     background-color: transparent;
 }
 

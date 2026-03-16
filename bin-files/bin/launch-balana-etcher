@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+nohup /home/dxle/builds/balenaEtcher-linux-x64/balena-etcher >/dev/null 2>&1 &
+

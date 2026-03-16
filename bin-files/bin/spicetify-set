@@ -1,0 +1,85 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+[ $# -lt 1 ] && {
+    echo "Usage: spicetify-set <mode>"
+    exit 1
+}
+
+MODE="$1"
+THEME=""
+FLAVOR=""
+
+case "$MODE" in
+    aetheria)
+        THEME="StarryNight"
+        FLAVOR="Galaxy"
+        ;;
+    akane)
+        THEME="StarryNight"
+        FLAVOR="Sunrise"
+        ;;
+    catppuccin)
+        THEME="text"
+        FLAVOR="CatppuccinMocha"
+        ;;
+    dracula)
+        THEME="Sleek"
+        FLAVOR="Dracula"
+        ;;
+    dreamwave)
+        THEME="StarryNight"
+        FLAVOR="Galaxy"
+        ;;
+    gruvbox)
+        THEME="text"
+        FLAVOR="Gruvbox"
+        ;;
+    matte-black)
+        THEME="Sleek"
+        FLAVOR="UltraBlack"
+        ;;
+    nord)
+        THEME="text"
+        FLAVOR="Nord"
+        ;;
+    rose-pine)
+        THEME="text"
+        FLAVOR="RosePine"
+        ;;
+    solarized)
+        THEME="text"
+        FLAVOR="Solarized"
+        ;;
+    tokyo-night)
+        THEME="text"
+        FLAVOR="TokyoNight"
+        ;;
+    everforest)
+        THEME="text"
+        FLAVOR="EverforestDarkMedium"
+        ;;
+    firesky)
+        THEME="StarryNight"
+        FLAVOR="Orange"
+        ;;
+    fuschia)
+        THEME="StarryNight"
+        FLAVOR="Cotton-candy"
+        ;;
+    osaka-jade)
+        THEME="Ziro"
+        FLAVOR="green-dark"
+        ;;
+    *)
+        echo "Unknown mode: $MODE"
+        exit 1
+        ;;
+esac
+
+spicetify config current_theme "${THEME}"
+if [ -n "${FLAVOR}" ]; then
+  spicetify config color_scheme "${FLAVOR}"
+fi
+
+spicetify -n apply

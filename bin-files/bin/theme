@@ -17,6 +17,11 @@ NEW_THEME="$THEME_DIR/$1"
     exit 1
 }
 
+
+# Stop apps that will be restarted against the new theme, if they are running.
+pgrep -x spotify >/dev/null && pkill -x spotify || true
+pgrep -x Discord >/dev/null && pkill -x Discord || true
+
 # Atomic theme switch (IMPORTANT)
 ln -sfn "$NEW_THEME" "$CURRENT_LINK"
 
@@ -35,12 +40,7 @@ ln -sfn "$NEW_THEME" "$CURRENT_LINK"
 "$SCRIPT_DIR/reload-celluloid" || true
 "$SCRIPT_DIR/reload-swayosd" || true
 "$SCRIPT_DIR/cursor-set" || true
-
-
-# # wallpaper AFTER reload (prevents flicker)
-# swww img "$CURRENT_LINK/wallpaper.png" \
-#     --transition-type fade \
-#     --transition-duration 1
+"$SCRIPT_DIR/spicetify-set" "$1" || true
 
 # Pretty notification
 FORMATTED_NAME=$(echo "$1" | tr '-' ' ' | sed -E 's/\b(.)/\U\1/g')
@@ -53,5 +53,4 @@ for i in {1..20}; do
     sleep 0.1
 done
 
-sleep 0.5
 notify-send -t 5000 "Theme" "Updated to $FORMATTED_NAME." >/dev/null 2>&1 || true
