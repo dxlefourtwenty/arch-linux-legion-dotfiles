@@ -1,1 +1,1 @@
-/home/dxle/.config/dashboard/styles/spaced-arrow.qml
+/home/dxle/.config/dashboard/styles/island.qml
