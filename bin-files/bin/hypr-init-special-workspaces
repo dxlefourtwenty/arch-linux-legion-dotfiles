@@ -3,13 +3,15 @@
 # Create in exact order you want
 hyprctl dispatch togglespecialworkspace socialspace
 hyprctl dispatch togglespecialworkspace socialspace
+~/bin/launch-instagram
 
 hyprctl dispatch togglespecialworkspace discordspace
 hyprctl dispatch togglespecialworkspace discordspace
+~/bin/launch-discord
 
 hyprctl dispatch togglespecialworkspace mediaspace
 hyprctl dispatch togglespecialworkspace mediaspace
-
+~/bin/launch-spotify
 
 hyprctl dispatch togglespecialworkspace scratchpad
 hyprctl dispatch togglespecialworkspace scratchpad

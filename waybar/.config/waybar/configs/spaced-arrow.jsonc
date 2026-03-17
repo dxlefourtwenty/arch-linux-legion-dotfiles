@@ -187,7 +187,10 @@
         "format": "<span font_desc=\"JetBrainsMono Nerd Font\">{icon}</span>",
         "format-icons": {
             "default": "",
-            "special": "",
+            "socialspace": "<span font-size='13pt'></span>",
+            "discordspace": "<span font-size='13pt'> 󱋊 </span>",
+            "mediaspace": "<span font-size='12pt'> </span>",
+            "scratchpad": "<span font-size='12pt'> </span>",
             "active": ""
         },
         "persistent-workspaces": {

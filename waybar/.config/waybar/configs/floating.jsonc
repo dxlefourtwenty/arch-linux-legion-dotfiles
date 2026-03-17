@@ -45,7 +45,10 @@
             "8": "8",
             "9": "9",
             "10": "0",
-            "special": "+",
+            "socialspace": "<span font-size='9pt'></span>",
+            "discordspace": "<span font-size='9pt'> 󱋊 </span>",
+            "mediaspace": "<span font-size='8pt'> </span>",
+            "scratchpad": "<span font-size='8pt'> </span>",
             "active": "󱓻"
         },
         "persistent-workspaces": {
