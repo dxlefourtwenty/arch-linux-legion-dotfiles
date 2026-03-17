@@ -46,3 +46,5 @@ export GOPATH="$HOME/builds/go"
 export GOMODCACHE="$GOPATH/pkg/mod"
 
 export OBS_WEBSOCKET_URL="obsws://localhost:4455/OJaIW5hECIC73gYI"
+
+export KEYBINDINGS="$HOME/.config/hypr/keybindings.conf"
