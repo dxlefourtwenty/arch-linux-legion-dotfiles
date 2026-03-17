@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+WIDTH=1200
+HEIGHT=800
+APP_URL="https://instagram.com"
+
+build_app_class() {
+    local url="$1"
+    local clean_url domain
+
+    clean_url="${url#http://}"
+    clean_url="${clean_url#https://}"
+    domain="${clean_url%%/*}"
+
+    echo "${domain//[^a-zA-Z0-9]/}WebApp"
+}
+
+APP_CLASS="$(build_app_class "$APP_URL")"
+APP_CLASS_LOWER="${APP_CLASS,,}"
+
+find_instagram_address() {
+    hyprctl clients -j | jq -r '
+        map(
+            select(
+                ((.class // "" | ascii_downcase) == "'"$APP_CLASS_LOWER"'")
+                or
+                ((.initialClass // "" | ascii_downcase) == "'"$APP_CLASS_LOWER"'")
+            )
+        )[0].address // empty
+    '
+}
+
+instagram_address="$(find_instagram_address)"
+
+if [ -z "$instagram_address" ]; then
+    launch-web-app "$APP_URL" >/dev/null 2>&1 &
+
+    for _ in {1..100}; do
+        sleep 0.1
+        instagram_address="$(find_instagram_address)"
+        if [ -n "$instagram_address" ]; then
+            break
+        fi
+    done
+fi
+
+if [ -z "$instagram_address" ]; then
+    echo "launch-instagram: could not find Instagram window" >&2
+    exit 1
+fi
+
+hyprctl dispatch focuswindow "address:$instagram_address"
+hyprctl dispatch setfloating
+hyprctl dispatch resizeactive exact "$WIDTH" "$HEIGHT"
+hyprctl dispatch centerwindow
+hyprctl dispatch movetoworkspacesilent special:socialspace
