@@ -1,8 +1,5 @@
+Press Knob | Mute Audio
 Hold Knob | Audio Menu
-ALT + F9 | Start OBS Recording
-SHIFT + ALT + F9 | Stop OBS Recording
-ALT + F10 | Pause OBS Recording
-SHIFT + ALT + F10 | Resume OBS Recording
 [TMUX] CTRL + ALT + LEFT | Close Terminal Pane
 [TMUX] CTRL + ALT + RIGHT | Split Terminal Right
 [TMUX] CTRL + ALT + DOWN | Split Terminal Down 

@@ -117,7 +117,7 @@ awk -F'|' -v arrow="$arrow" -v width="$max_width" '
 chosen=$(echo "$formatted" | rofi -dmenu -i \
     -p "" \
     -theme-str '
-        window { width: 1000px; }
+        window { width: 1075px; }
         entry { placeholder: "Keybindings…"; }
         element { 
             orientation: horizontal;
