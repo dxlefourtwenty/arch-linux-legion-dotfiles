@@ -1,11 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-MAX_THUMBNAILS=24
+MAX_THUMBNAILS="${MENU_CLIPBOARD_MAX_THUMBNAILS:-12}"
+MAX_MENU_ENTRIES="${MENU_CLIPBOARD_MAX_ENTRIES:-200}"
 CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/menu-clipboard"
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 MENU_ID="menu-clipboard"
 PID_FILE="/tmp/menu-rofi.pid"
+CLEANUP_STAMP="$CACHE_DIR/.last-cleanup"
 
 if "$SCRIPT_DIR/rofi-toggle-pidfile" begin "$MENU_ID"; then
     exit 0
@@ -17,6 +19,7 @@ inputbar {
     children: [ entry ];
 }
 entry { placeholder: "Clipboard…"; }
+listview { lines: 15; }
 element {
     orientation: horizontal;
     children: [ element-text, element-icon ];
@@ -130,7 +133,11 @@ if [[ -z "$history" ]]; then
 fi
 
 mkdir -p "$CACHE_DIR"
-find "$CACHE_DIR" -type f -mtime +14 -delete 2>/dev/null || true
+
+if [[ ! -f "$CLEANUP_STAMP" ]] || find "$CLEANUP_STAMP" -mtime +0 | grep -q .; then
+    find "$CACHE_DIR" -type f -mtime +14 -delete 2>/dev/null || true
+    touch "$CLEANUP_STAMP"
+fi
 
 tmp_dir="$(mktemp -d)"
 trap 'rm -rf "$tmp_dir"; "$SCRIPT_DIR/rofi-toggle-pidfile" clear "$MENU_ID"' EXIT
@@ -138,30 +145,45 @@ trap 'rm -rf "$tmp_dir"; "$SCRIPT_DIR/rofi-toggle-pidfile" clear "$MENU_ID"' EXI
 menu_input="$tmp_dir/menu-input"
 decode_file="$tmp_dir/decode"
 
-thumbnail_count=0
-row_index=0
+declare -a history_entries=()
+declare -a history_previews=()
 
-while IFS=$'\t' read -r _ preview; do
-    [[ -z "${preview:-}" ]] && preview="[empty]"
+while IFS= read -r history_line; do
+    [[ -z "${history_line:-}" ]] && continue
+
+    preview="${history_line#*$'\t'}"
+    if [[ "$preview" == "$history_line" ]]; then
+        preview="[empty]"
+    elif [[ -z "$preview" ]]; then
+        preview="[empty]"
+    fi
+
+    history_entries+=("$history_line")
+    history_previews+=("$preview")
+
+    if (( ${#history_entries[@]} >= MAX_MENU_ENTRIES )); then
+        break
+    fi
+done <<< "$history"
+
+if (( ${#history_entries[@]} == 0 )); then
+    notify-send "Clipboard" "No clipboard history found"
+    exit 0
+fi
+
+thumbnail_count=0
+for row_index in "${!history_entries[@]}"; do
+    preview="${history_previews[$row_index]}"
+    entry="${history_entries[$row_index]}"
 
     if (( thumbnail_count < MAX_THUMBNAILS )); then
-        entry="$(printf '%s\n' "$history" | sed -n "$((row_index + 1))p")"
-
-        if [[ -n "$entry" ]]; then
-            if append_menu_entry "$preview" "$entry" "$decode_file" "$menu_input"; then
-                ((thumbnail_count += 1))
-            else
-                :
-            fi
-        else
-            printf '%s\n' "$preview" >>"$menu_input"
+        if append_menu_entry "$preview" "$entry" "$decode_file" "$menu_input"; then
+            ((thumbnail_count += 1))
         fi
     else
         printf '%s\n' "$preview" >>"$menu_input"
     fi
-
-    ((row_index += 1))
-done <<< "$history"
+done
 
 chosen_index="$(rofi -dmenu -i \
     -pid "$PID_FILE" \
@@ -174,7 +196,7 @@ chosen_index="$(rofi -dmenu -i \
 
 [[ -z "$chosen_index" ]] && exit 0
 
-chosen="$(printf '%s\n' "$history" | sed -n "$((chosen_index + 1))p")"
+chosen="${history_entries[$chosen_index]:-}"
 [[ -z "$chosen" ]] && exit 0
 
 tmp="$tmp_dir/selected"
