@@ -1,0 +1,151 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+DEFAULT_CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/menu-unicode"
+CACHE_DIR="$DEFAULT_CACHE_DIR"
+CACHE_FILE=""
+MENU_ID="menu-unicode"
+PID_FILE="/tmp/menu-rofi.pid"
+
+if "$SCRIPT_DIR/rofi-toggle-pidfile" begin "$MENU_ID"; then
+    exit 0
+fi
+
+trap '"$SCRIPT_DIR/rofi-toggle-pidfile" clear "$MENU_ID"' EXIT
+
+build_cache() {
+    mkdir -p "$CACHE_DIR"
+
+    perl <<'EOF' >"$CACHE_FILE.tmp"
+use strict;
+use warnings;
+use utf8;
+use Unicode::UCD qw(charinfo charscript prop_invmap);
+
+binmode STDOUT, ':encoding(UTF-8)';
+
+my ($block_map, $block_vals) = prop_invmap('Block');
+my @rows;
+my $allowed_blocks = qr/^(?:Basic Latin|Latin-1 Supplement|Latin Extended-[A-G]|Latin Extended Additional|Greek and Coptic|Greek Extended|Combining Diacritical Marks(?: Supplement| Extended| for Symbols)?|Spacing Modifier Letters|Modifier Tone Letters|General Punctuation|Supplemental Punctuation|Superscripts and Subscripts|Currency Symbols|Letterlike Symbols|Number Forms|Arrows|Supplemental Arrows-[ABC]|Mathematical Operators|Supplemental Mathematical Operators|Miscellaneous Mathematical Symbols-[AB]|Miscellaneous Technical|Control Pictures|Optical Character Recognition|Enclosed Alphanumerics(?: Supplement)?|Box Drawing|Block Elements|Geometric Shapes(?: Extended)?|Miscellaneous Symbols(?: and Arrows)?|Dingbats|Braille Patterns|Symbols for Legacy Computing|Transport and Map Symbols|Alchemical Symbols|Chess Symbols|Playing Cards|Mahjong Tiles|Domino Tiles|Ancient Symbols|Ancient Greek Numbers|Ancient Greek Musical Notation|Byzantine Musical Symbols|Musical Symbols|Tai Xuan Jing Symbols|Yijing Hexagram Symbols|Aegean Numbers|Counting Rod Numerals|Rumi Numeral Symbols|Indic Siyaq Numbers|Ottoman Siyaq Numbers|Coptic Epact Numbers|Supplemental Symbols and Pictographs|Symbols and Pictographs Extended-A)$/;
+my $excluded_label_terms = qr/(?:aegean|acute angle|admetos|alchemical|black chess|apollon|xiangqi|zeus|astraea|uranus|russian|white vertical bar|white chess|coptic|neutral chess)/;
+
+for (my $i = 0; $i < @$block_map - 1; $i++) {
+    my $block = $block_vals->[$i] // q();
+
+    next unless $block =~ $allowed_blocks;
+
+    for my $cp ($block_map->[$i] .. $block_map->[$i + 1] - 1) {
+        my $info = charinfo($cp) or next;
+        my $name = $info->{name} // next;
+        my $category = $info->{category} // q();
+        my $script = charscript($cp) // q();
+
+        next if $name =~ /^</;
+        next if $category =~ /^(?:Cc|Cf|Cs|Co)$/;
+        next unless $script =~ /^(?:Common|Inherited|Latin|Greek)$/;
+
+        if ($category =~ /^(?:L|M)/) {
+            next unless $block =~ /(?:Latin|Greek)/ || $name =~ /^(?:LATIN|GREEK) /;
+        }
+
+        my $char = chr($cp);
+        my $code = sprintf('U+%04X', $cp);
+        my $label = lc $name;
+        my $block_label = lc $block;
+
+        $label =~ s/-/ /g;
+        $block_label =~ s/_/ /g;
+        next if $label =~ $excluded_label_terms;
+        next if $block_label =~ $excluded_label_terms;
+
+        my $alias = $label;
+        $alias =~ s/\s+/_/g;
+
+        my $meta = join ' ',
+            $label,
+            $alias,
+            ($label =~ s/\s+//gr),
+            $code,
+            lc($code),
+            (sprintf '%04x', $cp),
+            $block_label;
+
+        push @rows, join("\t", $char, $code, $label, $meta);
+    }
+}
+
+@rows = sort {
+    (split /\t/, $a, 4)[2] cmp (split /\t/, $b, 4)[2]
+} @rows;
+
+print "$_\n" for @rows;
+EOF
+
+    mv "$CACHE_FILE.tmp" "$CACHE_FILE"
+}
+
+cache_dir_writable() {
+    local probe
+
+    probe="$(mktemp "$1/.menu-unicode.XXXXXX" 2>/dev/null)" || return 1
+    rm -f "$probe"
+}
+
+if ! mkdir -p "$CACHE_DIR" 2>/dev/null || ! cache_dir_writable "$CACHE_DIR"; then
+    CACHE_DIR="/tmp/menu-unicode-${UID:-$(id -u)}"
+    mkdir -p "$CACHE_DIR"
+fi
+
+CACHE_FILE="$CACHE_DIR/unicode.tsv"
+
+if [[ ! -s "$CACHE_FILE" || "$CACHE_FILE" -ot "${BASH_SOURCE[0]}" ]]; then
+    build_cache
+fi
+
+tmp_dir="$(mktemp -d)"
+trap 'rm -rf "$tmp_dir"; "$SCRIPT_DIR/rofi-toggle-pidfile" clear "$MENU_ID"' EXIT
+menu_input="$tmp_dir/menu-input"
+
+declare -a chars=()
+
+while IFS=$'\t' read -r char code label meta; do
+    [[ -n "${char:-}" && -n "${code:-}" && -n "${label:-}" ]] || continue
+    chars+=("$char")
+    printf '%s  %s  %s\0meta\x1f%s\n' "$code" "$char" "$label" "${meta:-$label}" >>"$menu_input"
+done <"$CACHE_FILE"
+
+[[ ${#chars[@]} -gt 0 ]] || exit 0
+
+selected_index="$(
+    rofi -dmenu -i \
+        -pid "$PID_FILE" \
+        -p "" \
+        -format i \
+        -no-custom \
+        -theme-str '
+            window { width: 760px; }
+            entry { placeholder: "Unicode…"; }
+            listview { lines: 14; }
+            element {
+                orientation: horizontal;
+                children: [ element-text ];
+                spacing: 0px;
+                padding: 8px 8px;
+            }
+            element-text {
+                font: "JetBrainsMono Nerd Font 15";
+                horizontal-align: 0.0;
+                padding-left: 0px;
+            }
+        ' \
+        <"$menu_input"
+)"
+
+[[ -n "$selected_index" ]] || exit 0
+
+selected_char="${chars[$selected_index]:-}"
+[[ -n "$selected_char" ]] || exit 0
+
+printf '%s' "$selected_char" | wl-copy
+notify-send -t 2000 "Clipboard" "Unicode copied: $selected_char"

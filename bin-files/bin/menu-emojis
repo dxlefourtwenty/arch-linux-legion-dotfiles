@@ -1,0 +1,144 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+DEFAULT_CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/menu-emojis"
+CACHE_DIR="$DEFAULT_CACHE_DIR"
+CACHE_FILE=""
+MENU_ID="menu-emojis"
+PID_FILE="/tmp/menu-rofi.pid"
+
+if "$SCRIPT_DIR/rofi-toggle-pidfile" begin "$MENU_ID"; then
+    exit 0
+fi
+
+trap '"$SCRIPT_DIR/rofi-toggle-pidfile" clear "$MENU_ID"' EXIT
+
+build_cache() {
+    mkdir -p "$CACHE_DIR"
+
+    perl <<'EOF' >"$CACHE_FILE.tmp"
+use strict;
+use warnings;
+use utf8;
+use Unicode::UCD qw(charinfo prop_invmap);
+
+binmode STDOUT, ':encoding(UTF-8)';
+
+my ($emoji_map, $emoji_vals) = prop_invmap('Emoji');
+my ($presentation_map, $presentation_vals) = prop_invmap('Emoji_Presentation');
+my %is_presentation;
+
+for (my $i = 0; $i < @$presentation_map - 1; $i++) {
+    next unless $presentation_vals->[$i] eq 'Y';
+    for my $cp ($presentation_map->[$i] .. $presentation_map->[$i + 1] - 1) {
+        $is_presentation{$cp} = 1;
+    }
+}
+
+my @rows;
+
+for (my $i = 0; $i < @$emoji_map - 1; $i++) {
+    next unless $emoji_vals->[$i] eq 'Y';
+
+    for my $cp ($emoji_map->[$i] .. $emoji_map->[$i + 1] - 1) {
+        next if $cp <= 0x7F;
+
+        my $info = charinfo($cp) or next;
+        my $name = $info->{name} // next;
+        next if $name =~ /^</;
+        next if $name =~ /^(?:REGIONAL INDICATOR SYMBOL LETTER|TAG )/;
+        next if $name =~ /(?:EMOJI MODIFIER|VARIATION SELECTOR|COMBINING ENCLOSING KEYCAP|DIGIT ZERO|DIGIT ONE|DIGIT TWO|DIGIT THREE|DIGIT FOUR|DIGIT FIVE|DIGIT SIX|DIGIT SEVEN|DIGIT EIGHT|DIGIT NINE|NUMBER SIGN|ASTERISK)/;
+
+        my $emoji = chr($cp);
+        $emoji .= chr(0xFE0F) unless $is_presentation{$cp};
+
+        my $label = lc $name;
+        $label =~ s/-/ /g;
+
+        my $alias = $label;
+        $alias =~ s/\s+/_/g;
+
+        my $meta = join ' ',
+            $label,
+            $alias,
+            ($label =~ s/\s+//gr);
+
+        push @rows, join("\t", $emoji, $label, $meta);
+    }
+}
+
+@rows = sort {
+    (split /\t/, $a, 3)[1] cmp (split /\t/, $b, 3)[1]
+} @rows;
+
+print "$_\n" for @rows;
+EOF
+
+    mv "$CACHE_FILE.tmp" "$CACHE_FILE"
+}
+
+cache_dir_writable() {
+    local probe
+
+    probe="$(mktemp "$1/.menu-emojis.XXXXXX" 2>/dev/null)" || return 1
+    rm -f "$probe"
+}
+
+if ! mkdir -p "$CACHE_DIR" 2>/dev/null || ! cache_dir_writable "$CACHE_DIR"; then
+    CACHE_DIR="/tmp/menu-emojis-${UID:-$(id -u)}"
+    mkdir -p "$CACHE_DIR"
+fi
+
+CACHE_FILE="$CACHE_DIR/emojis.tsv"
+
+if [[ ! -s "$CACHE_FILE" || "$CACHE_FILE" -ot "${BASH_SOURCE[0]}" ]]; then
+    build_cache
+fi
+
+tmp_dir="$(mktemp -d)"
+trap 'rm -rf "$tmp_dir"; "$SCRIPT_DIR/rofi-toggle-pidfile" clear "$MENU_ID"' EXIT
+menu_input="$tmp_dir/menu-input"
+
+declare -a emojis=()
+
+while IFS=$'\t' read -r emoji label meta; do
+    [[ -n "${emoji:-}" && -n "${label:-}" ]] || continue
+    emojis+=("$emoji")
+    printf '%s  %s\0meta\x1f%s\n' "$emoji" "$label" "${meta:-$label}" >>"$menu_input"
+done <"$CACHE_FILE"
+
+[[ ${#emojis[@]} -gt 0 ]] || exit 0
+
+selected_index="$(
+    rofi -dmenu -i \
+        -pid "$PID_FILE" \
+        -p "" \
+        -format i \
+        -no-custom \
+        -theme-str '
+            window { width: 500px; }
+            entry { placeholder: "Emojis…"; }
+            listview { lines: 10; }
+            element {
+                orientation: horizontal;
+                children: [ element-text ];
+                spacing: 0px;
+                padding: 8px 8px;
+            }
+            element-text {
+                font: "Noto Color Emoji 18, JetBrainsMono Nerd Font 16";
+                horizontal-align: 0.0;
+                padding-left: 0px;
+            }
+        ' \
+        <"$menu_input"
+)"
+
+[[ -n "$selected_index" ]] || exit 0
+
+selected_emoji="${emojis[$selected_index]:-}"
+[[ -n "$selected_emoji" ]] || exit 0
+
+printf '%s' "$selected_emoji" | wl-copy
+notify-send -t 2000 "Clipboard" "Emoji copied: $selected_emoji"

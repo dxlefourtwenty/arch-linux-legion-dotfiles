@@ -11,6 +11,8 @@ fi
 options="  Install
   Capture
   Clipboard
+󰞅  Emojis
+󰡯  Unicode
 󰸌  Color Converter
   Tasks
   Files
@@ -50,6 +52,12 @@ case "$label" in
     ;;
   "Clipboard")
     "$SCRIPT_DIR/menu-clipboard"
+    ;;
+  "Emojis")
+    "$SCRIPT_DIR/menu-emojis"
+    ;;
+  "Unicode")
+    "$SCRIPT_DIR/menu-unicode"
     ;;
   "Color Converter")
     "$SCRIPT_DIR/menu-color-converter"
