@@ -1,0 +1,98 @@
+SUPER + SPACE | App Launcher
+SUPER + ALT + SPACE | Menu
+SUPER + ALT + K | Keybindings
+SUPER + ALT + L | Learn
+SUPER + ALT + P | Power
+SUPER + RETURN | Open Terminal
+SUPER + SHIFT + RETURN | Open Main Tmux
+SUPER + SHIFT + A | Activity
+SUPER + SHIFT + P | Displays
+SUPER + CTRL + ALT + SPACE | Open Background Gallery
+SUPER + CTRL + ALT + M | Open Live Background Gallery
+CTRL + ALT + SPACE | Next Background
+CTRL + ALT + SHIFT + SPACE | Previous Background
+SUPER + ALT + T | Change Theme
+SUPER + SHIFT + B | Toggle Top Bar
+SUPER + ALT + B | Change Top Bar Style
+SUPER + ALT + F | Files Menu
+SUPER + ALT + S | Screenshot
+SUPER + SHIFT + ALT + S | Capture Menu
+SUPER + ALT + C | Clipboard
+SUPER + SHIFT + ALT + C | Color Converter
+SUPER + SHIFT + LEFT | Move Window Left
+SUPER + SHIFT + RIGHT | Move Window Right
+SUPER + SHIFT + UP | Move Window Up
+SUPER + SHIFT + DOWN | Move Window Down
+SUPER + LEFT | Focus Left
+SUPER + RIGHT | Focus Right
+SUPER + UP | Focus Up
+SUPER + DOWN | Focus Down
+SUPER + SHIFT + CTRL + LEFT | Swap Window Left 
+SUPER + SHIFT + CTRL + RIGHT | Swap Window Right 
+SUPER + SHIFT + CTRL + UP | Swap Window Up 
+SUPER + SHIFT + CTRL + DOWN | Swap Window Down 
+SUPER + F | Toggle Fullscreen
+SHIFT + SUPER + F | Toggle Floating Window 
+SUPER + P | Pin Window
+SUPER + 1 | Focus Workspace 1
+SUPER + 2 | Focus Workspace 2
+SUPER + 3 | Focus Workspace 3
+SUPER + 4 | Focus Workspace 4
+SUPER + 5 | Focus Workspace 5
+SUPER + 6 | Focus Workspace 6
+SUPER + 7 | Focus Workspace 7
+SUPER + 8 | Focus Workspace 8
+SUPER + 9 | Focus Workspace 9
+SUPER + 0 | Focus Workspace 0
+SUPER + SHIFT + 1 | Move To Workspace 1
+SUPER + SHIFT + 2 | Move To Workspace 2
+SUPER + SHIFT + 3 | Move To Workspace 3
+SUPER + SHIFT + 4 | Move To Workspace 4
+SUPER + SHIFT + 5 | Move To Workspace 5
+SUPER + SHIFT + 6 | Move To Workspace 6
+SUPER + SHIFT + 7 | Move To Workspace 7
+SUPER + SHIFT + 8 | Move To Workspace 8
+SUPER + SHIFT + 9 | Move To Workspace 9
+SUPER + SHIFT + 0 | Move To Workspace 0
+SUPER + SHIFT + ALT + 1 | Move Window To Workspace 1
+SUPER + SHIFT + ALT + 2 | Move Window To Workspace 2
+SUPER + SHIFT + ALT + 3 | Move Window To Workspace 3
+SUPER + SHIFT + ALT + 4 | Move Window To Workspace 4
+SUPER + SHIFT + ALT + 5 | Move Window To Workspace 5
+SUPER + SHIFT + ALT + 6 | Move Window To Workspace 6
+SUPER + SHIFT + ALT + 7 | Move Window To Workspace 7
+SUPER + SHIFT + ALT + 8 | Move Window To Workspace 8
+SUPER + SHIFT + ALT + 9 | Move Window To Workspace 9
+SUPER + SHIFT + ALT + 0 | Move Window To Workspace 0
+SUPER + O | Toggle Window Opacity
+SUPER + EQUAL | Toggle Scratchpad
+SUPER + SHIFT + EQUAL | Move Window To Scratchpad
+SUPER + SHIFT + Q | Close Window
+SUPER + Q | Close Window
+SUPER + RMB | Resize Window
+SUPER + LMB | Move Window
+SUPER + SHIFT + C | Launch Color Picker
+SUPER + ALT + S | Take Screenshot
+SUPER + SHIFT + ALT + S | Capture Menu
+SUPER + SHIFT + D | Toggle Dashboard
+SUPER + ALT + V | Audio Menu
+Hold Knob | Audio Menu
+ALT + F9 | Start OBS Recording
+SHIFT + ALT + F9 | Stop OBS Recording
+ALT + F10 | Pause OBS Recording
+SHIFT + ALT + F10 | Resume OBS Recording
+[TMUX] CTRL + ALT + LEFT | Close Terminal Pane
+[TMUX] CTRL + ALT + RIGHT | Split Terminal Right
+[TMUX] CTRL + ALT + DOWN | Split Terminal Down 
+[TMUX] CTRL + A | <PREFIX>
+[TMUX] <PREFIX> + C | New Terminal Window (Cwd)
+[TMUX] <PREFIX> + [#] | Focus Terminal Window [#]
+[TMUX] ALT + [#] | Focus Terminal Window [#]
+[TMUX] ALT + P | New Terminal Window (CWD)
+[TMUX] ALT + SHIFT + P | Kill Terminal Window
+[TMUX] ALT + O | New Terminal Window (Home Dir)
+[TMUX] CTRL + Left | Focus Pane Left
+[TMUX] CTRL + Right | Focus Pane Right
+[TMUX] CTRL + Up | Focus Pane Above
+[TMUX] CTRL + Down | Focus Pane Below
+[TMUX] ALT + SHIFT + [#] | Move to Window [#]
