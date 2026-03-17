@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+
+# Get workspaces that actually have windows (exclude special)
+used=$(hyprctl clients -j | jq '.[].workspace.id' | sort -n | uniq)
+
+# Find lowest unused workspace > 0
+target=1
+while echo "$used" | grep -qx "$target"; do
+    ((target++))
+done
+
+# Make sure the window is tiled (disable floating if needed)
+hyprctl dispatch settiled
+
+# Move and follow
+hyprctl dispatch movetoworkspace "$target"
+hyprctl dispatch workspace "$target"
