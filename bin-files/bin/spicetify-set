@@ -93,22 +93,6 @@ fi
 
 spicetify -n apply
 
-# if [ "$LIVE" -eq 1 ]; then
-#     if [ -f "$WATCH_PID_FILE" ]; then
-#         OLD_PID="$(cat "$WATCH_PID_FILE")"
-#         if kill -0 "$OLD_PID" >/dev/null 2>&1; then
-#             kill "$OLD_PID" >/dev/null 2>&1 || true
-#             wait "$OLD_PID" 2>/dev/null || true
-#         fi
-#     fi
-#
-#     mkdir -p "$WATCH_WRAPPER_DIR"
-#     cat >"$WATCH_WRAPPER_DIR/spotify" <<EOF
-# #!/usr/bin/env bash
-# exec "$SCRIPT_DIR/launch-spotify" "\$@"
-# EOF
-#     chmod +x "$WATCH_WRAPPER_DIR/spotify"
-#
-#     nohup env PATH="$WATCH_WRAPPER_DIR:$PATH" spicetify watch -s >/tmp/spicetify-watch.log 2>&1 &
-#     echo "$!" >"$WATCH_PID_FILE"
-# fi
+if [ "$LIVE" -eq 1 ]; then
+    "$SCRIPT_DIR/reload-spotify"
+fi
