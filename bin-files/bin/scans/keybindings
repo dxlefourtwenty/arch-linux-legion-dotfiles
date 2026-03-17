@@ -1,8 +1,8 @@
 Press Knob | Mute Audio
 Hold Knob | Audio Menu
-[TMUX] CTRL + ALT + LEFT | Close Terminal Pane
-[TMUX] CTRL + ALT + RIGHT | Split Terminal Right
-[TMUX] CTRL + ALT + DOWN | Split Terminal Down 
+[TMUX] CTRL + ALT + Left | Close Terminal Pane
+[TMUX] CTRL + ALT + Right | Split Terminal Right
+[TMUX] CTRL + ALT + Down | Split Terminal Down 
 [TMUX] CTRL + A | <PREFIX>
 [TMUX] <PREFIX> + C | New Terminal Window (Cwd)
 [TMUX] <PREFIX> + [#] | Focus Terminal Window [#]
