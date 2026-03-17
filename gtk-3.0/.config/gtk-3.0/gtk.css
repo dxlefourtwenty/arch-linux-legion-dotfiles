@@ -112,3 +112,450 @@ entry:focus {
     border: 1px solid @accent;
 }
 
+/* ===== ROOT ===== */
+filechooser {
+    background: @base;
+    color: @text;
+    border-radius: 12px;
+}
+
+/* ===== HEADER BAR ===== */
+filechooser headerbar {
+    background: @mantle;
+    color: @text;
+    border: none;
+    box-shadow: none;
+}
+
+/* Title + entry (filename input) */
+filechooser entry {
+    background: @surface0;
+    color: @text;
+    border-radius: 8px;
+    border: 1px solid @surface1;
+}
+
+/* ===== SIDEBAR ===== */
+filechooser .sidebar {
+    background: @crust;
+    color: @subtext;
+}
+
+/* Sidebar rows */
+filechooser .sidebar row {
+    border-radius: 8px;
+    margin: 2px 6px;
+}
+
+/* Sidebar hover */
+filechooser .sidebar row:hover {
+    background: @surface0;
+}
+
+/* Sidebar selected */
+filechooser .sidebar row:selected {
+    background: @accent;
+    color: @crust;
+}
+
+/* ===== FILE LIST ===== */
+filechooser .view {
+    background: @base;
+    color: @text;
+}
+
+/* File rows */
+filechooser .view row {
+    border-radius: 8px;
+}
+
+/* Hover */
+filechooser .view row:hover {
+    background: @surface0;
+}
+
+/* Selected file */
+filechooser .view row:selected {
+    background: @accent;
+    color: @crust;
+}
+
+/* ===== BUTTONS ===== */
+filechooser button {
+    background: @surface0;
+    color: @text;
+    border-radius: 8px;
+    border: 1px solid @surface1;
+}
+
+/* Hover */
+filechooser button:hover {
+    background: @surface1;
+}
+
+/* Primary button (Save) */
+filechooser button.suggested-action {
+    background: @green;
+    color: @crust;
+}
+
+/* Cancel button */
+filechooser button.destructive-action {
+    background: @red;
+    color: @crust;
+}
+
+/* ===== PATH BAR ===== */
+filechooser .path-bar button {
+    background: transparent;
+    color: @subtext;
+}
+
+filechooser .path-bar button:hover {
+    background: @surface0;
+    color: @text;
+}
+
+/* ===== SCROLLBARS ===== */
+scrollbar slider {
+    background: @surface2;
+    border-radius: 6px;
+}
+
+scrollbar slider:hover {
+    background: @accent;
+}
+
+/* ===== SEPARATORS ===== */
+filechooser separator {
+    background: @surface0;
+}
+
+/* ===== HEADERBAR (real target) ===== */
+filechooser headerbar,
+filechooser .headerbar {
+    background: @mantle;
+    color: @text;
+    border: none;
+    box-shadow: none;
+}
+
+/* inactive window */
+filechooser headerbar:backdrop {
+    background: @crust;
+    color: @subtext;
+}
+
+/* ===== HEADERBAR BUTTONS (Cancel / Save) ===== */
+filechooser headerbar button {
+    background: @surface0;
+    color: @text;
+    border-radius: 8px;
+    border: 1px solid @surface1;
+}
+
+/* hover */
+filechooser headerbar button:hover {
+    background: @surface1;
+}
+
+/* inactive buttons */
+filechooser headerbar button:backdrop {
+    background: @surface0;
+    color: @subtext;
+}
+
+/* ===== PRIMARY ACTION (Save button) ===== */
+filechooser headerbar button.suggested-action {
+    background: @green;
+    color: @crust;
+    border: none;
+}
+
+/* ===== CANCEL BUTTON ===== */
+filechooser headerbar button:not(.suggested-action) {
+    background: @surface0;
+    color: @text;
+}
+
+/* ===== WHOLE DIALOG ===== */
+filechooser,
+filechooser.background,
+filechooser.csd,
+filechooser > box,
+filechooser > grid {
+    background-color: @base;
+    color: @text;
+}
+
+/* ===== TOP BAR / TITLEBAR / HEADERBAR ===== */
+filechooser headerbar,
+filechooser .headerbar,
+filechooser.titlebar,
+filechooser .titlebar,
+filechooser decoration,
+filechooser .background headerbar,
+filechooser .background .titlebar,
+filechooser > box > headerbar,
+filechooser > box > .titlebar,
+filechooser > grid > headerbar,
+filechooser > grid > .titlebar {
+    background: @mantle;
+    background-color: @mantle;
+    color: @text;
+    border: none;
+    box-shadow: none;
+}
+
+/* top bar when unfocused */
+filechooser headerbar:backdrop,
+filechooser .headerbar:backdrop,
+filechooser.titlebar:backdrop,
+filechooser .titlebar:backdrop {
+    background: @crust;
+    background-color: @crust;
+    color: @subtext;
+}
+
+/* remove weird bright borders/shadows in top area */
+filechooser headerbar *,
+filechooser .headerbar *,
+filechooser .titlebar *,
+filechooser.titlebar * {
+    box-shadow: none;
+}
+
+/* ===== HEADERBAR BUTTONS ===== */
+filechooser headerbar button,
+filechooser .headerbar button,
+filechooser .titlebar button,
+filechooser.titlebar button {
+    background: @surface0;
+    background-color: @surface0;
+    color: @text;
+    border: 1px solid @surface1;
+    border-radius: 8px;
+}
+
+/* hover */
+filechooser headerbar button:hover,
+filechooser .headerbar button:hover,
+filechooser .titlebar button:hover,
+filechooser.titlebar button:hover {
+    background: @surface1;
+    background-color: @surface1;
+    color: @text;
+}
+
+/* unfocused buttons */
+filechooser headerbar button:backdrop,
+filechooser .headerbar button:backdrop,
+filechooser .titlebar button:backdrop,
+filechooser.titlebar button:backdrop {
+    background: @surface0;
+    background-color: @surface0;
+    color: @subtext;
+}
+
+/* Save button */
+filechooser headerbar button.suggested-action,
+filechooser .headerbar button.suggested-action,
+filechooser .titlebar button.suggested-action,
+filechooser.titlebar button.suggested-action {
+    background: @green;
+    background-color: @green;
+    color: @crust;
+    border: none;
+}
+
+/* filename entry */
+filechooser entry,
+filechooser headerbar entry,
+filechooser .headerbar entry,
+filechooser .titlebar entry {
+    background: @surface0;
+    background-color: @surface0;
+    color: @text;
+    border: 1px solid @surface1;
+    border-radius: 8px;
+    caret-color: @text;
+}
+
+/* focused entry */
+filechooser entry:focus,
+filechooser headerbar entry:focus,
+filechooser .headerbar entry:focus,
+filechooser .titlebar entry:focus {
+    border-color: @blue;
+    box-shadow: none;
+}
+
+/* search button / icon buttons in top bar */
+filechooser button image,
+filechooser headerbar button image,
+filechooser .headerbar button image,
+filechooser .titlebar button image {
+    color: @text;
+}
+
+/* ===== SIDEBAR ===== */
+filechooser placessidebar,
+filechooser .sidebar,
+filechooser .places-sidebar,
+filechooser stacksidebar,
+filechooser scrolledwindow.sidebar {
+    background: @crust;
+    background-color: @crust;
+    color: @subtext;
+}
+
+filechooser placessidebar row,
+filechooser .sidebar row,
+filechooser .places-sidebar row {
+    border-radius: 8px;
+    margin: 2px 6px;
+    color: @subtext;
+}
+
+filechooser placessidebar row:hover,
+filechooser .sidebar row:hover,
+filechooser .places-sidebar row:hover {
+    background: @surface0;
+    background-color: @surface0;
+    color: @text;
+}
+
+filechooser placessidebar row:selected,
+filechooser .sidebar row:selected,
+filechooser .places-sidebar row:selected {
+    background: @accent;
+    background-color: @accent;
+    color: @crust;
+}
+
+/* ===== FILE LIST ===== */
+filechooser treeview,
+filechooser treeview.view,
+filechooser .view,
+filechooser scrolledwindow,
+filechooser viewport {
+    background: @base;
+    background-color: @base;
+    color: @text;
+}
+
+filechooser treeview:selected,
+filechooser .view:selected,
+filechooser treeview.view:selected {
+    background: @accent;
+    background-color: @accent;
+    color: @crust;
+}
+
+/* column header row */
+filechooser treeview header button,
+filechooser treeview.view header button {
+    background: @surface0;
+    background-color: @surface0;
+    color: @text;
+    border: 1px solid @surface1;
+    border-radius: 0;
+}
+
+/* path bar */
+filechooser .path-bar button,
+filechooser pathbar button {
+    background: transparent;
+    background-color: transparent;
+    color: @subtext;
+    border: 1px solid @surface1;
+    border-radius: 8px;
+}
+
+filechooser .path-bar button:hover,
+filechooser pathbar button:hover {
+    background: @surface0;
+    background-color: @surface0;
+    color: @text;
+}
+
+/* bottom type selector row */
+filechooser combobox,
+filechooser combobox button,
+filechooser button.combo {
+    background: @surface0;
+    background-color: @surface0;
+    color: @text;
+    border: 1px solid @surface1;
+    border-radius: 8px;
+}
+
+/* ===== FORCE TITLEBAR (this is what you're missing) ===== */
+filechooser .titlebar,
+filechooser headerbar.titlebar,
+filechooser .background .titlebar {
+    background: @mantle;
+    background-color: @mantle;
+    color: @text;
+    border: none;
+    box-shadow: none;
+}
+
+/* unfocused */
+filechooser .titlebar:backdrop,
+filechooser headerbar.titlebar:backdrop {
+    background: @crust;
+    background-color: @crust;
+    color: @subtext;
+}
+
+/* EVERYTHING inside titlebar */
+filechooser .titlebar * {
+    background-color: transparent;
+    color: @text;
+    box-shadow: none;
+}
+
+/* buttons inside titlebar */
+filechooser .titlebar button {
+    background: @surface0;
+    background-color: @surface0;
+    color: @text;
+    border: 1px solid @surface1;
+    border-radius: 8px;
+}
+
+/* Save button */
+filechooser .titlebar button.suggested-action {
+    background: @green;
+    background-color: @green;
+    color: @crust;
+    border: none;
+}
+
+/* ===== FIX WHITE TITLEBAR LAYER (REAL FIX) ===== */
+filechooser.background,
+filechooser.csd,
+filechooser.background.csd,
+filechooser.background > headerbar,
+filechooser.background > box,
+filechooser.background > grid {
+    background: @mantle !important;
+    background-color: @mantle !important;
+}
+
+/* also force decoration layer */
+decoration,
+filechooser decoration {
+    background: @mantle !important;
+    background-color: @mantle !important;
+}
+
+/* remove GTK light overlay */
+filechooser.background.csd > * {
+    background: transparent !important;
+}
+
+.background.csd {
+    background: @mantle !important;
+}

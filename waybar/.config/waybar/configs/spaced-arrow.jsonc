@@ -191,6 +191,7 @@
             "discordspace": "<span font-size='13pt'> 󱋊 </span>",
             "mediaspace": "<span font-size='12pt'> </span>",
             "scratchpad": "<span font-size='12pt'> </span>",
+            "floating": "+",
             "active": ""
         },
         "persistent-workspaces": {
