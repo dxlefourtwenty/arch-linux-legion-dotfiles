@@ -4,6 +4,8 @@ SUPER + Dradle | Toggle Media Space
 SUPER + SHIFT + Dradle | Move To Media Space 
 SUPER + Oragami | Toggle Discord Space
 SUPER + SHIFT + Oragami | Move To Discord Space
+SUPER + Torii | Toggle Social Space
+SUPER + SHIFT + Torii | Move To Social Space 
 SUPER + LMB | Move Window
 SUPER + RMB | Resize Window
 SUPER + Scroll | Change Workspace

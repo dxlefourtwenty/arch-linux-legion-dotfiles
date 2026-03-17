@@ -15,7 +15,7 @@ find_spotify_address() {
 spotify_address="$(find_spotify_address)"
 
 if [ -z "$spotify_address" ]; then
-    spotify >/dev/null 2>&1 &
+    spotify "$@" >/dev/null 2>&1 &
 
     for _ in {1..100}; do
         sleep 0.1

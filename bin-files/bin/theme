@@ -17,9 +17,8 @@ NEW_THEME="$THEME_DIR/$1"
     exit 1
 }
 
-
 # Stop apps that will be restarted against the new theme, if they are running.
-pgrep -x spotify >/dev/null && pkill -x spotify || true
+# pgrep -x spotify >/dev/null && pkill -x spotify || true
 
 # Atomic theme switch (IMPORTANT)
 ln -sfn "$NEW_THEME" "$CURRENT_LINK"
@@ -39,7 +38,7 @@ ln -sfn "$NEW_THEME" "$CURRENT_LINK"
 "$SCRIPT_DIR/reload-swayosd" || true
 "$SCRIPT_DIR/reload-discord" >/dev/null 2>&1 &
 
-"$SCRIPT_DIR/spicetify-set" "$1" >/dev/null 2>&1 &
+"$SCRIPT_DIR/spicetify-set" --live "$1" >/dev/null 2>&1 &
 
 # Pretty notification
 FORMATTED_NAME=$(echo "$1" | tr '-' ' ' | sed -E 's/\b(.)/\U\1/g')
