@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+MENU_ID="menu-audio"
+PID_FILE="/tmp/menu-rofi.pid"
+
+if "$SCRIPT_DIR/rofi-toggle-pidfile" begin "$MENU_ID"; then
+    exit 0
+fi
 
 # Get sinks
 sinks=$(pactl list sinks short)
@@ -34,6 +40,7 @@ done <<< "$sinks"
 
 chosen=$(printf '%s\n' "${options[@]}" | rofi -dmenu -i \
     -markup-rows \
+    -pid "$PID_FILE" \
     -p "" \
     -theme-str '
         window { width: 260px; }
@@ -49,6 +56,8 @@ chosen=$(printf '%s\n' "${options[@]}" | rofi -dmenu -i \
             padding-left: 0px;
         }
     ')
+
+"$SCRIPT_DIR/rofi-toggle-pidfile" clear "$MENU_ID"
 
 chosen_plain=$(printf '%s' "$chosen" | sed -E 's/<[^>]+>//g')
 sink_id=""

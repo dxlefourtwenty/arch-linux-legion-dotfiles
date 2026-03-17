@@ -2,6 +2,8 @@
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 SEARCH_DIR="$HOME"
+MENU_ID="menu-edit-file"
+PID_FILE="/tmp/menu-rofi.pid"
 
 # If user selected a file → open it
 if [[ -n "$1" && "$1" != "Loading…" ]]; then
@@ -12,6 +14,10 @@ fi
 
 # If not inside rofi yet → launch it
 if [[ -z "$ROFI_RETV" ]]; then
+    if "$SCRIPT_DIR/rofi-toggle-pidfile" begin "$MENU_ID"; then
+        exit 0
+    fi
+
     fd --type f --hidden --follow \
         --exclude .git \
         --exclude dotfiles \
@@ -33,6 +39,7 @@ if [[ -z "$ROFI_RETV" ]]; then
         . "$SEARCH_DIR" \
     | sed "s|^$HOME|~|" \
     | rofi -dmenu -i \
+        -pid "$PID_FILE" \
         -p "" \
         -async-pre-read 1 \
         -theme-str '
@@ -47,9 +54,10 @@ if [[ -z "$ROFI_RETV" ]]; then
             element-text {
                 font: "JetBrainsMono Nerd Font 14";
                 horizontal-align: 0.0;
-                padding-left: 0px;
+            padding-left: 0px;
             }
         ' \
     | xargs -r "$SCRIPT_DIR/menu-edit-file"
+    "$SCRIPT_DIR/rofi-toggle-pidfile" clear "$MENU_ID"
     exit
 fi

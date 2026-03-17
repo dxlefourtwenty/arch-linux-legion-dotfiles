@@ -2,12 +2,21 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+MENU_ID="menu-tasks"
+PID_FILE="/tmp/menu-rofi.pid"
+
+if "$SCRIPT_DIR/rofi-toggle-pidfile" begin "$MENU_ID"; then
+    exit 0
+fi
+
+trap '"$SCRIPT_DIR/rofi-toggle-pidfile" clear "$MENU_ID"' EXIT
 
 options="  Add Task
   Remove Task"
 
 chosen=$(printf '%b\n' "$options" | "$SCRIPT_DIR/rofi-nerd-markup" | rofi -dmenu -i \
     -markup-rows \
+    -pid "$PID_FILE" \
     -p "" \
     -theme-str '
         window { width: 260px; }

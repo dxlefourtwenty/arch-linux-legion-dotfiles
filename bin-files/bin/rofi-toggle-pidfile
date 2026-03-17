@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+PID_FILE="/tmp/menu-rofi.pid"
+KEY_FILE="/tmp/menu-rofi.key"
+command="${1:?missing command}"
+menu_id="${2:-}"
+
+case "$command" in
+    begin)
+        [[ -n "$menu_id" ]] || exit 1
+
+        if [[ -f "$PID_FILE" ]]; then
+            rofi_pid="$(<"$PID_FILE")"
+            if [[ -n "$rofi_pid" ]] && kill -0 "$rofi_pid" 2>/dev/null; then
+                current_menu_id=""
+                [[ -f "$KEY_FILE" ]] && current_menu_id="$(<"$KEY_FILE")"
+                kill "$rofi_pid" 2>/dev/null || true
+                rm -f "$PID_FILE" "$KEY_FILE"
+
+                if [[ "$current_menu_id" == "$menu_id" ]]; then
+                    exit 0
+                fi
+            else
+                rm -f "$PID_FILE" "$KEY_FILE"
+            fi
+        fi
+
+        printf '%s' "$menu_id" >"$KEY_FILE"
+        exit 1
+        ;;
+    clear)
+        [[ -n "$menu_id" ]] || exit 1
+
+        if [[ -f "$KEY_FILE" ]] && [[ "$(<"$KEY_FILE")" == "$menu_id" ]]; then
+            rm -f "$PID_FILE" "$KEY_FILE"
+        fi
+        ;;
+    *)
+        exit 1
+        ;;
+esac

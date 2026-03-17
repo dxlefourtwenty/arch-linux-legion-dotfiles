@@ -2,6 +2,15 @@
 set -euo pipefail
 
 LIST="$HOME/.config/apps.list"
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+MENU_ID="menu-apps"
+PID_FILE="/tmp/menu-rofi.pid"
+
+if "$SCRIPT_DIR/rofi-toggle-pidfile" begin "$MENU_ID"; then
+    exit 0
+fi
+
+trap '"$SCRIPT_DIR/rofi-toggle-pidfile" clear "$MENU_ID"' EXIT
 
 selection=$(
 awk -F'|' '{
@@ -10,6 +19,7 @@ awk -F'|' '{
     printf "%s\0icon\x1f%s\n", name, icon
 }' "$LIST" |
 rofi -dmenu -i -show-icons \
+    -pid "$PID_FILE" \
     -p "" \
     -theme-str '
         window { width: 300px; }

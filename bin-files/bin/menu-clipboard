@@ -3,6 +3,13 @@ set -euo pipefail
 
 MAX_THUMBNAILS=24
 CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/menu-clipboard"
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+MENU_ID="menu-clipboard"
+PID_FILE="/tmp/menu-rofi.pid"
+
+if "$SCRIPT_DIR/rofi-toggle-pidfile" begin "$MENU_ID"; then
+    exit 0
+fi
 
 THEME='
 window { width: 900px; }
@@ -126,7 +133,7 @@ mkdir -p "$CACHE_DIR"
 find "$CACHE_DIR" -type f -mtime +14 -delete 2>/dev/null || true
 
 tmp_dir="$(mktemp -d)"
-trap 'rm -rf "$tmp_dir"' EXIT
+trap 'rm -rf "$tmp_dir"; "$SCRIPT_DIR/rofi-toggle-pidfile" clear "$MENU_ID"' EXIT
 
 menu_input="$tmp_dir/menu-input"
 decode_file="$tmp_dir/decode"
@@ -157,6 +164,7 @@ while IFS=$'\t' read -r _ preview; do
 done <<< "$history"
 
 chosen_index="$(rofi -dmenu -i \
+    -pid "$PID_FILE" \
     -p "" \
     -format i \
     -no-custom \

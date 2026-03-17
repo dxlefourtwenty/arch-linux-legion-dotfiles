@@ -2,4 +2,9 @@
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 
+if pgrep -f '(^|[[:space:]/-])nmtui([[:space:]]|$)' >/dev/null 2>&1; then
+    pkill -f '(^|[[:space:]/-])nmtui([[:space:]]|$)' 2>/dev/null || true
+    exit 0
+fi
+
 "$SCRIPT_DIR/launch-terminal" nmtui

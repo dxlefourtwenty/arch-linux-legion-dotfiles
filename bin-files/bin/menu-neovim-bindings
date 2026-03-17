@@ -3,6 +3,14 @@
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 FILE="$SCRIPT_DIR/scans/neovim-bindings"
 arrow=" "
+MENU_ID="menu-neovim-bindings"
+PID_FILE="/tmp/menu-rofi.pid"
+
+if "$SCRIPT_DIR/rofi-toggle-pidfile" begin "$MENU_ID"; then
+    exit 0
+fi
+
+trap '"$SCRIPT_DIR/rofi-toggle-pidfile" clear "$MENU_ID"' EXIT
 
 [[ ! -f "$FILE" ]] && {
     notify-send "Neovim Bindings Menu" "File not found: $FILE"
@@ -35,6 +43,7 @@ NF >= 2 {
 )
 
 chosen=$(echo "$formatted" | rofi -dmenu -i \
+    -pid "$PID_FILE" \
     -p "" \
     -theme-str '
         window { width: 1000px; }

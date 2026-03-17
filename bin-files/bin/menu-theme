@@ -3,6 +3,14 @@
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 THEME_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/themes"
 THEME_DIR_RESOLVED="$(readlink -f "$THEME_DIR" 2>/dev/null || printf '%s' "$THEME_DIR")"
+MENU_ID="menu-theme"
+PID_FILE="/tmp/menu-rofi.pid"
+
+if "$SCRIPT_DIR/rofi-toggle-pidfile" begin "$MENU_ID"; then
+    exit 0
+fi
+
+trap '"$SCRIPT_DIR/rofi-toggle-pidfile" clear "$MENU_ID"' EXIT
 
 [ ! -d "$THEME_DIR_RESOLVED" ] && {
     notify-send -t 4000 "Theme" "Themes directory not found: $THEME_DIR"
@@ -40,6 +48,7 @@ done <<< "$THEMES"
 DISPLAY="${DISPLAY%\\n}"
 SELECTED_DISPLAY=$(printf '%b' "$DISPLAY" | rofi -dmenu -i \
     -markup-rows \
+    -pid "$PID_FILE" \
     -p "" \
     -theme-str '
         window { width: 210px; }

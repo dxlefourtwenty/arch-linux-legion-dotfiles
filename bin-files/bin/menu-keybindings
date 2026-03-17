@@ -4,6 +4,12 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 HYPERLAND_FILE="${XDG_CONFIG_HOME:-$HOME/.config}/hypr/keybindings.conf"
 FILE="$SCRIPT_DIR/scans/keybindings"
 arrow=" "
+MENU_ID="menu-keybindings"
+PID_FILE="/tmp/menu-rofi.pid"
+
+if "$SCRIPT_DIR/rofi-toggle-pidfile" begin "$MENU_ID"; then
+    exit 0
+fi
 
 [[ ! -f "$HYPERLAND_FILE" ]] && {
     notify-send "Keybind Menu" "File not found: $HYPERLAND_FILE"
@@ -16,7 +22,7 @@ arrow=" "
 }
 
 combined_file="$(mktemp)"
-trap 'rm -f "$combined_file"' EXIT
+trap 'rm -f "$combined_file"; "$SCRIPT_DIR/rofi-toggle-pidfile" clear "$MENU_ID"' EXIT
 
 awk '
 function trim(str) {
@@ -115,6 +121,7 @@ awk -F'|' -v arrow="$arrow" -v width="$max_width" '
 )
 
 chosen=$(echo "$formatted" | rofi -dmenu -i \
+    -pid "$PID_FILE" \
     -p "" \
     -theme-str '
         window { width: 1075px; }

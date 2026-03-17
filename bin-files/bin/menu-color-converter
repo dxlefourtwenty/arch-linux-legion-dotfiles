@@ -1,11 +1,20 @@
 #!/usr/bin/env bash
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+MENU_ID="menu-color-converter"
+PID_FILE="/tmp/menu-rofi.pid"
+
+if "$SCRIPT_DIR/rofi-toggle-pidfile" begin "$MENU_ID"; then
+    exit 0
+fi
+
+trap '"$SCRIPT_DIR/rofi-toggle-pidfile" clear "$MENU_ID"' EXIT
 
 rofi \
     -show color \
     -modi "color:${SCRIPT_DIR}/generate-rgba-or-hex" \
     -show-icons \
+    -pid "$PID_FILE" \
     -p "" \
     -theme-str '
         window { width: 525px; }

@@ -1,9 +1,20 @@
 #!/usr/bin/env bash
 
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+MENU_ID="menu-wifi-2"
+PID_FILE="/tmp/menu-rofi.pid"
+
+if "$SCRIPT_DIR/rofi-toggle-pidfile" begin "$MENU_ID"; then
+    exit 0
+fi
+
+trap '"$SCRIPT_DIR/rofi-toggle-pidfile" clear "$MENU_ID"' EXIT
+
 CHOICE=$(nmcli -t -f SSID,SECURITY,SIGNAL device wifi list | \
     sed '/^$/d' | \
     sort -u | \
     rofi -dmenu -p "" \
+    -pid "$PID_FILE" \
     -theme-str '
        window { width: 600px; }
         entry { placeholder: "WiFi…"; }
@@ -30,7 +41,7 @@ SECURITY=$(nmcli -t -f SSID,SECURITY device wifi list | \
 if [ -z "$SECURITY" ]; then
     nmcli device wifi connect "$SSID"
 else
-    PASS=$(rofi -dmenu -password -p "Password")
+    PASS=$(rofi -dmenu -password -p "Password" -pid "$PID_FILE")
     [ -z "$PASS" ] && exit 1
     nmcli device wifi connect "$SSID" password "$PASS"
 fi

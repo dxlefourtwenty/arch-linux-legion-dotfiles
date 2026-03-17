@@ -1,6 +1,12 @@
 #!/usr/bin/env bash
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+MENU_ID="menu-toggle"
+PID_FILE="/tmp/menu-rofi.pid"
+
+if "$SCRIPT_DIR/rofi-toggle-pidfile" begin "$MENU_ID"; then
+    exit 0
+fi
 
 options="  Top Bar
 󰨝  Dashboard"
@@ -9,6 +15,7 @@ HOME_DIR="/home/dxle"
 
 chosen=$(printf '%b\n' "$options" | "$SCRIPT_DIR/rofi-nerd-markup" | rofi -dmenu -i \
     -markup-rows \
+    -pid "$PID_FILE" \
     -p "" \
     -theme-str '
         window { width: 325px; }
@@ -24,6 +31,8 @@ chosen=$(printf '%b\n' "$options" | "$SCRIPT_DIR/rofi-nerd-markup" | rofi -dmenu
             padding-left: 0px;
         }
     ')
+
+"$SCRIPT_DIR/rofi-toggle-pidfile" clear "$MENU_ID"
 
 label="${chosen#*  }"   # remove up to the double-space after the icon
 
