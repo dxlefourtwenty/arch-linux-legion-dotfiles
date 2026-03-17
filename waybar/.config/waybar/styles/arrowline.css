@@ -129,61 +129,61 @@ tooltip label {
 }
 
 #custom-arrow1 {
-	font-size: 15pt;
+	font-size: 16pt;
 	color: @menu;
 	background: @wallpaper;
 }
 
 #custom-arrow2 {
-	font-size: 15pt;
+	font-size: 16pt;
 	color: @wallpaper;
 	background: @time;
 }
 
 #custom-arrow3 {
-	font-size: 15pt;
+	font-size: 16pt;
 	color: @time;
 	background: @battery;
 }
 
 #custom-arrow4 {
-	font-size: 15pt;
+	font-size: 16pt;
 	color: @battery;
 	background: @network;
 }
 
 #custom-arrow5 {
-	font-size: 15pt;
+	font-size: 16pt;
 	color: @network;
 	background: @sound;
 }
 
 #custom-arrow6 {
-	font-size: 15pt;
+	font-size: 16pt;
 	color: @sound;
 	background: @bluetooth;
 }
 
 #custom-arrow7 {
-	font-size: 15pt;
+	font-size: 16pt;
 	color: @bluetooth;
 	background: transparent;
 }
 
 #custom-arrow10 {
-	font-size: 15pt;
+	font-size: 16pt;
 	color: @background-alt;
 	background: @foreground;
 }
 
 #custom-arrow11 {
-	font-size: 15pt;
+	font-size: 16pt;
 	color: @foreground;
 	background: transparent;
 }
 
 #custom-arrow0 {
-  font-size: 15pt;
+  font-size: 16pt;
   color: @power;
   background: @menu;
 }
