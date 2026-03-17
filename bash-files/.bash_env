@@ -13,6 +13,8 @@ im=93:vi=31:mu=32:lo=36:cr=90:do=37:co=35:tm=93:cm=36:bu=90:sc=34"
 export THEMES=/home/dxle/.config/themes
 export CURRENT_THEME=/home/dxle/.config/themes/current
 
+export WALLPAPERS=/home/dxle/files/pictures/wallpapers
+
 export CURRSEM=/home/dxle/dev/coding-in-class/spring2026
 
 export DESKTOP_APPS=/usr/share/applications
@@ -25,10 +27,22 @@ export LOX_DEV=/home/dxle/dev/coding-in-class/spring2026/4080CS/lox-dev/lox/com/
 export EDITOR=nvim
 export VISUAL=nvim
 
-export DOWNLOADS=~/Downloads
+export DOWNLOADS=~/files/downloads
+export PICTURES=~/files/pictures
+export SCREENSHOTS=~/files/pictures/screenshots/
+export DOCUMENTS=~/files/documents
+
+export ICONS=~/.local/share/icons
+export GLOBAL_ICONS=/usr/share/icons
 
 export TERMINAL="kitty"
 
 export VIDEO_PLAYER="mpv"
-export VIDEOS="/home/dxle/Videos"
+export VIDEOS="/home/dxle/files/videos"
 
+export APPLICATIONS="/usr/share/applications"
+
+export GOPATH="$HOME/builds/go"
+export GOMODCACHE="$GOPATH/pkg/mod"
+
+export OBS_WEBSOCKET_URL="obsws://localhost:4455/OJaIW5hECIC73gYI"
