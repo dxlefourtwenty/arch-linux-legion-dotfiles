@@ -73,11 +73,14 @@
           "8": "",
           "9": "",
           "10": "",
-          "special": "+",
-          "active": "",
+          "mediaspace": "<span font-size='8pt'></span>",
+          "scratchpad": "",
+          "active": ""
       },
       "persistent-workspaces": {
           "HDMI-A-1": [ 1,2,3,4,5 ],
+          "special:mediaspace": [],
+          "special:scratchpad": []
       },
   },
   "hyprland/window": {

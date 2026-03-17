@@ -91,6 +91,10 @@ tooltip label {
   transition: all 0.3s ease-in-out;
 }
 
+#workspaces button label {
+  padding-right: 3px;
+}
+
 #window {
 	margin-right: 12pt;
 	margin-left: 12pt;
