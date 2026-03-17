@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+WIDTH=1200
+HEIGHT=800
+APP_CLASS=spotify
+
+find_spotify_address() {
+    hyprctl clients -j | jq -r '
+        map(select((.class | ascii_downcase) == "'"$APP_CLASS"'"))[0].address // empty
+    '
+}
+
+spotify_address="$(find_spotify_address)"
+
+if [ -z "$spotify_address" ]; then
+    spotify >/dev/null 2>&1 &
+
+    for _ in {1..100}; do
+        sleep 0.1
+        spotify_address="$(find_spotify_address)"
+        if [ -n "$spotify_address" ]; then
+            break
+        fi
+    done
+fi
+
+if [ -z "$spotify_address" ]; then
+    echo "launch-spotify: could not find Spotify window" >&2
+    exit 1
+fi
+
+hyprctl dispatch focuswindow "address:$spotify_address"
+hyprctl dispatch setfloating
+hyprctl dispatch resizeactive exact "$WIDTH" "$HEIGHT"
+hyprctl dispatch centerwindow
+hyprctl dispatch movetoworkspacesilent special:mediaspace

@@ -74,13 +74,12 @@
           "9": "",
           "10": "",
           "mediaspace": "<span font-size='8pt'></span>",
+          "discordspace": "<span font-size='9pt'>󱋊</span>",
           "scratchpad": "",
           "active": ""
       },
       "persistent-workspaces": {
           "HDMI-A-1": [ 1,2,3,4,5 ],
-          "special:mediaspace": [],
-          "special:scratchpad": []
       },
   },
   "hyprland/window": {
