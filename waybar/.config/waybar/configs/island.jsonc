@@ -36,7 +36,10 @@
             "8": "8",
             "9": "9",
             "10": "0",
-            "special": "+"
+            "mediaspace": "<span font-size='8pt'> </span>",
+            "discordspace": "<span font-size='9pt'> </span>",
+            "scratchpad": "",
+            "socialspace": "<span font-size='9pt'> </span>"
         },
         "persistent-workspaces": {
             "HDMI-A-1": [ 1,2,3,4,5 ],

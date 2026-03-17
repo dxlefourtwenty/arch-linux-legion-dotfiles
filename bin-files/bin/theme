@@ -20,7 +20,6 @@ NEW_THEME="$THEME_DIR/$1"
 
 # Stop apps that will be restarted against the new theme, if they are running.
 pgrep -x spotify >/dev/null && pkill -x spotify || true
-# pgrep -x Discord >/dev/null && pkill -x Discord || true
 
 # Atomic theme switch (IMPORTANT)
 ln -sfn "$NEW_THEME" "$CURRENT_LINK"

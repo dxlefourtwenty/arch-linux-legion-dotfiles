@@ -4,18 +4,24 @@ set -euo pipefail
 
 WIDTH=1200
 HEIGHT=800
-APP_CLASS=discord
+APP_CLASS=vesktop
 
 find_discord_address() {
     hyprctl clients -j | jq -r '
-        map(select((.class | ascii_downcase) == "'"$APP_CLASS"'"))[0].address // empty
+        map(
+            select(
+                ((.class // "" | ascii_downcase) == "'"$APP_CLASS"'")
+                or
+                ((.initialClass // "" | ascii_downcase) == "'"$APP_CLASS"'")
+            )
+        )[0].address // empty
     '
 }
 
 discord_address="$(find_discord_address)"
 
 if [ -z "$discord_address" ]; then
-    discord >/dev/null 2>&1 &
+    vesktop >/dev/null 2>&1 &
 
     for _ in {1..100}; do
         sleep 0.1
@@ -27,7 +33,7 @@ if [ -z "$discord_address" ]; then
 fi
 
 if [ -z "$discord_address" ]; then
-    echo "launch-discord: could not find Discord window" >&2
+    echo "launch-discord: could not find Vesktop window" >&2
     exit 1
 fi
 

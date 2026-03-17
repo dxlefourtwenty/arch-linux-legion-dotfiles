@@ -74,7 +74,7 @@ button {
 #workspaces {
     padding: 0;
     background-color: transparent;
-    margin: 0 10px 0 10px;
+    margin: 0 0 0 10px;
 }
 
 #workspaces button {
@@ -106,6 +106,10 @@ button {
 #workspaces button.urgent {
     background-color: @red;
     color: @background;
+}
+
+#workspaces button label {
+    padding-left: 0;
 }
 
 #mode {

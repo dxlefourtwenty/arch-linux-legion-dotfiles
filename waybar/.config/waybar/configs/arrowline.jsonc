@@ -76,6 +76,7 @@
           "mediaspace": "<span font-size='8pt'></span>",
           "discordspace": "<span font-size='9pt'>󱋊</span>",
           "scratchpad": "",
+          "socialspace": "<span font-size='9pt'></span>",
           "active": ""
       },
       "persistent-workspaces": {
