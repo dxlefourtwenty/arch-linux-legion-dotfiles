@@ -28,7 +28,7 @@ binmode STDOUT, ':encoding(UTF-8)';
 my ($block_map, $block_vals) = prop_invmap('Block');
 my @rows;
 my $allowed_blocks = qr/^(?:Basic Latin|Latin-1 Supplement|Latin Extended-[A-G]|Latin Extended Additional|Greek and Coptic|Greek Extended|Combining Diacritical Marks(?: Supplement| Extended| for Symbols)?|Spacing Modifier Letters|Modifier Tone Letters|General Punctuation|Supplemental Punctuation|Superscripts and Subscripts|Currency Symbols|Letterlike Symbols|Number Forms|Arrows|Supplemental Arrows-[ABC]|Mathematical Operators|Supplemental Mathematical Operators|Miscellaneous Mathematical Symbols-[AB]|Miscellaneous Technical|Control Pictures|Optical Character Recognition|Enclosed Alphanumerics(?: Supplement)?|Box Drawing|Block Elements|Geometric Shapes(?: Extended)?|Miscellaneous Symbols(?: and Arrows)?|Dingbats|Braille Patterns|Symbols for Legacy Computing|Transport and Map Symbols|Alchemical Symbols|Chess Symbols|Playing Cards|Mahjong Tiles|Domino Tiles|Ancient Symbols|Ancient Greek Numbers|Ancient Greek Musical Notation|Byzantine Musical Symbols|Musical Symbols|Tai Xuan Jing Symbols|Yijing Hexagram Symbols|Aegean Numbers|Counting Rod Numerals|Rumi Numeral Symbols|Indic Siyaq Numbers|Ottoman Siyaq Numbers|Coptic Epact Numbers|Supplemental Symbols and Pictographs|Symbols and Pictographs Extended-A)$/;
-my $excluded_label_terms = qr/(?:aegean|acute angle|admetos|alchemical|black chess|apollon|xiangqi|zeus|astraea|uranus|russian|white vertical bar|white chess|coptic|neutral chess)/;
+my $excluded_label_terms = qr/(?:aegean|alchemical|combining greek|white cross mark|admetos|apollon|xiangqi|zeus|astraea|uranus|russian)/;
 
 for (my $i = 0; $i < @$block_map - 1; $i++) {
     my $block = $block_vals->[$i] // q();
