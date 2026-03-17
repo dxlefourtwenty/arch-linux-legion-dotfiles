@@ -1,28 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-spotify_window_exists() {
-    hyprctl clients -j | jq -e '
-        any(.[]; (.class | ascii_downcase) == "spotify")
-    ' >/dev/null
-}
-
-spotify_process_exists() {
-    pgrep -x spotify >/dev/null
-}
-
-wait_for_spotify_shutdown() {
-    for _ in {1..100}; do
-        if ! spotify_process_exists && ! spotify_window_exists; then
-            return 0
-        fi
-        sleep 0.1
-    done
-
-    echo "spicetify-set: Spotify did not shut down cleanly" >&2
-    exit 1
-}
-
 [ $# -lt 1 ] && {
     echo "Usage: spicetify-set <mode>"
     exit 1
@@ -31,13 +9,6 @@ wait_for_spotify_shutdown() {
 MODE="$1"
 THEME=""
 FLAVOR=""
-relaunch_spotify=false
-
-if spotify_window_exists; then
-    relaunch_spotify=true
-    pkill -x spotify || true
-    wait_for_spotify_shutdown
-fi
 
 case "$MODE" in
     aetheria)
@@ -112,7 +83,3 @@ if [ -n "${FLAVOR}" ]; then
 fi
 
 spicetify -n apply
-
-if [ "$relaunch_spotify" = true ]; then
-    launch-spotify
-fi

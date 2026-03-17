@@ -1,7 +1,25 @@
-if pgrep -x Discord >/dev/null; then
-    pkill -SIGUSR2 Discord 
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+discord_address="$(
+    hyprctl clients -j | jq -r '
+        map(select((.class | ascii_downcase) == "discord"))[0].address // empty
+    '
+)"
+
+if [ -z "$discord_address" ]; then
+    exit 0
 fi
 
+active_address="$(
+    hyprctl activewindow -j | jq -r '.address // empty'
+)"
 
+hyprctl dispatch focuswindow "address:$discord_address" >/dev/null
+sleep 0.05
+hyprctl dispatch sendshortcut "CTRL" "r" activewindow >/dev/null
 
-
+if [ -n "$active_address" ] && [ "$active_address" != "$discord_address" ]; then
+    hyprctl dispatch focuswindow "address:$active_address" >/dev/null || true
+fi

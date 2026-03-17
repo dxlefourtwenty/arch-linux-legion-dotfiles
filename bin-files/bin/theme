@@ -20,27 +20,27 @@ NEW_THEME="$THEME_DIR/$1"
 
 # Stop apps that will be restarted against the new theme, if they are running.
 pgrep -x spotify >/dev/null && pkill -x spotify || true
-pgrep -x Discord >/dev/null && pkill -x Discord || true
+# pgrep -x Discord >/dev/null && pkill -x Discord || true
 
 # Atomic theme switch (IMPORTANT)
 ln -sfn "$NEW_THEME" "$CURRENT_LINK"
 
+"$SCRIPT_DIR/cursor-set" || true
 "$SCRIPT_DIR/reload-browsers" || true
 "$SCRIPT_DIR/bg-refresh-current" || true
 
 "$SCRIPT_DIR/reload-borders" || true
 "$SCRIPT_DIR/reload-terminal" || true
 "$SCRIPT_DIR/reload-waybar" || true
-
 "$SCRIPT_DIR/reload-btop" || true
 "$SCRIPT_DIR/reload-mako" || true
 "$SCRIPT_DIR/reload-dashboard" || true
-"$SCRIPT_DIR/reload-discord" || true
 "$SCRIPT_DIR/reload-nemo" || true
 "$SCRIPT_DIR/reload-celluloid" || true
 "$SCRIPT_DIR/reload-swayosd" || true
-"$SCRIPT_DIR/cursor-set" || true
-"$SCRIPT_DIR/spicetify-set" "$1" || true
+"$SCRIPT_DIR/reload-discord" >/dev/null 2>&1 &
+
+"$SCRIPT_DIR/spicetify-set" "$1" >/dev/null 2>&1 &
 
 # Pretty notification
 FORMATTED_NAME=$(echo "$1" | tr '-' ' ' | sed -E 's/\b(.)/\U\1/g')
