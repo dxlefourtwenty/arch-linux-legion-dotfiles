@@ -13,13 +13,15 @@ if "$SCRIPT_DIR/rofi-toggle-pidfile" begin "$MENU_ID"; then
     exit 0
 fi
 
+notify-send -t 4000 "Clipboard" "Opening Menu…"
+
 THEME='
 window { width: 900px; }
 inputbar {
     children: [ entry ];
 }
 entry { placeholder: "Clipboard…"; }
-listview { lines: 15; }
+listview { lines: 6; }
 element {
     orientation: horizontal;
     children: [ element-text, element-icon ];
