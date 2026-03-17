@@ -2,31 +2,19 @@
 
 set -euo pipefail
 
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 WIDTH=1200
 HEIGHT=800
 APP_URL="https://instagram.com"
-
-build_app_class() {
-    local url="$1"
-    local clean_url domain
-
-    clean_url="${url#http://}"
-    clean_url="${clean_url#https://}"
-    domain="${clean_url%%/*}"
-
-    echo "${domain//[^a-zA-Z0-9]/}WebApp"
-}
-
-APP_CLASS="$(build_app_class "$APP_URL")"
-APP_CLASS_LOWER="${APP_CLASS,,}"
+APP_CLASS_MATCH="instagram.com"
 
 find_instagram_address() {
     hyprctl clients -j | jq -r '
         map(
             select(
-                ((.class // "" | ascii_downcase) == "'"$APP_CLASS_LOWER"'")
+                ((.class // "" | ascii_downcase) | contains("'"$APP_CLASS_MATCH"'"))
                 or
-                ((.initialClass // "" | ascii_downcase) == "'"$APP_CLASS_LOWER"'")
+                ((.initialClass // "" | ascii_downcase) | contains("'"$APP_CLASS_MATCH"'"))
             )
         )[0].address // empty
     '
@@ -35,7 +23,7 @@ find_instagram_address() {
 instagram_address="$(find_instagram_address)"
 
 if [ -z "$instagram_address" ]; then
-    launch-web-app "$APP_URL" >/dev/null 2>&1 &
+    "$SCRIPT_DIR/launch-web-app" "$APP_URL" >/dev/null 2>&1 &
 
     for _ in {1..100}; do
         sleep 0.1
