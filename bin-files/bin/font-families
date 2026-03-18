@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+fc-list : family | awk -F',' '
+function trim(s) {
+    gsub(/^[[:space:]]+|[[:space:]]+$/, "", s)
+    return s
+}
+
+{
+    primary = trim($1)
+    if (primary != "") {
+        print primary
+    }
+
+    alias = trim($2)
+    if (alias != "" && length(alias) < length(primary)) {
+        print alias
+    }
+}
+' | grep -Fvi 'Emoji' | sort -u

@@ -14,7 +14,7 @@ trap '"$SCRIPT_DIR/rofi-toggle-pidfile" clear "$MENU_ID"' EXIT
 
 CURRENT_FONT="$(sed -n 's/^font_family[[:space:]]\+//p' "$KITTY_CONF" | head -n 1)"
 
-FONTS="$(fc-list : family | awk -F',' '{print $1}' | sed '/^$/d' | grep -Fvi 'Emoji' | sort -u)"
+FONTS="$(bash "$SCRIPT_DIR/font-families")"
 
 escape_markup() {
     sed -e 's/&/\&amp;/g' -e 's/</\&lt;/g' -e 's/>/\&gt;/g'

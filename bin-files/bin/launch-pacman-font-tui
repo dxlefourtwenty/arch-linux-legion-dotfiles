@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
+"$SCRIPT_DIR/launch-terminal-floating" 1200 800 bash -c '
+positive="^(ttf-|otf-)|(^|-)fonts?($|-)|^inter-font$|^terminus-font$"
+exclude="^(font(config|forge|-manager|-v|editfs)|deepin-font-manager|gnome-font-viewer|lib(font|xfont|xft).*$|perl-font-.*$|python-font.*$|texlive-font.*$|fcft$|ftgl$|graphite(-docs)?$|mate-utils$|birdfont$|haskell-sdl2-ttf$|libotf$|soundfont-.*$)"
+
+pkg=$(
+  pacman -Slq \
+    | rg -i "$positive" \
+    | rg -iv "$exclude" \
+    | sort -u \
+    | fzf \
+        --preview "pacman -Si {}" \
+        --preview-window=right:60%,wrap \
+        --prompt="Font package> "
+)
+
+clear
+
+if [[ -n "$pkg" ]]; then
+  sudo pacman -S "$pkg"
+  echo
+  echo "Done. Press any key to close."
+  read -n 1 -s
+fi
+'

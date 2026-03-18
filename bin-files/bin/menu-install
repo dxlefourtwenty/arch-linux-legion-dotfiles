@@ -8,9 +8,9 @@ if "$SCRIPT_DIR/rofi-toggle-pidfile" begin "$MENU_ID"; then
     exit 0
 fi
 
-options="  System Update
-  Arch
-  AUR"
+options="  Arch
+  AUR
+  Fonts"
 
 HOME_DIR="/home/dxle"
 
@@ -44,7 +44,7 @@ case "$label" in
   "AUR")
     "$SCRIPT_DIR/launch-pacman-aur-tui"
     ;;
-  "System Update")
-    "$SCRIPT_DIR/launch-pacman-update"
+  "Fonts")
+    "$SCRIPT_DIR/launch-pacman-font-tui"
     ;;
 esac
