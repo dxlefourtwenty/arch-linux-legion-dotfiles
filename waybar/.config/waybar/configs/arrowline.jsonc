@@ -151,70 +151,70 @@
 
 	"custom/arrow1": {
 		// "format": "",
-		"format": "",
+		"format": "<span font_desc=\"JetBrainsMono Nerd Font\"></span>",
 		// "format": "",
 		"tooltip": false
 	},
 
 	"custom/arrow2": {
 		// "format": "",
-		"format": "",
+		"format": "<span font_desc=\"JetBrainsMono Nerd Font\"></span>",
 		// "format": "",
 		"tooltip": false
 	},
 
 	"custom/arrow3": {
 		// "format": "",
-		"format": "",
+		"format": "<span font_desc=\"JetBrainsMono Nerd Font\"></span>",
 		// "format": "",
 		"tooltip": false
 	},
 
 	"custom/arrow4": {
 		// "format": "",
-		"format": "",
+		"format": "<span font_desc=\"JetBrainsMono Nerd Font\"></span>",
 		// "format": "",
 		"tooltip": false
 	},
 
 	"custom/arrow5": {
 		// "format": "",
-		"format": "",
+		"format": "<span font_desc=\"JetBrainsMono Nerd Font\"></span>",
 		// "format": "",
 		"tooltip": false
 	},
 
 	"custom/arrow6": {
 		// "format": "",
-		"format": "",
+		"format": "<span font_desc=\"JetBrainsMono Nerd Font\"></span>",
 		// "format": "",
 		"tooltip": false
 	},
 
   "custom/arrow7": {
 		// "format": "",
-		"format": "",
+		"format": "<span font_desc=\"JetBrainsMono Nerd Font\"></span>",
 		// "format": "",
 		"tooltip": false
 	},
 
 	"custom/arrow10": {
 		// "format": "",
-		"format": "",
+		"format": "<span font_desc=\"JetBrainsMono Nerd Font\"></span>",
 		// "format": "",
 		"tooltip": false
 	},
 
   "custom/arrow11": {
 		// "format": "",
-		"format": "",
+		"format": "<span font_desc=\"JetBrainsMono Nerd Font\"></span>",
 		// "format": "",
 		"tooltip": false
 	},
 
   "custom/arrow0": {
 		// "format": "",
-		"format": "",
+		"format": "<span font_desc=\"JetBrainsMono Nerd Font\"></span>",
 		// "format": "",
 		"tooltip": false
 	},
