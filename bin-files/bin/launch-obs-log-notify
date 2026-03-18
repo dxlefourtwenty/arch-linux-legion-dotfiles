@@ -2,5 +2,4 @@
 set -euo pipefail
 
 pkill -f '/obs-log-notify$' 2>/dev/null || true
-"${HOME}/bin/obs-log-notify" >/dev/null 2>&1 &
-disown
+nohup "${HOME}/bin/obs-log-notify" >/dev/null 2>&1 &

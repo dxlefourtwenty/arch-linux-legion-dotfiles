@@ -42,27 +42,32 @@ handle_line() {
 
 CURRENT_FILE=""
 ACTIVE_LOG=""
+LAST_LINE=0
 
 while true; do
     next_log="$(latest_log)"
-    if [[ -z "$next_log" ]]; then
+    if [[ -n "$next_log" && "$next_log" != "$ACTIVE_LOG" ]]; then
+        ACTIVE_LOG="$next_log"
+        LAST_LINE="$(wc -l < "$ACTIVE_LOG" 2>/dev/null || printf '0')"
+    fi
+
+    if [[ -z "$ACTIVE_LOG" ]]; then
         sleep 2
         continue
     fi
 
-    if [[ "$next_log" != "$ACTIVE_LOG" ]]; then
-        ACTIVE_LOG="$next_log"
+    line_count="$(wc -l < "$ACTIVE_LOG" 2>/dev/null || printf '0')"
+    if (( line_count < LAST_LINE )); then
+        LAST_LINE=0
     fi
 
-    while IFS= read -r line; do
-        handle_line "$line"
+    if (( line_count > LAST_LINE )); then
+        while IFS= read -r line; do
+            handle_line "$line"
+        done < <(sed -n "$((LAST_LINE + 1)),$line_count"'p' "$ACTIVE_LOG")
 
-        next_log="$(latest_log)"
-        if [[ -n "$next_log" && "$next_log" != "$ACTIVE_LOG" ]]; then
-            ACTIVE_LOG="$next_log"
-            break
-        fi
-    done < <(tail -Fn0 "$ACTIVE_LOG")
+        LAST_LINE="$line_count"
+    fi
 
     sleep 1
 done
