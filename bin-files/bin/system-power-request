@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+
+set -uo pipefail
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+action="${1:-}"
+
+case "$action" in
+    shutdown|reboot)
+        ;;
+    *)
+        exit 64
+        ;;
+esac
+
+launch_request_after() {
+    local delay_seconds="$1"
+    shift
+    local command_name="$1"
+    shift
+
+    if ! command -v "$command_name" >/dev/null 2>&1; then
+        return 1
+    fi
+
+    (
+        trap '' HUP
+        if command -v sleep >/dev/null 2>&1; then
+            sleep "$delay_seconds" >/dev/null 2>&1 || true
+        fi
+        "$command_name" "$@" >/dev/null 2>&1 || true
+    ) &
+
+    return 0
+}
+
+dispatched=1
+
+"$SCRIPT_DIR/system-stop-session-apps" >/dev/null 2>&1 || true
+
+if [[ "$action" == "shutdown" ]]; then
+    launch_request_after 1 systemctl poweroff && dispatched=0
+    launch_request_after 3 loginctl poweroff && dispatched=0
+    launch_request_after 5 shutdown -P now && dispatched=0
+    launch_request_after 7 poweroff && dispatched=0
+else
+    launch_request_after 1 systemctl reboot && dispatched=0
+    launch_request_after 3 loginctl reboot && dispatched=0
+    launch_request_after 5 shutdown -r now && dispatched=0
+    launch_request_after 7 reboot && dispatched=0
+fi
+
+if [[ "$dispatched" -ne 0 ]] && [[ -t 2 ]]; then
+    printf 'No supported %s command was found.\n' "$action" >&2
+fi
+
+exit 0

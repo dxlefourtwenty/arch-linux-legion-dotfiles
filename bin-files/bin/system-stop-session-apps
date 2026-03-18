@@ -1,0 +1,146 @@
+#!/usr/bin/env bash
+
+set -uo pipefail
+
+kill_name_now() {
+    local signal="$1"
+    local process_name="$2"
+
+    if ! command -v pkill >/dev/null 2>&1; then
+        return 1
+    fi
+
+    pkill "-${signal}" -x "$process_name" >/dev/null 2>&1 || true
+    return 0
+}
+
+kill_pattern_now() {
+    local signal="$1"
+    local pattern="$2"
+
+    if ! command -v pkill >/dev/null 2>&1; then
+        return 1
+    fi
+
+    pkill "-${signal}" -f "$pattern" >/dev/null 2>&1 || true
+    return 0
+}
+
+kill_name_later() {
+    local delay_seconds="$1"
+    local signal="$2"
+    local process_name="$3"
+
+    if ! command -v pkill >/dev/null 2>&1; then
+        return 1
+    fi
+
+    (
+        trap '' HUP
+        if command -v sleep >/dev/null 2>&1; then
+            sleep "$delay_seconds" >/dev/null 2>&1 || true
+        fi
+        pkill "-${signal}" -x "$process_name" >/dev/null 2>&1 || true
+    ) &
+
+    return 0
+}
+
+kill_pattern_later() {
+    local delay_seconds="$1"
+    local signal="$2"
+    local pattern="$3"
+
+    if ! command -v pkill >/dev/null 2>&1; then
+        return 1
+    fi
+
+    (
+        trap '' HUP
+        if command -v sleep >/dev/null 2>&1; then
+            sleep "$delay_seconds" >/dev/null 2>&1 || true
+        fi
+        pkill "-${signal}" -f "$pattern" >/dev/null 2>&1 || true
+    ) &
+
+    return 0
+}
+
+stop_user_unit_now() {
+    if ! command -v systemctl >/dev/null 2>&1; then
+        return 1
+    fi
+
+    systemctl --user stop "$@" >/dev/null 2>&1 || true
+    return 0
+}
+
+stop_user_unit_now \
+    dotfiles-push.service \
+    dotfiles-push.timer \
+    xdg-desktop-portal.service \
+    xdg-desktop-portal-hyprland.service \
+    pipewire.service \
+    pipewire.socket \
+    pipewire-pulse.service \
+    pipewire-pulse.socket \
+    wireplumber.service \
+    gvfs-daemon.service \
+    gvfs-metadata.service \
+    gvfs-udisks2-volume-monitor.service \
+    gvfs-mtp-volume-monitor.service \
+    gvfs-goa-volume-monitor.service \
+    gvfs-afc-volume-monitor.service \
+    gvfs-gphoto2-volume-monitor.service \
+    dconf.service \
+    at-spi-dbus-bus.service
+
+for process_name in \
+    xdg-desktop-portal \
+    xdg-desktop-portal-hyprland \
+    pipewire \
+    pipewire-pulse \
+    wireplumber \
+    gvfsd \
+    gvfsd-metadata \
+    dconf-service \
+    at-spi-bus-launcher \
+    at-spi2-registryd
+do
+    kill_name_now TERM "$process_name"
+    kill_name_later 3 KILL "$process_name"
+done
+
+for process_pattern in \
+    'gvfs-udisks2-volume-monitor' \
+    'gvfs-mtp-volume-monitor' \
+    'gvfs-goa-volume-monitor' \
+    'gvfs-afc-volume-monitor' \
+    'gvfs-gphoto2-volume-monitor'
+do
+    kill_pattern_now TERM "$process_pattern"
+    kill_pattern_later 3 KILL "$process_pattern"
+done
+
+for process_name in \
+    waybar \
+    swayosd-server \
+    mako \
+    swww-daemon \
+    topdash \
+    hypridle
+do
+    kill_name_now TERM "$process_name"
+    kill_name_later 3 KILL "$process_name"
+done
+
+kill_pattern_now TERM '/obs-log-notify$'
+kill_pattern_later 3 KILL '/obs-log-notify$'
+
+kill_pattern_now TERM 'wl-paste --type text --watch cliphist store'
+kill_pattern_later 3 KILL 'wl-paste --type text --watch cliphist store'
+
+kill_pattern_now TERM 'wl-paste --type image --watch cliphist store'
+kill_pattern_later 3 KILL 'wl-paste --type image --watch cliphist store'
+
+exit 0

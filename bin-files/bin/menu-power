@@ -36,10 +36,10 @@ case "$chosen" in
     "$SCRIPT_DIR/menu-power-profile"
     ;;
   *Shutdown)
-    systemctl poweroff
+    "$SCRIPT_DIR/system-shutdown"
     ;;
   *Reboot)
-    systemctl reboot
+    "$SCRIPT_DIR/system-reboot"
     ;;
   *Lock)
     sleep 0.1
