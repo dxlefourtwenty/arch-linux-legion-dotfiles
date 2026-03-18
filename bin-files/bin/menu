@@ -48,5 +48,5 @@ case "$label" in
     Config) "$SCRIPT_DIR/menu-config" ;;
     Tools) "$SCRIPT_DIR/menu-tools" ;;
     Activity) "$SCRIPT_DIR/launch-terminal" btop ;;
-    System) "$SCRIPT_DIR/menu-power" ;;
+    System) "$SCRIPT_DIR/menu-system" ;;
 esac

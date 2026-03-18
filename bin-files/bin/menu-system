@@ -16,7 +16,7 @@ chosen=$(printf '%b\n' "$options" | "$SCRIPT_DIR/rofi-nerd-markup" | rofi -dmenu
     -p "" \
     -theme-str '
         window { width: 300px; }
-        entry { placeholder: "Power…"; }
+        entry { placeholder: "System…"; }
         element { 
             orientation: horizontal;
             children: [ element-text ];

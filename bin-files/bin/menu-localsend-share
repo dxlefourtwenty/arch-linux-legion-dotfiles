@@ -16,16 +16,16 @@ chosen=$(printf '%b\n' "$options" | "$SCRIPT_DIR/rofi-nerd-markup" | rofi -dmenu
     -pid "$PID_FILE" \
     -p "" \
     -theme-str '
-        window { width: 320px; }
+        window { width: 420px; }
         entry { placeholder: "Share with LocalSend…"; }
-        element {
+        element { 
             orientation: horizontal;
             children: [ element-text ];
             spacing: 0px;
-            padding: 8px 8px;
+            padding: 8px 10px;
         }
-        element-text {
-            horizontal-align: 0.0;
+        element-text { 
+            horizontal-align: 0.0; 
             padding-left: 0px;
         }
     ')
