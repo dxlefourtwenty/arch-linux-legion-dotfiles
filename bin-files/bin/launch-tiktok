@@ -5,10 +5,10 @@ set -euo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 WIDTH=1200
 HEIGHT=800
-APP_URL="https://instagram.com"
+APP_URL="https://tiktok.com"
 SOCIAL_WORKSPACE="special:socialspace"
-APP_MATCHES=("instagram.com" "instagramcomwebapp")
-OTHER_APP_MATCHES=("tiktok.com" "tiktokcomwebapp")
+APP_MATCHES=("tiktok.com" "tiktokcomwebapp")
+OTHER_APP_MATCHES=("instagram.com" "instagramcomwebapp")
 
 find_address() {
     local workspace_name="$1"
@@ -47,40 +47,40 @@ wait_for_address_to_close() {
     return 1
 }
 
-find_instagram_address() {
+find_tiktok_address() {
     find_address "" "${APP_MATCHES[@]}"
 }
 
-find_tiktok_socialspace_address() {
+find_instagram_socialspace_address() {
     find_address "$SOCIAL_WORKSPACE" "${OTHER_APP_MATCHES[@]}"
 }
 
-instagram_address="$(find_instagram_address)"
-tiktok_socialspace_address="$(find_tiktok_socialspace_address)"
+tiktok_address="$(find_tiktok_address)"
+instagram_socialspace_address="$(find_instagram_socialspace_address)"
 
-if [ -n "$tiktok_socialspace_address" ] && [ "$tiktok_socialspace_address" != "$instagram_address" ]; then
-    hyprctl dispatch closewindow "address:$tiktok_socialspace_address" >/dev/null
-    wait_for_address_to_close "$tiktok_socialspace_address"
+if [ -n "$instagram_socialspace_address" ] && [ "$instagram_socialspace_address" != "$tiktok_address" ]; then
+    hyprctl dispatch closewindow "address:$instagram_socialspace_address" >/dev/null
+    wait_for_address_to_close "$instagram_socialspace_address"
 fi
 
-if [ -z "$instagram_address" ]; then
+if [ -z "$tiktok_address" ]; then
     "$SCRIPT_DIR/launch-web-app" "$APP_URL" >/dev/null 2>&1 &
 
     for _ in {1..100}; do
         sleep 0.1
-        instagram_address="$(find_instagram_address)"
-        if [ -n "$instagram_address" ]; then
+        tiktok_address="$(find_tiktok_address)"
+        if [ -n "$tiktok_address" ]; then
             break
         fi
     done
 fi
 
-if [ -z "$instagram_address" ]; then
-    echo "launch-instagram: could not find Instagram window" >&2
+if [ -z "$tiktok_address" ]; then
+    echo "launch-tiktok: could not find tiktok window" >&2
     exit 1
 fi
 
-hyprctl dispatch focuswindow "address:$instagram_address"
+hyprctl dispatch focuswindow "address:$tiktok_address"
 hyprctl dispatch setfloating
 hyprctl dispatch resizeactive exact "$WIDTH" "$HEIGHT"
 hyprctl dispatch centerwindow

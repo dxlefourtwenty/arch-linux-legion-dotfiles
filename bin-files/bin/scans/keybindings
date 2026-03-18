@@ -8,7 +8,8 @@ SUPER + Leaf | Toggle Scratchpad
 SUPER + SHIFT + Leaf | Move To Scratchpad
 SUPER + Soup | Toggle Social Space
 SUPER + SHIFT + Soup | Move To Social Space 
-SUPER + SHIFT + ALT + Soup | Launch Instagram
+SUPER + SHIFT + Soup | Launch Instagram
+SUPER + SHIFT + ALT + Soup | Launch TikTok
 SUPER + LMB | Move Window
 SUPER + RMB | Resize Window
 SUPER + Scroll | Change Workspace
