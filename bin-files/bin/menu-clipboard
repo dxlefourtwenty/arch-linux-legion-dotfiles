@@ -146,6 +146,7 @@ trap 'rm -rf "$tmp_dir"; "$SCRIPT_DIR/rofi-toggle-pidfile" clear "$MENU_ID"' EXI
 
 menu_input="$tmp_dir/menu-input"
 decode_file="$tmp_dir/decode"
+share_label="󰇮  Share with LocalSend"
 
 declare -a history_entries=()
 declare -a history_previews=()
@@ -174,6 +175,8 @@ if (( ${#history_entries[@]} == 0 )); then
 fi
 
 thumbnail_count=0
+printf '%s\n' "$share_label" >"$menu_input"
+
 for row_index in "${!history_entries[@]}"; do
     preview="${history_previews[$row_index]}"
     entry="${history_entries[$row_index]}"
@@ -198,7 +201,14 @@ chosen_index="$(rofi -dmenu -i \
 
 [[ -z "$chosen_index" ]] && exit 0
 
-chosen="${history_entries[$chosen_index]:-}"
+if [[ "$chosen_index" == "0" ]]; then
+    "$SCRIPT_DIR/menu-localsend-share"
+    exit 0
+fi
+
+history_index=$((chosen_index - 1))
+
+chosen="${history_entries[$history_index]:-}"
 [[ -z "$chosen" ]] && exit 0
 
 tmp="$tmp_dir/selected"
