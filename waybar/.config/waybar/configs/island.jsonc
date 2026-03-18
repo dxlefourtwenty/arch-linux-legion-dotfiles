@@ -37,14 +37,14 @@
             "8": "8",
             "9": "9",
             "10": "0",
-            "socialspace": "<span font-size='10pt'></span>",
+            "socialspace": "<span font-size='10pt'> </span>",
             "discordspace": "<span font-size='9pt'> </span>",
             "mediaspace": "<span font-size='8pt'> </span>",
             "scratchpad": "<span font-size='14pt'>✎</span>",
             "floating": "+",
         },
         "persistent-workspaces": {
-            "HDMI-A-1": [ 1,2,3,4,5 ]
+            "HDMI-A-1": [ 1,2,3,4,5,"discordspace","mediaspace","socialspace" ]
         },
     },
     "keyboard-state": {
