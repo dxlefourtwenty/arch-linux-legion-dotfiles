@@ -1,7 +1,7 @@
 @import "~/.config/rofi/colors.rasi"
 
 * {
-    font: "MesloLGS Nerd Font 16";
+    font: "CaskaydiaMono Nerd Font 16";
     background-color: transparent;
     text-color: @fg;
 }

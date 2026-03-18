@@ -36,7 +36,7 @@ done
 
 FONT_NAME="$*"
 
-if ! bash "$SCRIPT_DIR/font-families" | grep -Fxq "$FONT_NAME"; then
+if ! bash "$SCRIPT_DIR/font-families" --include-omitted | grep -Fxq "$FONT_NAME"; then
     echo "Font not found: $FONT_NAME"
     exit 1
 fi

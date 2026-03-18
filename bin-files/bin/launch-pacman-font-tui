@@ -7,13 +7,28 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 positive="^(ttf-|otf-)|(^|-)fonts?($|-)|^inter-font$|^terminus-font$"
 exclude="^(font(config|forge|-manager|-v|editfs)|deepin-font-manager|gnome-font-viewer|lib(font|xfont|xft).*$|perl-font-.*$|python-font.*$|texlive-font.*$|fcft$|ftgl$|graphite(-docs)?$|mate-utils$|birdfont$|haskell-sdl2-ttf$|libotf$|soundfont-.*$)"
 
+list_font_packages() {
+  local repo aur
+
+  repo="$(yay -Slq --repo 2>/dev/null || true)"
+  aur="$(yay -Slq --aur 2>/dev/null || true)"
+
+  if [[ -n "$repo" ]]; then
+    printf "%s\n" "$repo"
+  fi
+
+  if [[ -n "$aur" ]]; then
+    printf "%s\n" "$aur"
+  fi
+}
+
 pkg=$(
-  pacman -Slq \
+  list_font_packages \
     | rg -i "$positive" \
     | rg -iv "$exclude" \
     | sort -u \
     | fzf \
-        --preview "pacman -Si {}" \
+        --preview "yay -Si --repo {} 2>/dev/null || yay -Si --aur {} 2>/dev/null || yay -Si {} 2>/dev/null" \
         --preview-window=right:60%,wrap \
         --prompt="Font package> "
 )
@@ -21,7 +36,7 @@ pkg=$(
 clear
 
 if [[ -n "$pkg" ]]; then
-  sudo pacman -S "$pkg"
+  yay -S "$pkg"
   echo
   echo "Done. Press any key to close."
   read -n 1 -s
