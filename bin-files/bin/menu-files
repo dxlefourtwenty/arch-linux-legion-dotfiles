@@ -37,7 +37,7 @@ label="${chosen#*  }"   # remove up to the double-space after the icon
 
 case "$label" in
     "Edit File")      "$SCRIPT_DIR/menu-edit-file" ;;
-    "File Explorer")  nemo ;;
+    "File Explorer")  "$SCRIPT_DIR/menu-file-explorer" ;;
     "Share with LocalSend") "$SCRIPT_DIR/menu-localsend-share" ;;
     *) exit 0 ;;
 esac

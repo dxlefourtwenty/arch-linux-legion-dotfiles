@@ -51,7 +51,7 @@ SELECTED_DISPLAY=$(printf '%b' "$DISPLAY" | rofi -dmenu -i \
     -pid "$PID_FILE" \
     -p "" \
     -theme-str '
-        window { width: 210px; }
+        window { width: 235px; }
         entry { placeholder: "Theme…"; }
         element { 
             orientation: horizontal;

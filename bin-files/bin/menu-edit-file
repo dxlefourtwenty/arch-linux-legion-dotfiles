@@ -4,12 +4,44 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 SEARCH_DIR="$HOME"
 MENU_ID="menu-edit-file"
 PID_FILE="/tmp/menu-rofi.pid"
+LAST_FILE_STATE="/tmp/menu-edit-file-last"
+EDIT_LAST_LABEL="󰋚  Edit Last File"
+
+open_file() {
+    local real_path="$1"
+    local display_path="${2:-${real_path/#$HOME/\~}}"
+
+    printf '%s\n' "$real_path" > "$LAST_FILE_STATE"
+    notify-send -t 5000 "Files" "Editing $display_path"
+    exec "$SCRIPT_DIR/launch-terminal-floating" 1400 800 nvim "$real_path"
+}
+
+open_last_file() {
+    local real_path
+
+    if [[ ! -s "$LAST_FILE_STATE" ]]; then
+        notify-send -t 5000 "Files" "No last file has been edited yet"
+        exit 1
+    fi
+
+    real_path="$(<"$LAST_FILE_STATE")"
+
+    if [[ ! -f "$real_path" ]]; then
+        notify-send -t 5000 "Files" "Last edited file no longer exists"
+        exit 1
+    fi
+
+    open_file "$real_path"
+}
 
 # If user selected a file → open it
 if [[ -n "$1" && "$1" != "Loading…" ]]; then
+    if [[ "$1" == "$EDIT_LAST_LABEL" ]]; then
+        open_last_file
+    fi
+
     real_path="${1/#\~/$HOME}"
-    notify-send -t 5000 "Files" "Editing $1"
-    exec "$SCRIPT_DIR/launch-terminal-floating" 1400 800 nvim "$real_path"
+    open_file "$real_path" "$1"
 fi
 
 # If not inside rofi yet → launch it
@@ -18,45 +50,56 @@ if [[ -z "$ROFI_RETV" ]]; then
         exit 0
     fi
 
-    fd --type f --hidden --follow \
-        --exclude .git \
-        --exclude dotfiles \
-        --exclude .pub-cache \
-        --exclude .cache \
-        --exclude .pki \
-        --exclude .nvm \
-        --exclude go \
-        --exclude 'Code Cache' \
-        --exclude Cache \
-        --exclude 'Local Cache' \
-        --exclude 'Local Storage' \
-        --exclude cache \
-        --exclude .cargo \
-        --exclude '.local/state' \
-        --exclude node_modules \
-        --exclude 'Service Worker' \
-        --exclude lua-language-server \
-        . "$SEARCH_DIR" \
-    | sed "s|^$HOME|~|" \
-    | rofi -dmenu -i \
-        -pid "$PID_FILE" \
-        -p "" \
-        -async-pre-read 1 \
-        -theme-str '
-            window { width: 1300px; }
-            entry { placeholder: "Edit file…"; }
-            element {
-                orientation: horizontal;
-                children: [ element-text ];
-                spacing: 0px;
-                padding: 8px 10px;
-            }
-            element-text {
-                horizontal-align: 0.0;
-            padding-left: 0px;
-            }
-        ' \
-    | xargs -r "$SCRIPT_DIR/menu-edit-file"
+    chosen=$(
+        {
+            if [[ -s "$LAST_FILE_STATE" ]]; then
+                last_file="$(<"$LAST_FILE_STATE")"
+                if [[ -f "$last_file" ]]; then
+                    printf '%s\n' "$EDIT_LAST_LABEL"
+                fi
+            fi
+
+            fd --type f --hidden --follow \
+                --exclude .git \
+                --exclude dotfiles \
+                --exclude .pub-cache \
+                --exclude .cache \
+                --exclude .pki \
+                --exclude .nvm \
+                --exclude go \
+                --exclude 'Code Cache' \
+                --exclude Cache \
+                --exclude 'Local Cache' \
+                --exclude 'Local Storage' \
+                --exclude cache \
+                --exclude .cargo \
+                --exclude '.local/state' \
+                --exclude node_modules \
+                --exclude 'Service Worker' \
+                --exclude lua-language-server \
+                . "$SEARCH_DIR" \
+            | sed "s|^$HOME|~|"
+        } | rofi -dmenu -i \
+            -pid "$PID_FILE" \
+            -p "" \
+            -async-pre-read 1 \
+            -theme-str '
+                window { width: 1300px; }
+                entry { placeholder: "Edit file…"; }
+                element {
+                    orientation: horizontal;
+                    children: [ element-text ];
+                    spacing: 0px;
+                    padding: 8px 10px;
+                }
+                element-text {
+                    horizontal-align: 0.0;
+                padding-left: 0px;
+                }
+            '
+    )
+
     "$SCRIPT_DIR/rofi-toggle-pidfile" clear "$MENU_ID"
+    [[ -n "$chosen" ]] && exec "$SCRIPT_DIR/menu-edit-file" "$chosen"
     exit
 fi

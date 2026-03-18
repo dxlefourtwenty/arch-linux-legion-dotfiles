@@ -1,0 +1,70 @@
+#!/usr/bin/env bash
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+SEARCH_DIR="$HOME"
+MENU_ID="menu-file-explorer"
+PID_FILE="/tmp/menu-rofi.pid"
+
+if [[ -n "$1" && "$1" != "Loading…" ]]; then
+    real_path="${1/#\~/$HOME}"
+
+    if [[ ! -e "$real_path" ]]; then
+        notify-send -t 5000 "Files" "File no longer exists"
+        exit 1
+    fi
+
+    target_dir="$(dirname "$real_path")"
+    notify-send -t 5000 "Files" "Opening $target_dir"
+    exec "$SCRIPT_DIR/launch-file-explorer" "$target_dir"
+fi
+
+if [[ -z "$ROFI_RETV" ]]; then
+    if "$SCRIPT_DIR/rofi-toggle-pidfile" begin "$MENU_ID"; then
+        exit 0
+    fi
+
+    chosen=$(
+        fd --type f --hidden --follow \
+            --exclude .git \
+            --exclude dotfiles \
+            --exclude .pub-cache \
+            --exclude .cache \
+            --exclude .pki \
+            --exclude .nvm \
+            --exclude go \
+            --exclude 'Code Cache' \
+            --exclude Cache \
+            --exclude 'Local Cache' \
+            --exclude 'Local Storage' \
+            --exclude cache \
+            --exclude .cargo \
+            --exclude '.local/state' \
+            --exclude node_modules \
+            --exclude 'Service Worker' \
+            --exclude lua-language-server \
+            . "$SEARCH_DIR" \
+        | sed "s|^$HOME|~|" \
+        | rofi -dmenu -i \
+            -pid "$PID_FILE" \
+            -p "" \
+            -async-pre-read 1 \
+            -theme-str '
+                window { width: 1300px; }
+                entry { placeholder: "Open file directory…"; }
+                element {
+                    orientation: horizontal;
+                    children: [ element-text ];
+                    spacing: 0px;
+                    padding: 8px 10px;
+                }
+                element-text {
+                    horizontal-align: 0.0;
+                    padding-left: 0px;
+                }
+            '
+    )
+
+    "$SCRIPT_DIR/rofi-toggle-pidfile" clear "$MENU_ID"
+    [[ -n "$chosen" ]] && exec "$SCRIPT_DIR/menu-file-explorer" "$chosen"
+    exit
+fi
