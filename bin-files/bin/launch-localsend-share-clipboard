@@ -12,7 +12,7 @@ focus_floating_workspace() {
 launch_localsend() {
     local selected_path="$1"
 
-    "$SCRIPT_DIR/launch-window-floating" 800 600 localsend "$selected_path"
+    "$SCRIPT_DIR/launch-window-floating" 400 500 localsend "$selected_path"
     focus_floating_workspace
 }
 
