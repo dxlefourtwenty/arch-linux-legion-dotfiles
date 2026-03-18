@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 
+set -euo pipefail
+
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-MENU_ID="menu-localsend-share"
+MENU_ID="menu-share"
 PID_FILE="/tmp/menu-rofi.pid"
 
 if "$SCRIPT_DIR/rofi-toggle-pidfile" begin "$MENU_ID"; then
@@ -9,15 +11,16 @@ if "$SCRIPT_DIR/rofi-toggle-pidfile" begin "$MENU_ID"; then
 fi
 
 options="󰈔  File
-󰆏  Clipboard"
+󰆏  Clipboard
+󰅍  Clipboard History"
 
 chosen=$(printf '%b\n' "$options" | "$SCRIPT_DIR/rofi-nerd-markup" | rofi -dmenu -i \
     -markup-rows \
     -pid "$PID_FILE" \
     -p "" \
     -theme-str '
-        window { width: 420px; }
-        entry { placeholder: "Share with LocalSend…"; }
+        window { width: 340px; }
+        entry { placeholder: "Share…"; }
         element { 
             orientation: horizontal;
             children: [ element-text ];
@@ -37,5 +40,6 @@ label="${chosen#*  }"
 case "$label" in
     "File") "$SCRIPT_DIR/launch-localsend-share-file" ;;
     "Clipboard") "$SCRIPT_DIR/launch-localsend-share-clipboard" ;;
+    "Clipboard History") "$SCRIPT_DIR/menu-clipboard" --share ;;
     *) exit 0 ;;
 esac

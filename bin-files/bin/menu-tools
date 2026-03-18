@@ -8,9 +8,9 @@ if "$SCRIPT_DIR/rofi-toggle-pidfile" begin "$MENU_ID"; then
     exit 0
 fi
 
-options="  Install
-  Capture
+options="  Capture
   Clipboard
+  Share
 󰞅  Emojis
 󰡯  Unicode
 󰸌  Color Converter
@@ -44,14 +44,14 @@ chosen=$(printf '%b\n' "$options" | "$SCRIPT_DIR/rofi-nerd-markup" | rofi -dmenu
 label="${chosen#*  }"   # remove up to the double-space after the icon
 
 case "$label" in
-  "Install")
-    "$SCRIPT_DIR/menu-install"
-    ;;
   "Capture")
     "$SCRIPT_DIR/menu-capture"
     ;;
   "Clipboard")
     "$SCRIPT_DIR/menu-clipboard"
+    ;;
+  "Share")
+    "$SCRIPT_DIR/menu-share"
     ;;
   "Emojis")
     "$SCRIPT_DIR/menu-emojis"

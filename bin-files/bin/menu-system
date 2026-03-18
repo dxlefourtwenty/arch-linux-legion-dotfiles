@@ -1,14 +1,18 @@
 #!/usr/bin/env bash
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-MENU_ID="menu-power"
+MENU_ID="menu-system"
 PID_FILE="/tmp/menu-rofi.pid"
 
 if "$SCRIPT_DIR/rofi-toggle-pidfile" begin "$MENU_ID"; then
     exit 0
 fi
 
-options="󱐋  Power Profile\n󰐥  Shutdown\n󰤁  Reboot\n  Lock"
+options="  Install
+󱐋  Power Profile
+󰐥  Shutdown
+󰤁  Reboot
+  Lock"
 
 chosen=$(printf '%b\n' "$options" | "$SCRIPT_DIR/rofi-nerd-markup" | rofi -dmenu -i \
     -markup-rows \
@@ -32,6 +36,12 @@ chosen=$(printf '%b\n' "$options" | "$SCRIPT_DIR/rofi-nerd-markup" | rofi -dmenu
 "$SCRIPT_DIR/rofi-toggle-pidfile" clear "$MENU_ID"
 
 case "$chosen" in
+  *System\ Update)
+    "$SCRIPT_DIR/launch-pacman-update"
+    ;;
+  *Install)
+    "$SCRIPT_DIR/menu-install"
+    ;;
   *Power\ Profile)
     "$SCRIPT_DIR/menu-power-profile"
     ;;

@@ -4,16 +4,81 @@ set -euo pipefail
 MAX_THUMBNAILS="${MENU_CLIPBOARD_MAX_THUMBNAILS:-12}"
 MAX_MENU_ENTRIES="${MENU_CLIPBOARD_MAX_ENTRIES:-200}"
 CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/menu-clipboard"
+LOCALSEND_CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/localsend-share"
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 MENU_ID="menu-clipboard"
 PID_FILE="/tmp/menu-rofi.pid"
 CLEANUP_STAMP="$CACHE_DIR/.last-cleanup"
+SHARE_MODE=false
+
+case "${1:-}" in
+    --share)
+        SHARE_MODE=true
+        ;;
+    "")
+        ;;
+    *)
+        notify-send -t 4000 "Clipboard" "Unknown option: ${1}"
+        exit 1
+        ;;
+esac
 
 if "$SCRIPT_DIR/rofi-toggle-pidfile" begin "$MENU_ID"; then
     exit 0
 fi
 
-notify-send -t 4000 "Clipboard" "Opening Menu…"
+focus_floating_workspace() {
+    hyprctl dispatch focusworkspaceoncurrentmonitor special:floating >/dev/null 2>&1 || true
+}
+
+launch_localsend() {
+    local selected_path="$1"
+
+    "$SCRIPT_DIR/launch-window-floating" 800 600 localsend "$selected_path"
+    focus_floating_workspace
+}
+
+share_decoded_entry() {
+    local decoded_path="$1"
+    local mime_type extension output_path
+
+    mime_type="$(file --mime-type -b "$decoded_path" 2>/dev/null || true)"
+
+    case "$mime_type" in
+        image/png)
+            extension='png'
+            ;;
+        image/jpeg)
+            extension='jpg'
+            ;;
+        image/webp)
+            extension='webp'
+            ;;
+        text/html)
+            extension='html'
+            ;;
+        text/plain|text/plain\;charset=*)
+            extension='txt'
+            ;;
+        *)
+            notify-send "LocalSend" "Clipboard history item type is not supported"
+            exit 0
+            ;;
+    esac
+
+    mkdir -p "$LOCALSEND_CACHE_DIR"
+    find "$LOCALSEND_CACHE_DIR" -type f -mtime +3 -delete 2>/dev/null || true
+
+    output_path="$(mktemp "$LOCALSEND_CACHE_DIR/history-XXXXXX.$extension")"
+    cp "$decoded_path" "$output_path"
+    launch_localsend "$output_path"
+}
+
+if [[ "$SHARE_MODE" == true ]]; then
+    notify-send -t 4000 "Clipboard" "Opening Share History…"
+else
+    notify-send -t 4000 "Clipboard" "Opening Menu…"
+fi
 
 THEME='
 window { width: 900px; }
@@ -175,7 +240,10 @@ if (( ${#history_entries[@]} == 0 )); then
 fi
 
 thumbnail_count=0
-printf '%s\n' "$share_label" >"$menu_input"
+
+if [[ "$SHARE_MODE" == false ]]; then
+    printf '%s\n' "$share_label" >"$menu_input"
+fi
 
 for row_index in "${!history_entries[@]}"; do
     preview="${history_previews[$row_index]}"
@@ -201,12 +269,16 @@ chosen_index="$(rofi -dmenu -i \
 
 [[ -z "$chosen_index" ]] && exit 0
 
-if [[ "$chosen_index" == "0" ]]; then
-    "$SCRIPT_DIR/menu-localsend-share"
+if [[ "$SHARE_MODE" == false && "$chosen_index" == "0" ]]; then
+    "$SCRIPT_DIR/launch-localsend-share-clipboard"
     exit 0
 fi
 
-history_index=$((chosen_index - 1))
+if [[ "$SHARE_MODE" == true ]]; then
+    history_index=$chosen_index
+else
+    history_index=$((chosen_index - 1))
+fi
 
 chosen="${history_entries[$history_index]:-}"
 [[ -z "$chosen" ]] && exit 0
@@ -218,9 +290,17 @@ printf '%s\n' "$chosen" | cliphist decode >"$tmp"
 mime_type="$(file --mime-type -b "$tmp")"
 
 if [[ "$mime_type" == image/* ]]; then
-    wl-copy --type "$mime_type" <"$tmp"
-    notify-send "Clipboard" "Copied image from history"
+    if [[ "$SHARE_MODE" == true ]]; then
+        share_decoded_entry "$tmp"
+    else
+        wl-copy --type "$mime_type" <"$tmp"
+        notify-send "Clipboard" "Copied image from history"
+    fi
 else
-    wl-copy --type "$mime_type" <"$tmp"
-    notify-send "Clipboard" "Copied selection from history"
+    if [[ "$SHARE_MODE" == true ]]; then
+        share_decoded_entry "$tmp"
+    else
+        wl-copy --type "$mime_type" <"$tmp"
+        notify-send "Clipboard" "Copied selection from history"
+    fi
 fi

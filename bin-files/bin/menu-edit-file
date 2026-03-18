@@ -52,7 +52,6 @@ if [[ -z "$ROFI_RETV" ]]; then
                 padding: 8px 10px;
             }
             element-text {
-                font: "JetBrainsMono Nerd Font 14";
                 horizontal-align: 0.0;
             padding-left: 0px;
             }

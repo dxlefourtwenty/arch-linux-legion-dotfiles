@@ -17,7 +17,7 @@ chosen=$(printf '%b\n' "$options" | "$SCRIPT_DIR/rofi-nerd-markup" | rofi -dmenu
     -pid "$PID_FILE" \
     -p "" \
     -theme-str '
-        window { width: 300px; }
+        window { width: 400px; }
         entry { placeholder: "Files…"; }
         element { 
             orientation: horizontal;

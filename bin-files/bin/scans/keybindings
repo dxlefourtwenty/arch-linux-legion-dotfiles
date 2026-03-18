@@ -1,11 +1,11 @@
-SUPER + Dradle | Toggle Scratchpad
-SUPER + SHIFT + Dradle | Move To Scratchpad
-SUPER + Origami | Toggle Media Space
-SUPER + SHIFT + Origami | Move To Media Space 
-SUPER + SHIFT + ALT + Origami | Launch Spotify
-SUPER + Torii | Toggle Discord Space
-SUPER + SHIFT + Torii | Move To Discord Space
-SUPER + SHIFT + ALT + Torii | Launch Discord
+SUPER + Dradle | Toggle Discord Space
+SUPER + SHIFT + Dradle | Move To Discord Space
+SUPER + SHIFT + ALT + Dradle | Launch Discord
+SUPER + Torii | Toggle Media Space
+SUPER + SHIFT + Torii | Move To Media Space 
+SUPER + SHIFT + ALT + Torii | Launch Spotify
+SUPER + Leaf | Toggle Scratchpad
+SUPER + SHIFT + Leaf | Move To Scratchpad
 SUPER + Soup | Toggle Social Space
 SUPER + SHIFT + Soup | Move To Social Space 
 SUPER + SHIFT + ALT + Soup | Launch Instagram
