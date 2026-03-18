@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+STEP=5
+MIN=10
+MAX=100
+BUS=4
+
+current=$(ddcutil --bus=$BUS getvcp 10 | grep -oP 'current value =\s*\K\d+')
+rounded=$(( (current + 2) / 5 * 5 ))
+
+if [[ "$1" == "up" ]]; then
+    new=$((rounded + STEP))
+else
+    new=$((rounded - STEP))
+fi
+
+(( new > MAX )) && new=$MAX
+(( new < MIN )) && new=$MIN
+
+ddcutil --bus=$BUS setvcp 10 $new --noverify >/dev/null
+
+swayosd-client --custom-message "🔆 Primary ${new}%"

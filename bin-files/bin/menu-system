@@ -12,7 +12,8 @@ options="  Install
 󱐋  Power Profile
 󰐥  Shutdown
 󰤁  Reboot
-  Lock"
+  Lock
+󰒲  Sleep"
 
 chosen=$(printf '%b\n' "$options" | "$SCRIPT_DIR/rofi-nerd-markup" | rofi -dmenu -i \
     -markup-rows \
@@ -54,5 +55,8 @@ case "$chosen" in
   *Lock)
     sleep 0.1
     ~/bin/launch-lock-screen
+    ;;
+  *Sleep)
+    ~/bin/system-toggle-monitors
     ;;
 esac

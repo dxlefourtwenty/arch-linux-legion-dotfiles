@@ -12,15 +12,21 @@
     "created_at": "2026-03-01T09:09:19Z"
   },
   {
-    "task": "CS4080 Presentation",
-    "recurrence_type": "daily",
-    "recurrence_value": "daily",
-    "created_at": "2026-03-01T09:10:33Z"
-  },
-  {
     "task": "CS4310 Project",
     "recurrence_type": "daily",
     "recurrence_value": "daily",
     "created_at": "2026-03-05T23:16:45Z"
+  },
+  {
+    "task": "configure hyprsunset",
+    "recurrence_type": "daily",
+    "recurrence_value": "daily",
+    "created_at": "2026-03-18T12:12:12Z"
+  },
+  {
+    "task": "CS4080 Homework",
+    "recurrence_type": "daily",
+    "recurrence_value": "daily",
+    "created_at": "2026-03-18T12:12:31Z"
   }
 ]
