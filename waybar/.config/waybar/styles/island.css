@@ -145,7 +145,7 @@ button {
 }
 
 #battery {
-    padding-left: 3px;
+    padding-left: 4px;
     background-color: transparent;
     color: @cyan;
 }
@@ -214,6 +214,7 @@ button {
 
 #network {
     margin-right: 10px;
+    padding-left: 4px;
     background-color: transparent;
     color: @bright-red;
 }

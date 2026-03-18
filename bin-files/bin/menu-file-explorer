@@ -4,8 +4,40 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 SEARCH_DIR="$HOME"
 MENU_ID="menu-file-explorer"
 PID_FILE="/tmp/menu-rofi.pid"
+LAST_DIRECTORY_STATE="/tmp/menu-file-explorer-last-directory"
+OPEN_LAST_LABEL="󰉋  Open Last Directory"
+
+open_directory() {
+    local target_dir="$1"
+
+    printf '%s\n' "$target_dir" > "$LAST_DIRECTORY_STATE"
+    notify-send -t 5000 "Files" "Opening $target_dir"
+    exec "$SCRIPT_DIR/launch-file-explorer" "$target_dir"
+}
+
+open_last_directory() {
+    local target_dir
+
+    if [[ ! -s "$LAST_DIRECTORY_STATE" ]]; then
+        notify-send -t 5000 "Files" "No last directory has been opened yet"
+        exit 1
+    fi
+
+    target_dir="$(<"$LAST_DIRECTORY_STATE")"
+
+    if [[ ! -d "$target_dir" ]]; then
+        notify-send -t 5000 "Files" "Last opened directory no longer exists"
+        exit 1
+    fi
+
+    open_directory "$target_dir"
+}
 
 if [[ -n "$1" && "$1" != "Loading…" ]]; then
+    if [[ "$1" == "$OPEN_LAST_LABEL" ]]; then
+        open_last_directory
+    fi
+
     real_path="${1/#\~/$HOME}"
 
     if [[ ! -e "$real_path" ]]; then
@@ -14,8 +46,7 @@ if [[ -n "$1" && "$1" != "Loading…" ]]; then
     fi
 
     target_dir="$(dirname "$real_path")"
-    notify-send -t 5000 "Files" "Opening $target_dir"
-    exec "$SCRIPT_DIR/launch-file-explorer" "$target_dir"
+    open_directory "$target_dir"
 fi
 
 if [[ -z "$ROFI_RETV" ]]; then
@@ -24,33 +55,41 @@ if [[ -z "$ROFI_RETV" ]]; then
     fi
 
     chosen=$(
-        fd --type f --hidden --follow \
-            --exclude .git \
-            --exclude dotfiles \
-            --exclude .pub-cache \
-            --exclude .cache \
-            --exclude .pki \
-            --exclude .nvm \
-            --exclude go \
-            --exclude 'Code Cache' \
-            --exclude Cache \
-            --exclude 'Local Cache' \
-            --exclude 'Local Storage' \
-            --exclude cache \
-            --exclude .cargo \
-            --exclude '.local/state' \
-            --exclude node_modules \
-            --exclude 'Service Worker' \
-            --exclude lua-language-server \
-            . "$SEARCH_DIR" \
-        | sed "s|^$HOME|~|" \
-        | rofi -dmenu -i \
+        {
+            if [[ -s "$LAST_DIRECTORY_STATE" ]]; then
+                last_directory="$(<"$LAST_DIRECTORY_STATE")"
+                if [[ -d "$last_directory" ]]; then
+                    printf '%s\n' "$OPEN_LAST_LABEL"
+                fi
+            fi
+
+            fd --type f --hidden --follow \
+                --exclude .git \
+                --exclude dotfiles \
+                --exclude .pub-cache \
+                --exclude .cache \
+                --exclude .pki \
+                --exclude .nvm \
+                --exclude go \
+                --exclude 'Code Cache' \
+                --exclude Cache \
+                --exclude 'Local Cache' \
+                --exclude 'Local Storage' \
+                --exclude cache \
+                --exclude .cargo \
+                --exclude '.local/state' \
+                --exclude node_modules \
+                --exclude 'Service Worker' \
+                --exclude lua-language-server \
+                . "$SEARCH_DIR" \
+            | sed "s|^$HOME|~|"
+        } | rofi -dmenu -i \
             -pid "$PID_FILE" \
             -p "" \
             -async-pre-read 1 \
             -theme-str '
                 window { width: 1300px; }
-                entry { placeholder: "Open file directory…"; }
+                entry { placeholder: "Open Parent Directory…"; }
                 element {
                     orientation: horizontal;
                     children: [ element-text ];

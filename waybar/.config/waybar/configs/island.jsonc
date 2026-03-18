@@ -23,6 +23,7 @@
         "disable-scroll": true,
         "all-outputs": false,
         "show-special": true,
+        "sort-by": "name",
         "warp-on-scroll": false,
         "format": "<span font_desc=\"JetBrainsMono Nerd Font\">{icon}</span>",
         "format-icons": {
