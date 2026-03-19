@@ -1,22 +1,18 @@
 #!/usr/bin/env bash
 
-# 1. Lock screen (your script)
+# 1. Lock screen
 ~/bin/launch-lock-screen &
 
-# Give lock time to appear
 sleep 0.5
 
 # 2. Turn off displays
 hyprctl dispatch dpms off
 
-# Let system settle (avoid instant wake)
-sleep 2
-
-# 3. Wait for real input → wake displays
-libinput debug-events | while read -r line; do
-    if echo "$line" | grep -qE "KEYBOARD_KEY|POINTER_MOTION|POINTER_BUTTON"; then
+# 3. Wait until ANY input happens (Hyprland socket)
+while true; do
+    if hyprctl -j devices | grep -q '"active":true'; then
         hyprctl dispatch dpms on
-        pkill -f "libinput debug-events"
         break
     fi
+    sleep 0.2
 done
