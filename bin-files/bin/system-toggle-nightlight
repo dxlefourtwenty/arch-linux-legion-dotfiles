@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+FILTER=4000
+STATE_FILE="${XDG_RUNTIME_DIR:-/tmp}/system-toggle-nightlight.state"
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
+ensure_hyprsunset() {
+  if pgrep -x hyprsunset >/dev/null 2>&1; then
+    return
+  fi
+
+  if [ -x "$SCRIPT_DIR/launch-hyprsunset" ]; then
+    "$SCRIPT_DIR/launch-hyprsunset"
+  else
+    hyprsunset >/dev/null 2>&1 &
+    disown
+  fi
+
+  sleep 0.2
+}
+
+state="off"
+if pgrep -x hyprsunset >/dev/null 2>&1 && [ -f "$STATE_FILE" ]; then
+  state="$(<"$STATE_FILE")"
+fi
+
+if [ "$state" = "on" ]; then
+  hyprctl hyprsunset identity
+  printf 'off\n' > "$STATE_FILE"
+else
+  ensure_hyprsunset
+  hyprctl hyprsunset temperature "$FILTER"
+  printf 'on\n' > "$STATE_FILE"
+fi

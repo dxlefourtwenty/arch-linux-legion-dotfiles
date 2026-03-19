@@ -8,7 +8,8 @@ if "$SCRIPT_DIR/rofi-toggle-pidfile" begin "$MENU_ID"; then
     exit 0
 fi
 
-options="  Top Bar
+options="󰛨  Nightlight
+  Top Bar
 󰨝  Dashboard"
 
 HOME_DIR="/home/dxle"
@@ -37,6 +38,9 @@ chosen=$(printf '%b\n' "$options" | "$SCRIPT_DIR/rofi-nerd-markup" | rofi -dmenu
 label="${chosen#*  }"   # remove up to the double-space after the icon
 
 case "$label" in
+  "Nightlight")
+    "$SCRIPT_DIR/system-toggle-nightlight"
+    ;;
   "Top Bar")
     "$SCRIPT_DIR/toggle-waybar"
     ;;

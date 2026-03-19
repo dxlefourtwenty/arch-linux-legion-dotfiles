@@ -16,4 +16,6 @@ hyprctl dispatch togglespecialworkspace mediaspace
 hyprctl dispatch togglespecialworkspace scratchpad
 hyprctl dispatch togglespecialworkspace scratchpad
 
+~/bin/reload-waybar
+
 
