@@ -6,4 +6,9 @@ sleep 1
 hyprctl dispatch dpms on
 
 # Reload Hyprland (fix broken state)
-hyprctl reload
+sleep 0.2
+
+# Reapply monitor layout
+hyprctl keyword monitor "DP-1,1920x1080@144,0x0,1"
+hyprctl keyword monitor "HDMI-A-1,2560x1440@144.01,1920x0,1.25"
+hyprctl keyword monitor "eDP-2,disable"
