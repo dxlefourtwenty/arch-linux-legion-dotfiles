@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+pgrep -x swaylock && exit 0
+
 source ~/.config/swaylock/colors.sh
 
-swaylock \
-  --daemonize \
+exec swaylock \
   --screenshots \
   --effect-blur 8x6 \
   --clock \
