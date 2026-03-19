@@ -1,22 +1,78 @@
 #!/usr/bin/env bash
 
-# 1. Lock screen (your script)
-~/bin/launch0-lock-screen &
+set -euo pipefail
 
-# Give lock time to appear
-sleep 0.5
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_PATH="${SCRIPT_DIR}/$(basename -- "${BASH_SOURCE[0]}")"
+LOCK_SCRIPT="${SCRIPT_DIR}/launch-lock-screen"
+STATE_DIR="${XDG_RUNTIME_DIR:-/tmp}/system-toggle-monitors"
+PID_FILE="${STATE_DIR}/hypridle.pid"
+CONFIG_FILE="${STATE_DIR}/hypridle.conf"
 
-# 2. Turn off displays
-hyprctl dispatch dpms off
+set_power_profile() {
+    local profile="$1"
 
-# Let system settle (avoid instant wake)
-sleep 2
-
-# 3. Wait for real input → wake displays
-libinput debug-events | while read -r line; do
-    if echo "$line" | grep -qE "KEYBOARD_KEY|POINTER_MOTION|POINTER_BUTTON"; then
-        hyprctl dispatch dpms on
-        pkill -f "libinput debug-events"
-        break
+    if ! command -v powerprofilesctl >/dev/null 2>&1; then
+        return 0
     fi
-done
+
+    powerprofilesctl set "${profile}" >/dev/null 2>&1 || true
+}
+
+cleanup_helper() {
+    rm -f "${PID_FILE}" "${CONFIG_FILE}"
+}
+
+stop_helper() {
+    if [[ -f "${PID_FILE}" ]]; then
+        local pid
+        pid="$(<"${PID_FILE}")"
+
+        if [[ "${pid}" =~ ^[0-9]+$ ]] && kill -0 "${pid}" 2>/dev/null; then
+            kill "${pid}" 2>/dev/null || true
+        fi
+    fi
+
+    cleanup_helper
+}
+
+turn_monitors_off() {
+    set_power_profile "power-saver"
+    hyprctl dispatch dpms off
+}
+
+turn_monitors_on() {
+    hyprctl dispatch dpms on
+    set_power_profile "performance"
+}
+
+case "${1:-}" in
+    --timeout)
+        turn_monitors_off
+        exit 0
+        ;;
+    --resume)
+        turn_monitors_on
+        stop_helper
+        exit 0
+        ;;
+esac
+
+mkdir -p "${STATE_DIR}"
+stop_helper
+
+if [[ -x "${LOCK_SCRIPT}" ]]; then
+    "${LOCK_SCRIPT}" &
+fi
+
+cat > "${CONFIG_FILE}" <<EOF
+listener {
+    timeout = 1
+    on-timeout = ${SCRIPT_PATH} --timeout
+    on-resume = ${SCRIPT_PATH} --resume
+}
+EOF
+
+hypridle -c "${CONFIG_FILE}" >/dev/null 2>&1 &
+echo "$!" > "${PID_FILE}"
+disown 2>/dev/null || true
