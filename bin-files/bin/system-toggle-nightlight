@@ -28,9 +28,11 @@ fi
 
 if [ "$state" = "on" ]; then
   hyprctl hyprsunset identity
+  notify-send -t 2000 "System" "Nightlight: Off"
   printf 'off\n' > "$STATE_FILE"
 else
   ensure_hyprsunset
   hyprctl hyprsunset temperature "$FILTER"
+  notify-send -t 2000 "System" "Nightlight: On"
   printf 'on\n' > "$STATE_FILE"
 fi
