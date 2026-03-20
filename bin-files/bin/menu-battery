@@ -1,0 +1,237 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+SELF_PATH="$(readlink -f -- "${BASH_SOURCE[0]}")"
+MENU_ID="menu-battery"
+PID_FILE="/tmp/menu-rofi.pid"
+LEGION_ARGS=(legion_cli --donotexpecthwmon)
+
+sanitize_legion_output() {
+    sed '/^dmesg: read kernel buffer failed: /d'
+}
+
+feature_state() {
+    local subcommand="$1"
+    local output=""
+
+    output="$("${LEGION_ARGS[@]}" "${subcommand}" 2>&1 || true)"
+    output="$(printf '%s\n' "${output}" | sanitize_legion_output | tail -n 1 | tr -d '\r')"
+
+    case "${output}" in
+        True)
+            printf 'true\n'
+            ;;
+        False)
+            printf 'false\n'
+            ;;
+        *)
+            printf 'unavailable\n'
+            ;;
+    esac
+}
+
+notify_battery() {
+    local urgency_timeout="$1"
+    local message="$2"
+
+    notify-send -t "${urgency_timeout}" "Battery" "${message}"
+}
+
+run_legion_action() {
+    local subcommand="$1"
+    local success_message="$2"
+    local failure_message="$3"
+
+    if sudo "${LEGION_ARGS[@]}" "${subcommand}"; then
+        notify_battery 4000 "${success_message}"
+        exit 0
+    fi
+
+    notify_battery 5000 "${failure_message}"
+    printf '\n'
+    read -r -p "Press Enter to close..."
+    exit 1
+}
+
+launch_privileged_legion_action() {
+    local subcommand="$1"
+    local success_message="$2"
+    local failure_message="$3"
+
+    if sudo -n true >/dev/null 2>&1; then
+        if sudo "${LEGION_ARGS[@]}" "${subcommand}" >/dev/null 2>&1; then
+            notify_battery 4000 "${success_message}"
+        else
+            notify_battery 5000 "${failure_message}"
+            return 1
+        fi
+        return 0
+    fi
+
+    "${SCRIPT_DIR}/launch-terminal-floating" 700 220 \
+        "${SELF_PATH}" --run-action "${subcommand}" "${success_message}" "${failure_message}"
+}
+
+if [[ "${1:-}" == "--run-action" ]]; then
+    shift
+    run_legion_action "${1:?missing subcommand}" "${2:-Updated Legion battery setting.}" "${3:-Legion battery command failed.}"
+fi
+
+if "${SCRIPT_DIR}/rofi-toggle-pidfile" begin "${MENU_ID}"; then
+    exit 0
+fi
+
+trap '"${SCRIPT_DIR}/rofi-toggle-pidfile" clear "${MENU_ID}"' EXIT
+
+format_entry() {
+    local label="$1"
+
+    printf '%s\n' "${label}" | "${SCRIPT_DIR}/rofi-nerd-markup"
+}
+
+add_entry() {
+    local label="$1"
+    local action="$2"
+    local italicize="${3:-false}"
+    local display_label=""
+
+    display_label="$(format_entry "${label}")"
+    if [[ "${italicize}" == "true" ]]; then
+        display_label="<i>${display_label}</i>"
+    fi
+
+    entries+=("${display_label}|${action}")
+}
+
+entries=()
+
+conservation_state="$(feature_state batteryconservation-status)"
+always_usb_state="$(feature_state always-on-usb-charging-status)"
+rapid_charge_state="$(feature_state rapid-charging-status)"
+power_supply_state="$(feature_state on-power-supply-status)"
+
+add_entry "󱈑  Conservation Mode" "batteryconservation-enable" "$([[ "${conservation_state}" == "true" ]] && printf 'true' || printf 'false')"
+add_entry "󰁹  Full Charge Mode" "batteryconservation-disable" "$([[ "${conservation_state}" == "false" ]] && printf 'true' || printf 'false')"
+
+case "${always_usb_state}" in
+    true|false)
+        add_entry "󰌹  Always-On USB On" "always-on-usb-charging-enable" "$([[ "${always_usb_state}" == "true" ]] && printf 'true' || printf 'false')"
+        add_entry "󰌺  Always-On USB Off" "always-on-usb-charging-disable" "$([[ "${always_usb_state}" == "false" ]] && printf 'true' || printf 'false')"
+        ;;
+    *)
+        add_entry "󰌿  Always-On USB Unavailable" "info:always-on-usb"
+        ;;
+esac
+
+case "${rapid_charge_state}" in
+    true|false)
+        add_entry "󱃥  Rapid Charging On" "rapid-charging-enable" "$([[ "${rapid_charge_state}" == "true" ]] && printf 'true' || printf 'false')"
+        add_entry "󰚥  Rapid Charging Off" "rapid-charging-disable" "$([[ "${rapid_charge_state}" == "false" ]] && printf 'true' || printf 'false')"
+        ;;
+    *)
+        add_entry "󱃥  Rapid Charging Unavailable" "info:rapid-charging"
+        ;;
+esac
+
+case "${power_supply_state}" in
+    true)
+        add_entry "󰚥  Power Source: AC" "info:on-power-supply"
+        ;;
+    false)
+        add_entry "󰚥  Power Source: Battery" "info:on-power-supply"
+        ;;
+    *)
+        add_entry "󰚥  Power Source: Unknown" "info:on-power-supply"
+        ;;
+esac
+
+chosen_index="$(
+    printf '%s\n' "${entries[@]}" | cut -d'|' -f1 | rofi -dmenu -i -markup-rows -format i \
+        -pid "${PID_FILE}" \
+        -p "" \
+        -theme-str '
+            window { width: 450px; }
+            entry { placeholder: "Battery…"; }
+            element {
+                orientation: horizontal;
+                children: [ element-text ];
+                spacing: 0px;
+                padding: 8px 10px;
+            }
+            element-text {
+                horizontal-align: 0.0;
+                padding-left: 0px;
+            }
+        '
+)"
+
+[[ "${chosen_index}" =~ ^[0-9]+$ ]] || exit 0
+
+action="${entries[chosen_index]}"
+action="${action#*|}"
+
+case "${action}" in
+    batteryconservation-enable)
+        [[ "${conservation_state}" == "true" ]] || \
+            launch_privileged_legion_action \
+                "batteryconservation-enable" \
+                "Conservation mode enabled." \
+                "Conservation mode could not be enabled."
+        ;;
+    batteryconservation-disable)
+        [[ "${conservation_state}" == "false" ]] || \
+            launch_privileged_legion_action \
+                "batteryconservation-disable" \
+                "Full charge mode enabled." \
+                "Full charge mode could not be enabled."
+        ;;
+    always-on-usb-charging-enable)
+        [[ "${always_usb_state}" == "true" ]] || \
+            launch_privileged_legion_action \
+                "always-on-usb-charging-enable" \
+                "Always-On USB charging enabled." \
+                "Always-On USB charging could not be enabled."
+        ;;
+    always-on-usb-charging-disable)
+        [[ "${always_usb_state}" == "false" ]] || \
+            launch_privileged_legion_action \
+                "always-on-usb-charging-disable" \
+                "Always-On USB charging disabled." \
+                "Always-On USB charging could not be disabled."
+        ;;
+    rapid-charging-enable)
+        [[ "${rapid_charge_state}" == "true" ]] || \
+            launch_privileged_legion_action \
+                "rapid-charging-enable" \
+                "Rapid charging enabled." \
+                "Rapid charging could not be enabled."
+        ;;
+    rapid-charging-disable)
+        [[ "${rapid_charge_state}" == "false" ]] || \
+            launch_privileged_legion_action \
+                "rapid-charging-disable" \
+                "Rapid charging disabled." \
+                "Rapid charging could not be disabled."
+        ;;
+    info:always-on-usb)
+        notify_battery 4000 "Always-On USB charging is not available on this machine."
+        ;;
+    info:rapid-charging)
+        notify_battery 4000 "Rapid charging is not available on this machine."
+        ;;
+    info:on-power-supply)
+        case "${power_supply_state}" in
+            true)
+                notify_battery 3000 "System is currently running on AC power."
+                ;;
+            false)
+                notify_battery 3000 "System is currently running on battery power."
+                ;;
+            *)
+                notify_battery 3000 "Current power source could not be determined."
+                ;;
+        esac
+        ;;
+esac

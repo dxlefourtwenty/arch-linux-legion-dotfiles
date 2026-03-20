@@ -9,6 +9,7 @@ if "$SCRIPT_DIR/rofi-toggle-pidfile" begin "$MENU_ID"; then
 fi
 
 options="  Install
+󰂄  Battery
 󱐋  Power Profile
 󰐥  Shutdown
 󰤁  Reboot
@@ -41,6 +42,9 @@ case "$chosen" in
     ;;
   *Install)
     "$SCRIPT_DIR/menu-install"
+    ;;
+  *Battery)
+    "$SCRIPT_DIR/menu-battery"
     ;;
   *Power\ Profile)
     "$SCRIPT_DIR/menu-power-profile"
