@@ -134,7 +134,7 @@
       "on-click-right": "~/bin/launch-window-floating 1000 800 pavucontrol",
       "max-volume": 150,
       "scroll-step": 2,
-      "tooltip-format": "<span font_desc=\"JetBrainsMono Nerd Font\">{icon}</span>  {volume}%",
+      "tooltip-format": "{icon} {volume}%",
   },
     
 	"niri/window": {
