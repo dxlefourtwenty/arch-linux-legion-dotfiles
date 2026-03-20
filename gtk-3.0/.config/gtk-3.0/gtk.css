@@ -8,6 +8,21 @@
     color: @text;
 }
 
+.nemo-window > grid,
+.nemo-window > grid:backdrop,
+.nemo-window:backdrop > grid,
+.nemo-window > .vertical,
+.nemo-window > .vertical:backdrop,
+.nemo-window:backdrop > .vertical,
+NemoWindow GtkGrid,
+NemoWindow GtkGrid:backdrop {
+    background: @mantle !important;
+    background-color: @mantle !important;
+    background-image: none !important;
+    box-shadow: none !important;
+    color: @text;
+}
+
 /* Header Bar */
 .nemo-window headerbar {
     background: @mantle;
@@ -75,7 +90,98 @@
     border-top: 1px solid @surface1;
 }
 
+/* Top chrome wrapper around Nemo's menubar/toolbar area */
+.nemo-window > grid > eventbox,
+.nemo-window > grid > eventbox:backdrop,
+.nemo-window:backdrop > grid > eventbox,
+.nemo-window > grid > box,
+.nemo-window > grid > box:backdrop,
+.nemo-window:backdrop > grid > box {
+    background: @mantle !important;
+    background-color: @mantle !important;
+    background-image: none !important;
+    box-shadow: none !important;
+    color: @text;
+}
+
+.nemo-window > grid > separator,
+.nemo-window > grid > separator:backdrop,
+.nemo-window:backdrop > grid > separator {
+    background: @surface1 !important;
+    background-color: @surface1 !important;
+    background-image: none !important;
+}
+
 /* Menus */
+.nemo-window menubar,
+.nemo-window menubar:backdrop,
+.nemo-window:backdrop menubar,
+.nemo-window .menubar,
+.nemo-window .menubar:backdrop,
+.nemo-window:backdrop .menubar,
+NemoWindow GtkMenuBar,
+NemoWindow GtkMenuBar:backdrop {
+    background: @mantle !important;
+    background-color: @mantle !important;
+    background-image: none !important;
+    border-image: none !important;
+    color: @text;
+    border-bottom: 1px solid @surface1;
+    box-shadow: none !important;
+}
+
+.nemo-window menubar > menuitem,
+.nemo-window menubar > menuitem:backdrop,
+.nemo-window:backdrop menubar > menuitem,
+.nemo-window .menubar > menuitem,
+.nemo-window .menubar > menuitem:backdrop,
+.nemo-window:backdrop .menubar > menuitem,
+NemoWindow GtkMenuBar > GtkMenuItem,
+NemoWindow GtkMenuBar > GtkMenuItem:backdrop {
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    border-image: none !important;
+    color: @text;
+    box-shadow: none !important;
+}
+
+.nemo-window menubar > menuitem:hover,
+.nemo-window menubar > menuitem:active,
+.nemo-window menubar > menuitem:selected,
+.nemo-window .menubar > menuitem:hover,
+.nemo-window .menubar > menuitem:active,
+.nemo-window .menubar > menuitem:selected,
+NemoWindow GtkMenuBar > GtkMenuItem:hover,
+NemoWindow GtkMenuBar > GtkMenuItem:active,
+NemoWindow GtkMenuBar > GtkMenuItem:selected {
+    background: @surface0 !important;
+    background-color: @surface0 !important;
+    background-image: none !important;
+    color: @text;
+}
+
+.nemo-window menubar > menuitem:backdrop:hover,
+.nemo-window menubar > menuitem:backdrop:active,
+.nemo-window menubar > menuitem:backdrop:selected,
+.nemo-window:backdrop menubar > menuitem:hover,
+.nemo-window:backdrop menubar > menuitem:active,
+.nemo-window:backdrop menubar > menuitem:selected,
+.nemo-window .menubar > menuitem:backdrop:hover,
+.nemo-window .menubar > menuitem:backdrop:active,
+.nemo-window .menubar > menuitem:backdrop:selected,
+.nemo-window:backdrop .menubar > menuitem:hover,
+.nemo-window:backdrop .menubar > menuitem:active,
+.nemo-window:backdrop .menubar > menuitem:selected,
+NemoWindow GtkMenuBar > GtkMenuItem:backdrop:hover,
+NemoWindow GtkMenuBar > GtkMenuItem:backdrop:active,
+NemoWindow GtkMenuBar > GtkMenuItem:backdrop:selected {
+    background: @surface0 !important;
+    background-color: @surface0 !important;
+    background-image: none !important;
+    color: @text;
+}
+
 menu,
 popover {
     background: @mantle;
@@ -558,4 +664,31 @@ filechooser.background.csd > * {
 
 .background.csd {
     background: @mantle !important;
+}
+
+/* ===== KILL DEFAULT GTK TITLEBAR (REAL FIX) ===== */
+.titlebar.default-decoration {
+    background: @mantle !important;
+    background-color: @mantle !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+/* filechooser-specific override */
+filechooser .titlebar.default-decoration,
+filechooser headerbar.titlebar.default-decoration {
+    background: @mantle !important;
+    background-color: @mantle !important;
+}
+
+/* remove white overlay layer */
+.background.csd {
+    background: @mantle !important;
+    background-color: @mantle !important;
+}
+
+/* force headerbar above it */
+filechooser headerbar.titlebar {
+    background: @mantle !important;
+    background-color: @mantle !important;
 }

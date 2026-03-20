@@ -380,3 +380,7 @@ scale slider {
     background: @surface2;
     border-radius: 50%;
 }
+
+menubar, .menubar {
+    background: @mantle !important;
+}
