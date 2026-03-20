@@ -3,6 +3,7 @@
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 MENU_ID="menu-audio"
 PID_FILE="/tmp/menu-rofi.pid"
+HDMI_CARD="alsa_card.pci-0000_01_00.1"
 
 if "$SCRIPT_DIR/rofi-toggle-pidfile" begin "$MENU_ID"; then
     exit 0
@@ -11,41 +12,65 @@ fi
 # Get sinks
 sinks=$(pactl list sinks short)
 current_sink=$(pactl get-default-sink 2>/dev/null)
-
-options=()
 entries=()
 
-display_name_for_sink() {
-    local raw="$1"
+sink_name_for_profile() {
+    local profile="$1"
 
-    shopt -s nocasematch
-    if [[ "$raw" == *acer* ]]; then
-        printf 'Acer\n'
-    elif [[ "$raw" == *asus* ]]; then
-        printf 'Asus\n'
-    else
-        printf '%s\n' "$raw"
-    fi
-    shopt -u nocasematch
+    case "$profile" in
+        output:hdmi-stereo-extra1)
+            printf 'alsa_output.pci-0000_01_00.1.hdmi-stereo-extra1\n'
+            ;;
+    esac
 }
 
-while read -r id name driver format channels rate state; do
-    # Get node.nick (real device name like Acer/ASUS)
-    nick=$(pactl list sinks | awk -v n="$name" '
-        $0 ~ "Name: " n {found=1}
-        found && /node.nick/ {
-            gsub(/.*= "/, "")
-            gsub(/"/, "")
-            print
-            exit
-        }
-    ')
+switch_hdmi_monitor() {
+    local profile="$1"
+    local target_sink
+    local sink_id=""
 
+    target_sink="$(sink_name_for_profile "$profile")"
+    if [[ -z "$target_sink" ]]; then
+        exit 1
+    fi
+
+    pactl set-card-profile "$HDMI_CARD" "$profile"
+
+    for _ in 1 2 3 4 5 6 7 8 9 10; do
+        sink_id="$(pactl list sinks short | awk -v target="$target_sink" '$2 == target { print $2; exit }')"
+        if [[ -n "$sink_id" ]]; then
+            break
+        fi
+        sleep 0.2
+    done
+
+    if [[ -z "$sink_id" ]]; then
+        exit 1
+    fi
+
+    pactl set-default-sink "$sink_id"
+
+    pactl list sink-inputs short | while read -r input rest; do
+        pactl move-sink-input "$input" "$sink_id"
+    done
+}
+
+for monitor in "Acer|output:hdmi-stereo-extra1"; do
+    IFS='|' read -r display_name profile <<< "$monitor"
+    label="󰍹  $display_name"
+    display_label="$(printf '%s\n' "$label" | "$SCRIPT_DIR/rofi-nerd-markup")"
+
+    if [[ "$current_sink" == "$(sink_name_for_profile "$profile")" ]]; then
+        display_label="<i>$display_label</i>"
+    fi
+
+    entries+=("$display_label|hdmi:$profile")
+done
+
+while read -r id name driver format channels rate state; do
     # Label logic
     if [[ "$name" == *usb* ]]; then
         label="󰋋  Headset"
-    elif [[ "$name" == *hdmi* ]]; then
-        label="󰍹  $(display_name_for_sink "$nick")"
     elif [[ "$name" == *analog* ]]; then
         label="󰓃  Speakers"
     else
@@ -58,10 +83,13 @@ while read -r id name driver format channels rate state; do
         display_label="<i>$display_label</i>"
     fi
 
-    entries+=("$display_label|$name")
+    if [[ "$name" != *hdmi* ]]; then
+        entries+=("$display_label|sink:$name")
+    fi
 done <<< "$sinks"
 
-chosen=$(printf '%s\n' "${entries[@]}" | cut -d'|' -f1 | rofi -dmenu -i \
+chosen_index=$(printf '%s\n' "${entries[@]}" | cut -d'|' -f1 | rofi -dmenu -i \
+    -format i \
     -markup-rows \
     -pid "$PID_FILE" \
     -p "" \
@@ -82,26 +110,24 @@ chosen=$(printf '%s\n' "${entries[@]}" | cut -d'|' -f1 | rofi -dmenu -i \
 
 "$SCRIPT_DIR/rofi-toggle-pidfile" clear "$MENU_ID"
 
-chosen_plain=$(printf '%s' "$chosen" | sed -E 's/<[^>]+>//g')
-sink_id=""
-
-for entry in "${entries[@]}"; do
-    label="${entry%%|*}"
-    name="${entry##*|}"
-
-    plain=$(printf '%s' "$label" | sed -E 's/<[^>]+>//g')
-
-    if [[ "$plain" == "$chosen" ]]; then
-        sink_id="$name"
-        break
-    fi
-done
-
-if [ -n "$sink_id" ]; then
-    pactl set-default-sink "$sink_id"
-
-    # Move existing audio streams
-    pactl list sink-inputs short | while read -r input rest; do
-        pactl move-sink-input "$input" "$sink_id"
-    done
+if ! [[ "$chosen_index" =~ ^[0-9]+$ ]]; then
+    exit 0
 fi
+
+action="${entries[$chosen_index]}"
+action="${action#*|}"
+
+case "$action" in
+    sink:*)
+        sink_id="${action#sink:}"
+        pactl set-default-sink "$sink_id"
+
+        pactl list sink-inputs short | while read -r input rest; do
+            pactl move-sink-input "$input" "$sink_id"
+        done
+        ;;
+    hdmi:*)
+        profile="${action#hdmi:}"
+        switch_hdmi_monitor "$profile"
+        ;;
+esac
