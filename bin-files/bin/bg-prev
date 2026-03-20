@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-WALL_DIR="$HOME/.config/themes/current/wallpapers"
+WALL_DIR=$(readlink -f "$HOME/.config/themes/current/wallpapers")
 CURRENT_LINK="$HOME/.config/themes/current/wallpaper.png"
 
 # Ensure directory exists
@@ -9,8 +9,9 @@ CURRENT_LINK="$HOME/.config/themes/current/wallpaper.png"
 # Get current filename
 CURRENT_FILE=$(basename "$(readlink -f "$CURRENT_LINK")")
 
-# Extract leading number
-CURRENT_NUM=$(echo "$CURRENT_FILE" | grep -o '^[0-9]\+')
+# Extract leading number, but tolerate non-numbered names
+CURRENT_NUM=$(printf '%s\n' "$CURRENT_FILE" | grep -o '^[0-9]\+' || true)
+CURRENT_NUM=${CURRENT_NUM:-0}
 
 # Build sorted numeric list
 mapfile -t FILES < <(
@@ -26,7 +27,9 @@ PREV_FILE="${FILES[-1]}"
 
 # Walk forward and remember last valid lower
 for FILE in "${FILES[@]}"; do
-    NUM=$(echo "$FILE" | grep -o '^[0-9]\+')
+    NUM=$(printf '%s\n' "$FILE" | grep -o '^[0-9]\+' || true)
+    [ -z "$NUM" ] && continue
+
     if [[ "$NUM" -lt "$CURRENT_NUM" ]]; then
         PREV_FILE="$FILE"
     fi
