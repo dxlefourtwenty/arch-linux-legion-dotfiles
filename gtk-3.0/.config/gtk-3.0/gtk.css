@@ -8,14 +8,30 @@
     color: @text;
 }
 
+.nemo-window:backdrop,
+.nemo-window.background:backdrop,
+window.nemo-window.background:backdrop {
+    background: @mantle !important;
+    background-color: @mantle !important;
+    background-image: none !important;
+    box-shadow: none !important;
+    color: @text;
+}
+
+window.nemo-window.background > grid,
+window.nemo-window.background:backdrop > grid {
+    background: @mantle !important;
+    background-color: @mantle !important;
+    background-image: none !important;
+    box-shadow: none !important;
+}
+
 .nemo-window > grid,
 .nemo-window > grid:backdrop,
 .nemo-window:backdrop > grid,
 .nemo-window > .vertical,
 .nemo-window > .vertical:backdrop,
-.nemo-window:backdrop > .vertical,
-NemoWindow GtkGrid,
-NemoWindow GtkGrid:backdrop {
+.nemo-window:backdrop > .vertical {
     background: @mantle !important;
     background-color: @mantle !important;
     background-image: none !important;
@@ -44,6 +60,29 @@ NemoWindow GtkGrid:backdrop {
 .nemo-window .sidebar {
     background: @crust;
     color: @subtext;
+}
+
+.nemo-window paned,
+.nemo-window paned:backdrop,
+.nemo-window paned.horizontal,
+.nemo-window paned.horizontal:backdrop {
+    background: @base !important;
+    background-color: @base !important;
+    background-image: none !important;
+    box-shadow: none !important;
+    color: @text;
+}
+
+.nemo-window paned > separator,
+.nemo-window paned > separator:backdrop,
+.nemo-window paned.horizontal > separator,
+.nemo-window paned.horizontal > separator:backdrop {
+    background: @surface1 !important;
+    background-color: @surface1 !important;
+    background-image: none !important;
+    box-shadow: none !important;
+    min-width: 1px;
+    min-height: 1px;
 }
 
 .nemo-window .sidebar row:hover {
@@ -119,8 +158,10 @@ NemoWindow GtkGrid:backdrop {
 .nemo-window .menubar,
 .nemo-window .menubar:backdrop,
 .nemo-window:backdrop .menubar,
-NemoWindow GtkMenuBar,
-NemoWindow GtkMenuBar:backdrop {
+window.nemo-window.background > grid > menubar,
+window.nemo-window.background > grid > menubar:backdrop,
+window.nemo-window.background:backdrop > grid > menubar,
+window.nemo-window.background:backdrop > grid > menubar:backdrop {
     background: @mantle !important;
     background-color: @mantle !important;
     background-image: none !important;
@@ -136,8 +177,10 @@ NemoWindow GtkMenuBar:backdrop {
 .nemo-window .menubar > menuitem,
 .nemo-window .menubar > menuitem:backdrop,
 .nemo-window:backdrop .menubar > menuitem,
-NemoWindow GtkMenuBar > GtkMenuItem,
-NemoWindow GtkMenuBar > GtkMenuItem:backdrop {
+window.nemo-window.background > grid > menubar > menuitem,
+window.nemo-window.background > grid > menubar > menuitem:backdrop,
+window.nemo-window.background:backdrop > grid > menubar > menuitem,
+window.nemo-window.background:backdrop > grid > menubar > menuitem:backdrop {
     background: transparent !important;
     background-color: transparent !important;
     background-image: none !important;
@@ -152,9 +195,12 @@ NemoWindow GtkMenuBar > GtkMenuItem:backdrop {
 .nemo-window .menubar > menuitem:hover,
 .nemo-window .menubar > menuitem:active,
 .nemo-window .menubar > menuitem:selected,
-NemoWindow GtkMenuBar > GtkMenuItem:hover,
-NemoWindow GtkMenuBar > GtkMenuItem:active,
-NemoWindow GtkMenuBar > GtkMenuItem:selected {
+window.nemo-window.background > grid > menubar > menuitem:hover,
+window.nemo-window.background > grid > menubar > menuitem:active,
+window.nemo-window.background > grid > menubar > menuitem:selected,
+window.nemo-window.background > grid > menubar > menuitem:backdrop:hover,
+window.nemo-window.background > grid > menubar > menuitem:backdrop:active,
+window.nemo-window.background > grid > menubar > menuitem:backdrop:selected {
     background: @surface0 !important;
     background-color: @surface0 !important;
     background-image: none !important;
@@ -173,9 +219,12 @@ NemoWindow GtkMenuBar > GtkMenuItem:selected {
 .nemo-window:backdrop .menubar > menuitem:hover,
 .nemo-window:backdrop .menubar > menuitem:active,
 .nemo-window:backdrop .menubar > menuitem:selected,
-NemoWindow GtkMenuBar > GtkMenuItem:backdrop:hover,
-NemoWindow GtkMenuBar > GtkMenuItem:backdrop:active,
-NemoWindow GtkMenuBar > GtkMenuItem:backdrop:selected {
+window.nemo-window.background:backdrop > grid > menubar > menuitem:hover,
+window.nemo-window.background:backdrop > grid > menubar > menuitem:active,
+window.nemo-window.background:backdrop > grid > menubar > menuitem:selected,
+window.nemo-window.background:backdrop > grid > menubar > menuitem:backdrop:hover,
+window.nemo-window.background:backdrop > grid > menubar > menuitem:backdrop:active,
+window.nemo-window.background:backdrop > grid > menubar > menuitem:backdrop:selected {
     background: @surface0 !important;
     background-color: @surface0 !important;
     background-image: none !important;

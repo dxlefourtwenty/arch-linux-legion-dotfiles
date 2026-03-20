@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+while true; do
+    pactl subscribe | while read -r event; do
+        if echo "$event" | grep -q "sink"; then
+
+            # Find Acer sink
+            SINK=$(pactl list sinks | awk '
+            /Name: / {name=$2}
+            /node.nick = "KG271U N3"/ {print name}
+            ')
+
+            if [ -n "$SINK" ]; then
+                pactl set-default-sink "$SINK"
+
+                pactl list sink-inputs short | while read -r input rest; do
+                    pactl move-sink-input "$input" "$SINK"
+                done
+            fi
+        fi
+    done
+done

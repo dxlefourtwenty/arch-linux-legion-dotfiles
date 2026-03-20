@@ -13,15 +13,39 @@ sinks=$(pactl list sinks short)
 current_sink=$(pactl get-default-sink 2>/dev/null)
 
 options=()
-labels=()
-ids=()
+entries=()
+
+display_name_for_sink() {
+    local raw="$1"
+
+    shopt -s nocasematch
+    if [[ "$raw" == *acer* ]]; then
+        printf 'Acer\n'
+    elif [[ "$raw" == *asus* ]]; then
+        printf 'Asus\n'
+    else
+        printf '%s\n' "$raw"
+    fi
+    shopt -u nocasematch
+}
 
 while read -r id name driver format channels rate state; do
-    # Pretty names
+    # Get node.nick (real device name like Acer/ASUS)
+    nick=$(pactl list sinks | awk -v n="$name" '
+        $0 ~ "Name: " n {found=1}
+        found && /node.nick/ {
+            gsub(/.*= "/, "")
+            gsub(/"/, "")
+            print
+            exit
+        }
+    ')
+
+    # Label logic
     if [[ "$name" == *usb* ]]; then
         label="󰋋  Headset"
     elif [[ "$name" == *hdmi* ]]; then
-        label="󰍹  Monitor"
+        label="󰍹  $(display_name_for_sink "$nick")"
     elif [[ "$name" == *analog* ]]; then
         label="󰓃  Speakers"
     else
@@ -29,16 +53,15 @@ while read -r id name driver format channels rate state; do
     fi
 
     display_label="$(printf '%s\n' "$label" | "$SCRIPT_DIR/rofi-nerd-markup")"
+
     if [[ "$name" == "$current_sink" ]]; then
         display_label="<i>$display_label</i>"
     fi
 
-    options+=("$display_label")
-    labels+=("$label")
-    ids+=("$id")
+    entries+=("$display_label|$name")
 done <<< "$sinks"
 
-chosen=$(printf '%s\n' "${options[@]}" | rofi -dmenu -i \
+chosen=$(printf '%s\n' "${entries[@]}" | cut -d'|' -f1 | rofi -dmenu -i \
     -markup-rows \
     -pid "$PID_FILE" \
     -p "" \
@@ -62,9 +85,14 @@ chosen=$(printf '%s\n' "${options[@]}" | rofi -dmenu -i \
 chosen_plain=$(printf '%s' "$chosen" | sed -E 's/<[^>]+>//g')
 sink_id=""
 
-for i in "${!labels[@]}"; do
-    if [[ "${labels[$i]}" == "$chosen_plain" ]]; then
-        sink_id="${ids[$i]}"
+for entry in "${entries[@]}"; do
+    label="${entry%%|*}"
+    name="${entry##*|}"
+
+    plain=$(printf '%s' "$label" | sed -E 's/<[^>]+>//g')
+
+    if [[ "$plain" == "$chosen" ]]; then
+        sink_id="$name"
         break
     fi
 done
