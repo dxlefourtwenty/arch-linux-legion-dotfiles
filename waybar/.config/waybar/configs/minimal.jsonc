@@ -213,7 +213,7 @@
     },
     "custom/power": {
         "format": "<span font_desc=\"JetBrainsMono Nerd Font\"></span> ",
-        "on-click": "~/bin/menu-power",
+        "on-click": "~/bin/menu-system",
         "tooltip": false,
     },
     "custom/menu": {

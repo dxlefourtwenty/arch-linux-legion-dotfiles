@@ -158,7 +158,7 @@
 
   "custom/power": {
     "format": " ",
-    "on-click": "~/bin/menu-power",
+    "on-click": "~/bin/menu-system",
     "tooltip": false,
   },
   "custom/menu": {

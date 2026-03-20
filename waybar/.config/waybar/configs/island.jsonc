@@ -1,4 +1,4 @@
-// -*- mode: jsonc -*-
+system -*- mode: jsonc -*-
 {
     // "layer": "top", // Waybar at top layer
     // "position": "bottom", // Waybar position (top|bottom|left|right)
@@ -206,7 +206,7 @@
     },
     "custom/power": {
         "format": "<span font_desc=\"JetBrainsMono Nerd Font\"></span> ",
-        "on-click": "~/bin/menu-power",
+        "on-click": "~/bin/menu-system",
         "tooltip": false,
     },
     "custom/menu": {
