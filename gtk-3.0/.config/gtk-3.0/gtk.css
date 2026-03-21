@@ -741,3 +741,36 @@ filechooser headerbar.titlebar {
     background: @mantle !important;
     background-color: @mantle !important;
 }
+
+/* ===== FILE PICKER MENU BAR (THE WHITE STRIP) ===== */
+filechooser menubar {
+    background: @mantle;
+    background-color: @mantle;
+    color: @text;
+}
+
+/* menu items */
+filechooser menubar menuitem {
+    background: transparent;
+    color: @text;
+}
+
+/* hover */
+filechooser menubar menuitem:hover {
+    background: @surface0;
+    color: @text;
+}
+
+/* active/open */
+filechooser menubar menuitem:selected {
+    background: @accent;
+    color: @crust;
+}
+
+filechooser > box > menubar,
+filechooser > grid > menubar,
+menubar {
+    background: @mantle !important;
+    background-color: @mantle !important;
+    color: @text !important;
+}
