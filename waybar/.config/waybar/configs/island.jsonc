@@ -44,7 +44,7 @@
             "floating": "+",
         },
         "persistent-workspaces": {
-            "HDMI-A-1": [ 1,2,3,4,5,"discordspace","mediaspace","socialspace" ]
+            "HDMI-A-1": [ 1,2,3,4,5 ]
         },
     },
     "keyboard-state": {
