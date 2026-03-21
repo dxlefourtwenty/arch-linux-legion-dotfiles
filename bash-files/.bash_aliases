@@ -19,6 +19,7 @@ alias bashenv='nvim ~/.bash_env'
 
 # git
 alias git-log='git log --oneline --abbrev-commit --all --graph --decorate --color'
+alias lg='lazygit'
 
 # ls
 alias ll='eza --icons --color=always -l'
