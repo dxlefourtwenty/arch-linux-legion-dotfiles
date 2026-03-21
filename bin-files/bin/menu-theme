@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 THEME_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/themes"
@@ -12,67 +13,71 @@ fi
 
 trap '"$SCRIPT_DIR/rofi-toggle-pidfile" clear "$MENU_ID"' EXIT
 
+format_theme_display() {
+    printf '%s\n' "$1" | sed -E '
+        s/rose-pine/Rosé Pine/;
+        s/[-_]/ /g;
+        s/\b(.)/\U\1/g
+    '
+}
+
 [ ! -d "$THEME_DIR_RESOLVED" ] && {
     notify-send -t 4000 "Theme" "Themes directory not found: $THEME_DIR"
     exit 1
 }
 
-# Get current theme from symlink
-CURRENT_THEME=$(basename "$(readlink -f "$THEME_DIR_RESOLVED/current")")
+CURRENT_THEME="$(basename "$(readlink -f "$THEME_DIR_RESOLVED/current")")"
 
-# List valid theme directories
-THEMES=$(find "$THEME_DIR_RESOLVED" -mindepth 1 -maxdepth 1 -type d \
-    ! -name "current" \
-    ! -name ".*" \
-    -printf "%f\n" | sort)
+mapfile -t THEMES < <(
+    find "$THEME_DIR_RESOLVED" -mindepth 1 -maxdepth 1 -type d \
+        ! -name "current" \
+        ! -name ".*" \
+        -printf "%f\n" | sort
+)
 
-DISPLAY=""
+[[ ${#THEMES[@]} -gt 0 ]] || exit 0
 
-while IFS= read -r theme; do
-    # Pretty formatting
-    pretty=$(echo "$theme" | sed -E '
-        s/rose-pine/Rosé Pine/;
-        s/[-_]/ /g;
-        s/\b(.)/\U\1/g
-    ')
+DISPLAY_THEMES=()
 
-    # Italicize current theme using Pango markup
-    if [ "$theme" = "$CURRENT_THEME" ]; then
+for theme in "${THEMES[@]}"; do
+    pretty="$(format_theme_display "$theme")"
+
+    if [[ "$theme" == "$CURRENT_THEME" ]]; then
         pretty="<i>$pretty</i>"
     fi
 
-    DISPLAY+="$pretty\n"
-done <<< "$THEMES"
+    DISPLAY_THEMES+=("$pretty")
+done
 
-# Show rofi menu (enable markup)
-DISPLAY="${DISPLAY%\\n}"
-SELECTED_DISPLAY=$(printf '%b' "$DISPLAY" | rofi -dmenu -i \
-    -markup-rows \
-    -pid "$PID_FILE" \
-    -p "" \
-    -theme-str '
-        window { width: 235px; }
-        entry { placeholder: "Theme…"; }
-        element { 
-            orientation: horizontal;
-            children: [ element-text ];
-            spacing: 0px;
-            padding: 8px 8px;
-        }
-        element-text { 
-            horizontal-align: 0.0;
-            padding-left: 0px;
-            margin: 0 2px;
-        }
-    ')
+CHOSEN_INDEX="$(
+    printf '%s\n' "${DISPLAY_THEMES[@]}" | rofi -dmenu -i -markup-rows -format i \
+        -pid "$PID_FILE" \
+        -p "" \
+        -theme-str '
+            window { width: 235px; }
+            entry { placeholder: "Theme…"; }
+            element {
+                orientation: horizontal;
+                children: [ element-text ];
+                spacing: 0px;
+                padding: 8px 8px;
+            }
+            element-text {
+                horizontal-align: 0.0;
+                padding-left: 0px;
+                margin: 0 2px;
+            }
+        '
+)"
 
-# Exit if nothing selected
-[ -z "$SELECTED_DISPLAY" ] && exit 0
+[[ -n "$CHOSEN_INDEX" ]] || exit 0
 
-# Strip markup and convert back to directory format
-SELECTED=$(echo "$SELECTED_DISPLAY" | \
-    sed -E 's/<[^>]+>//g' | \
-    tr '[:upper:]' '[:lower:]' | \
-    sed 's/é/e/g; s/ /-/g')
+SELECTED="${THEMES[CHOSEN_INDEX]}"
+
+[[ -n "$SELECTED" ]] || exit 0
+[[ "$SELECTED" != "$CURRENT_THEME" ]] || exit 0
+
+"$SCRIPT_DIR/rofi-toggle-pidfile" clear "$MENU_ID"
+trap - EXIT
 
 "$SCRIPT_DIR/theme" "$SELECTED" >/dev/null 2>&1 &
