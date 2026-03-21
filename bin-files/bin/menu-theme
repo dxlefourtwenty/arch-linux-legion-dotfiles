@@ -75,4 +75,4 @@ SELECTED=$(echo "$SELECTED_DISPLAY" | \
     tr '[:upper:]' '[:lower:]' | \
     sed 's/é/e/g; s/ /-/g')
 
-"$SCRIPT_DIR/theme" "$SELECTED"
+"$SCRIPT_DIR/theme" "$SELECTED" >/dev/null 2>&1 &

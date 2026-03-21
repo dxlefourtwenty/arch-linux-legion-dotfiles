@@ -1,14 +1,24 @@
 #!/usr/bin/env bash
+set -euo pipefail
 
 FLAGS="--transition-type=none"
 SELECTED="$HOME/.config/themes/current/wallpaper.png"
+READY=0
 
-# Ensure daemon exists
-pgrep -x swww-daemon >/dev/null || swww-daemon &
+# Ensure the daemon exists, but don't let a failed restart stall theme changes.
+if ! pgrep -x swww-daemon >/dev/null 2>&1; then
+    nohup swww-daemon >/dev/null 2>&1 &
+fi
 
-# Wait until daemon is ready
-while ! swww query >/dev/null 2>&1; do
-    sleep 0.1
+for _ in {1..8}; do
+    if timeout 0.25s swww query >/dev/null 2>&1; then
+        READY=1
+        break
+    fi
+
+    sleep 0.15
 done
+
+[ "$READY" -eq 1 ] || exit 0
 
 swww img "$SELECTED" $FLAGS

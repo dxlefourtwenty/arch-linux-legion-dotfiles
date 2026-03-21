@@ -226,26 +226,6 @@ button:hover {
     color: @subtext;
 }
 
-.vertical {
-    background-color: @mantle;
-    color: @text;
-    border: none;
-    box-shadow: none;
-}
-
-.info {
-    background-color: @mantle;
-    color: @text;
-    border: none;
-    box-shadow: none;
-}
-
-.horizontal.info {
-    background-color: @mantle;
-    color: @text;
-    border: none;
-    box-shadow: none;
-}
 
 /* ===============================
    FILE PICKER (CLEAN FIX)
@@ -710,3 +690,82 @@ filechooser treeview header button {
     box-shadow: none;
 }
 
+/* ===============================
+   NEMO TRASH BAR — ACTUAL FIX
+================================= */
+
+/* target the revealer directly (NO nemo-window prefix) */
+infobar > revealer {
+    background-color: @mantle !important;
+    background-image: none !important;
+}
+
+/* fallback: catch all revealers inside infobar */
+infobar revealer {
+    background-color: @mantle !important;
+    background-image: none !important;
+}
+
+/* kill GTK info styling */
+infobar.info {
+    background: transparent !important;
+}
+
+/* content */
+infobar label {
+    color: @text !important;
+}
+
+/* buttons */
+infobar button {
+    background-color: @surface0 !important;
+    color: @text !important;
+    border: 1px solid @surface1 !important;
+}
+
+/* ===============================
+   FILECHOOSER HEADERBAR (REAL FIX)
+================================= */
+
+filechooser headerbar.titlebar,
+filechooser headerbar,
+filechooser .titlebar {
+    background-color: @mantle !important;
+    color: @text !important;
+    background-image: none !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+filechooser headerbar.titlebar entry {
+    background-color: @surface0 !important;
+    color: @text !important;
+    border: 1px solid @surface1 !important;
+    border-radius: 8px;
+}
+
+filechooser headerbar.titlebar:backdrop {
+    background-color: @mantle !important;
+    color: @text !important;
+    background-image: none !important;
+}
+
+/* normal buttons */
+filechooser headerbar.titlebar button {
+    background-color: @surface0 !important;
+    color: @text !important;
+    border: 1px solid @surface1 !important;
+    border-radius: 8px;
+}
+
+/* hover */
+filechooser headerbar.titlebar button:hover {
+    background-color: @surface1 !important;
+}
+
+/* save button */
+filechooser headerbar.titlebar button.suggested-action {
+    background-color: @green !important;
+    color: @crust !important;
+    border: none !important;
+}
