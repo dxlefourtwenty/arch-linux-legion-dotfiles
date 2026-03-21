@@ -77,6 +77,12 @@ button:hover {
     color: @text;
 }
 
+.image-button {
+    background-color: transparent;
+    color: @subtext;
+    border-radius: 8px;
+}
+
 /* ===== TOOLBAR ===== */
 .nemo-window toolbar {
     background-color: @mantle;
@@ -220,6 +226,27 @@ button:hover {
     color: @subtext;
 }
 
+.vertical {
+    background-color: @mantle;
+    color: @text;
+    border: none;
+    box-shadow: none;
+}
+
+.info {
+    background-color: @mantle;
+    color: @text;
+    border: none;
+    box-shadow: none;
+}
+
+.horizontal.info {
+    background-color: @mantle;
+    color: @text;
+    border: none;
+    box-shadow: none;
+}
+
 /* ===============================
    FILE PICKER (CLEAN FIX)
 ================================= */
@@ -232,6 +259,13 @@ filechooser {
 
 /* header */
 filechooser headerbar {
+    background-color: @mantle;
+    color: @text;
+    box-shadow: none;
+}
+
+/* header */
+filechooser headerbar.background {
     background-color: @mantle;
     color: @text;
     box-shadow: none;
@@ -675,3 +709,4 @@ filechooser treeview header button {
     background-image: none;
     box-shadow: none;
 }
+
