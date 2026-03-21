@@ -14,5 +14,6 @@ localsend.desktop|/home/dxle/.local/share/icons/localsend.png|LocalSend
 org.kde.kdenlive.desktop|/usr/share/icons/hicolor/128x128/apps/kdenlive.png|Kdenlive
 virtualbox.desktop|/usr/share/icons/hicolor/128x128/mimetypes/virtualbox.png|VirtualBox
 nemo.desktop|/home/dxle/.local/share/icons/file.png|Files
+org.gnome.FileRoller.desktop|/usr/share/icons/hicolor/128x128/apps/xfce4-logo.png|File Roller
 org.pulseaudio.pavucontrol.desktop|/home/dxle/.local/share/icons/volume.png|Volume
 Alacritty.desktop|/home/dxle/.local/share/icons/alacritty.png|Alacritty
