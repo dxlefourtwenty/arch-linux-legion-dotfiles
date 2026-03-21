@@ -1,1 +1,574 @@
-/home/dxle/.themes/Colloid-Dark-Catppuccin/gtk-4.0/gtk.css
+@import url("colors.css");
+
+/* main window */
+window {
+    background: @base;
+    color: @text;
+}
+
+/* tabs */
+tabbar tabbox tab {
+    background: @surface0;
+    color: @subtext;
+}
+
+tabbar tabbox tab:selected {
+    background: @accent;
+    color: @crust;
+}
+
+/* sliders */
+scale trough {
+    background: @surface1;
+    border-radius: 8px;
+}
+
+scale highlight {
+    background: @accent;
+}
+
+scale slider {
+    background: @surface2;
+}
+
+/* buttons */
+button {
+    background: @surface0;
+    color: @text;
+}
+
+button:hover {
+    background: @surface1;
+}
+
+/* device rows */
+listview row {
+    background: transparent;
+}
+
+listview row:hover {
+    background: @surface0;
+}
+
+listview row:selected {
+    background: @accent;
+    color: @crust;
+}
+
+/* audio meters */
+levelbar block.filled {
+    background: @green;
+}
+
+levelbar trough {
+    background: @surface1;
+}
+
+/* main background */
+window {
+    background: @base;
+    color: @text;
+}
+
+/* libadwaita cards (this is the white block) */
+card {
+    background: @surface0;
+    border-radius: 10px;
+    border: 1px solid @surface1;
+}
+
+/* some versions use preferencesgroup instead */
+preferencesgroup {
+    background: @surface0;
+}
+
+/* internal container */
+box {
+    background: transparent;
+}
+
+/* dropdown buttons (like "Port: Microphone") */
+dropdown button {
+    background: @surface1;
+    color: @text;
+}
+
+/* sliders */
+scale trough {
+    background: @surface1;
+}
+
+scale highlight {
+    background: @accent;
+}
+
+scale slider {
+    background: @surface2;
+}
+
+/* level meters */
+levelbar block.filled {
+    background: @green;
+}
+
+levelbar trough {
+    background: @surface1;
+}
+
+/* rows (this is the white block) */
+row {
+    background: @surface0;
+    border-radius: 10px;
+}
+
+/* list container */
+listbox {
+    background: transparent;
+}
+
+/* hover state */
+row:hover {
+    background: @surface1;
+}
+
+/* active/selected */
+row:selected {
+    background: @accent;
+    color: @crust;
+}
+
+/* VU meter container */
+.vumeter {
+    background: @surface1;
+    border-radius: 6px;
+}
+
+/* the actual signal bar */
+.vumeter progress {
+    background: @green;
+}
+
+/* clipping / loud sections */
+.vumeter progress.warning {
+    background: @orange;
+}
+
+.vumeter progress.error {
+    background: @red;
+}
+
+/* card container (the white block) */
+.boxed-list {
+    background: @mantle;
+    border-radius: 12px;
+    border: 1px solid @surface1;
+    padding: 6px;
+}
+
+/* list background */
+.boxed-list list {
+    background: transparent;
+}
+
+/* rows inside card */
+.boxed-list row {
+    background: @surface0;
+    border-radius: 10px;
+    margin: 4px;
+}
+
+.boxed-list row:hover {
+    background: @surface1;
+}
+
+/* row separators */
+.boxed-list separator {
+    background: @surface1;
+    min-height: 1px;
+}
+
+/* device selector button */
+dropdown button {
+    background: @surface1;
+    color: @text;
+    border-radius: 8px;
+}
+
+/* dropdown menu */
+popover {
+    background: @mantle;
+    border: 1px solid @surface1;
+}
+
+/* dropdown rows */
+popover listview row {
+    background: transparent;
+}
+
+popover listview row:hover {
+    background: @surface0;
+}
+
+/* remove libadwaita white surfaces */
+.background {
+    background: @base;
+}
+
+/* container around the device list */
+clamp {
+    background: transparent;
+}
+
+/* card list */
+.boxed-list {
+    background: @mantle;
+    border-radius: 12px;
+    border: 1px solid @surface1;
+}
+
+/* rows inside */
+.boxed-list row {
+    background: @surface0;
+    border-radius: 10px;
+    margin: 4px;
+}
+
+.boxed-list row:hover {
+    background: @surface1;
+}
+
+listview,
+list,
+box {
+    background: transparent;
+}
+
+/* main pavucontrol background */
+window {
+    background: @base;
+}
+
+/* main vertical container (sinksVBox) */
+box.vertical {
+    background: @base;
+}
+
+/* tab bar container */
+tabs {
+    background: @mantle;
+    border-bottom: 1px solid @surface1;
+}
+
+/* individual tabs */
+tabs tab {
+    background: @surface0;
+    color: @subtext;
+    padding: 6px 12px;
+    border-radius: 6px 6px 0 0;
+}
+
+/* hover */
+tabs tab:hover {
+    background: @surface1;
+}
+
+/* active tab */
+tabs tab:checked {
+    background: @accent;
+    color: @crust;
+}
+
+/* editable text fields */
+text {
+    background: @surface0;
+    color: @text;
+    border: 1px solid @surface1;
+    border-radius: 6px;
+}
+
+/* focused state */
+text:focus {
+    border: 1px solid @accent;
+}
+
+/* dropdown menu background */
+popover {
+    background: @mantle;
+    border: 1px solid @surface1;
+    border-radius: 8px;
+}
+
+/* container inside popover */
+popover box {
+    background: @mantle;
+}
+
+/* menu items */
+menuitem {
+    background: transparent;
+    color: @text;
+    padding: 6px 10px;
+}
+
+/* hover state */
+menuitem:hover {
+    background: @surface0;
+}
+
+/* selected item */
+menuitem:selected {
+    background: @accent;
+    color: @crust;
+}
+
+/* separators */
+separator {
+    background: @surface1;
+    min-height: 1px;
+}
+
+/* the popup container */
+popover {
+    background: @mantle;
+    border: 1px solid @surface1;
+}
+
+/* popover content */
+popover box {
+    background: @mantle;
+}
+
+/* scrolling container */
+popover scrolledwindow {
+    background: @mantle;
+}
+
+/* THIS is usually the white layer */
+popover viewport {
+    background: @mantle;
+}
+
+/* dropdown rows */
+modelbutton {
+    background: transparent;
+    color: @text;
+}
+
+modelbutton:hover {
+    background: @surface0;
+}
+
+popover,
+popover box,
+popover scrolledwindow,
+popover viewport,
+treepopover {
+    background: @mantle;
+}
+
+scale trough {
+    background: @surface1;
+    border-radius: 6px;
+}
+
+scale highlight {
+    background: @accent;
+    border-radius: 6px;
+}
+
+scale slider {
+    background: @surface2;
+    border-radius: 50%;
+}
+
+/* ===============================
+   NEMO (COLLOID-STYLE CLEAN)
+================================= */
+
+/* ===== ROOT WINDOW ===== */
+.nemo-window,
+.nemo-window.background {
+    background-color: @base;
+    color: @text;
+}
+
+/* ===== HEADERBAR ===== */
+.nemo-window headerbar {
+    background-color: @mantle;
+    color: @text;
+    border: none;
+    box-shadow: none;
+}
+
+/* buttons in header */
+.nemo-window headerbar button {
+    background-color: transparent;
+    color: @subtext;
+    border-radius: 8px;
+}
+
+/* hover */
+.nemo-window headerbar button:hover {
+    background-color: @surface0;
+    color: @text;
+}
+
+/* ===== TOOLBAR ===== */
+.nemo-window toolbar {
+    background-color: @mantle;
+    border-bottom: 1px solid @surface0;
+}
+
+/* ===== SIDEBAR ===== */
+.nemo-window .sidebar,
+.nemo-window placessidebar {
+    background-color: @crust;
+    color: @subtext;
+}
+
+/* sidebar rows */
+.nemo-window .sidebar row,
+.nemo-window placessidebar row {
+    border-radius: 8px;
+    margin: 2px 6px;
+}
+
+/* hover */
+.nemo-window .sidebar row:hover,
+.nemo-window placessidebar row:hover {
+    background-color: @surface0;
+    color: @text;
+}
+
+/* selected */
+.nemo-window .sidebar row:selected,
+.nemo-window placessidebar row:selected {
+    background-color: @accent;
+    color: @crust;
+}
+
+/* ===== FILE VIEW ===== */
+.nemo-window .view,
+.nemo-window treeview.view {
+    background-color: @base;
+    color: @text;
+}
+
+/* file rows */
+.nemo-window .view row {
+    border-radius: 6px;
+}
+
+/* hover */
+.nemo-window .view row:hover {
+    background-color: @surface0;
+}
+
+/* selected */
+.nemo-window .view row:selected {
+    background-color: @accent;
+    color: @crust;
+}
+
+/* ===== COLUMN HEADER ===== */
+.nemo-window treeview header button {
+    background-color: @mantle;
+    color: @subtext;
+    border: none;
+}
+
+/* ===== PATH BAR ===== */
+.nemo-window .path-bar button {
+    background: transparent;
+    color: @subtext;
+    border-radius: 6px;
+}
+
+/* hover */
+.nemo-window .path-bar button:hover {
+    background-color: @surface0;
+    color: @text;
+}
+
+/* active */
+.nemo-window .path-bar button:checked {
+    background-color: @accent;
+    color: @crust;
+}
+
+/* ===== STATUS BAR ===== */
+.nemo-window statusbar {
+    background-color: @mantle;
+    color: @subtext;
+    border-top: 1px solid @surface0;
+}
+
+/* ===== GLOBAL BUTTON STYLE (colloid-like) ===== */
+.nemo-window button {
+    background-color: alpha(currentColor, 0.05);
+    border-radius: 8px;
+}
+
+/* hover */
+.nemo-window button:hover {
+    background-color: alpha(currentColor, 0.12);
+}
+
+/* ===== ENTRY (search / rename) ===== */
+.nemo-window entry {
+    background-color: @surface0;
+    color: @text;
+    border: 1px solid @surface1;
+    border-radius: 8px;
+}
+
+/* focus */
+.nemo-window entry:focus {
+    border-color: @accent;
+}
+
+/* ===== FIX WHITE LAYER (colloid-style) ===== */
+.background,
+.background.csd,
+window.background {
+    background-color: @base;
+    color: @text;
+}
+
+/* ===== FILE PICKER TOP AREA ===== */
+filechooser menubar {
+    background-color: @mantle;
+    color: @text;
+}
+
+/* menu items */
+filechooser menubar menuitem {
+    background: transparent;
+    color: @text;
+}
+
+filechooser menubar menuitem:hover {
+    background: @surface0;
+}
+
+/* ===== PATH BAR (colloid-style targeting) ===== */
+filechooser #pathbarbox button {
+    background: transparent;
+    color: @subtext;
+    border-radius: 6px;
+}
+
+filechooser #pathbarbox button:hover {
+    background: @surface0;
+    color: @text;
+}
+
+/* ===== GLOBAL BUTTON BEHAVIOR (important) ===== */
+button {
+    background-color: alpha(currentColor, 0.05);
+    border-radius: 8px;
+}
+
+button:hover {
+    background-color: alpha(currentColor, 0.12);
+}

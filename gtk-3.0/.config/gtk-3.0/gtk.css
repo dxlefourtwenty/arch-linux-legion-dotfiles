@@ -1,0 +1,303 @@
+@import url("colors.css");
+
+/* ===== FIX WHITE LAYER (colloid-style) ===== */
+.background,
+.background.csd,
+window.background {
+    background-color: @base;
+    color: @text;
+}
+
+/* ===== FILE PICKER TOP AREA ===== */
+filechooser menubar {
+    background-color: @mantle;
+    color: @text;
+}
+
+/* menu items */
+filechooser menubar menuitem {
+    background: transparent;
+    color: @text;
+}
+
+filechooser menubar menuitem:hover {
+    background: @surface0;
+}
+
+/* ===== PATH BAR (colloid-style targeting) ===== */
+filechooser #pathbarbox button {
+    background: transparent;
+    color: @subtext;
+    border-radius: 6px;
+}
+
+filechooser #pathbarbox button:hover {
+    background: @surface0;
+    color: @text;
+}
+
+/* ===== GLOBAL BUTTON BEHAVIOR (important) ===== */
+button {
+    background-color: alpha(currentColor, 0.05);
+    border-radius: 8px;
+}
+
+button:hover {
+    background-color: alpha(currentColor, 0.12);
+}
+
+/* ===============================
+   NEMO (COLLOID-STYLE CLEAN)
+================================= */
+
+/* ===== ROOT WINDOW ===== */
+.nemo-window,
+.nemo-window.background {
+    background-color: @base;
+    color: @text;
+}
+
+/* ===== HEADERBAR ===== */
+.nemo-window headerbar {
+    background-color: @mantle;
+    color: @text;
+    border: none;
+    box-shadow: none;
+}
+
+/* buttons in header */
+.nemo-window headerbar button {
+    background-color: transparent;
+    color: @subtext;
+    border-radius: 8px;
+}
+
+/* hover */
+.nemo-window headerbar button:hover {
+    background-color: @surface0;
+    color: @text;
+}
+
+/* ===== TOOLBAR ===== */
+.nemo-window toolbar {
+    background-color: @mantle;
+    border-bottom: 1px solid @surface0;
+}
+
+/* ===== SIDEBAR ===== */
+.nemo-window .sidebar,
+.nemo-window placessidebar {
+    background-color: @crust;
+    color: @subtext;
+}
+
+/* sidebar rows */
+.nemo-window .sidebar row,
+.nemo-window placessidebar row {
+    border-radius: 8px;
+    margin: 2px 6px;
+}
+
+/* hover */
+.nemo-window .sidebar row:hover,
+.nemo-window placessidebar row:hover {
+    background-color: @surface0;
+    color: @text;
+}
+
+/* selected */
+.nemo-window .sidebar row:selected,
+.nemo-window placessidebar row:selected {
+    background-color: @accent;
+    color: @crust;
+}
+
+/* ===== FILE VIEW ===== */
+.nemo-window .view,
+.nemo-window treeview.view {
+    background-color: @base;
+    color: @text;
+}
+
+/* file rows */
+.nemo-window .view row {
+    border-radius: 6px;
+}
+
+/* hover */
+.nemo-window .view row:hover {
+    background-color: @surface0;
+}
+
+/* selected */
+.nemo-window .view row:selected {
+    background-color: @accent;
+    color: @crust;
+}
+
+/* ===== COLUMN HEADER ===== */
+.nemo-window treeview header button {
+    background-color: @mantle;
+    color: @subtext;
+    border: none;
+}
+
+/* ===== PATH BAR ===== */
+.nemo-window .path-bar button {
+    background: transparent;
+    color: @subtext;
+    border-radius: 6px;
+}
+
+/* hover */
+.nemo-window .path-bar button:hover {
+    background-color: @surface0;
+    color: @text;
+}
+
+/* active */
+.nemo-window .path-bar button:checked {
+    background-color: @accent;
+    color: @crust;
+}
+
+/* ===== STATUS BAR ===== */
+.nemo-window statusbar {
+    background-color: @mantle;
+    color: @subtext;
+    border-top: 1px solid @surface0;
+}
+
+/* ===== GLOBAL BUTTON STYLE (colloid-like) ===== */
+.nemo-window button {
+    background-color: alpha(currentColor, 0.05);
+    border-radius: 8px;
+}
+
+/* hover */
+.nemo-window button:hover {
+    background-color: alpha(currentColor, 0.12);
+}
+
+/* ===== ENTRY (search / rename) ===== */
+.nemo-window entry {
+    background-color: @surface0;
+    color: @text;
+    border: 1px solid @surface1;
+    border-radius: 8px;
+}
+
+/* focus */
+.nemo-window entry:focus {
+    border-color: @accent;
+}
+
+/* ===== NEMO MENU BAR (REAL FIX) ===== */
+.nemo-window menubar,
+.nemo-window menubar.background,
+.nemo-window .toolbar menubar {
+    background-color: @mantle;
+    color: @text;
+    border: none;
+    box-shadow: none;
+}
+
+/* menu items */
+.nemo-window menubar menuitem {
+    background: transparent;
+    color: @text;
+    padding: 4px 8px;
+}
+
+/* hover */
+.nemo-window menubar menuitem:hover {
+    background-color: @surface0;
+    color: @text;
+}
+
+/* active/open */
+.nemo-window menubar menuitem:selected {
+    background-color: @accent;
+    color: @crust;
+}
+
+/* inactive window */
+.nemo-window menubar:backdrop {
+    background-color: @crust;
+    color: @subtext;
+}
+
+/* ===============================
+   FILE PICKER (CLEAN FIX)
+================================= */
+
+/* root */
+filechooser {
+    background-color: @base;
+    color: @text;
+}
+
+/* header */
+filechooser headerbar {
+    background-color: @mantle;
+    color: @text;
+    box-shadow: none;
+}
+
+/* filename entry */
+filechooser entry {
+    background-color: @surface0;
+    color: @text;
+    border: 1px solid @surface1;
+    border-radius: 6px;
+}
+
+/* sidebar */
+filechooser placessidebar {
+    background-color: @crust;
+    color: @subtext;
+}
+
+filechooser placessidebar row:selected {
+    background-color: @accent;
+    color: @crust;
+}
+
+/* file list */
+filechooser treeview.view {
+    background-color: @base;
+    color: @text;
+}
+
+/* column header */
+filechooser treeview header button {
+    background-color: @mantle;
+    color: @text;
+}
+
+/* path bar */
+filechooser #pathbarbox button {
+    background: transparent;
+    color: @subtext;
+}
+
+filechooser #pathbarbox button:hover {
+    background: @surface0;
+    color: @text;
+}
+
+/* buttons */
+filechooser button {
+    background: @surface0;
+    color: @text;
+    border-radius: 6px;
+}
+
+filechooser button:hover {
+    background: @surface1;
+}
+
+filechooser button.suggested-action {
+    background: @green;
+    color: @crust;
+}
