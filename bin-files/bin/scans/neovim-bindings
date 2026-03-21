@@ -171,3 +171,4 @@ gT | Move to Prev Tab
 f: w | Jump to : Then Next Word Start
 
 <leader>gg | Open Lazygit
+H | Enable Hidden Files (Explorer)
