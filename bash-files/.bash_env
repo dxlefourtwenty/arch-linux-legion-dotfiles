@@ -1,3 +1,12 @@
+export EDITOR=vim
+export PATH="$HOME/bin:$PATH"
+export PATH="/opt/dart-2.19/bin:$PATH"
+export NVM_DIR="$HOME/.nvm"
+export BASH_ENV="$HOME/.bash_env"
+export PATH="$PATH:/home/dxle/.local/bin"
+export PATH=$PATH:/home/dxle/.spicetify
+export PATH=$PATH:/home/dxle/.cargo/bin
+
 export EZA_COLORS="\
 fi=37:di=34:ln=36:pi=90:so=90:bd=31:cd=31:or=31:sp=34:mp=36:\
 ur=97:uw=93:ux=32:ue=32:gr=37:gw=93:gx=32:tr=34:tw=93:tx=32:su=34:sf=90:xa=34:\

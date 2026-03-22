@@ -5,12 +5,6 @@
 # If not running interactively, don't do anything
 [[ $- != *i* ]] && return
 
-export EDITOR=vim
-export PATH="$HOME/bin:$PATH"
-export PATH="/opt/dart-2.19/bin:$PATH"
-export NVM_DIR="$HOME/.nvm"
-export BASH_ENV="$HOME/.bash_env"
-
 if [ -f ~/.bash_aliases ]; then
   . ~/.bash_aliases
 fi
@@ -38,13 +32,3 @@ fi
 
 eval "$(starship init bash)"
 
-
-
-
-
-
-
-# Created by `pipx` on 2026-02-16 11:24:36
-export PATH="$PATH:/home/dxle/.local/bin"
-
-export PATH=$PATH:/home/dxle/.spicetify
