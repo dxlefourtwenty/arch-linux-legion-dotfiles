@@ -14,6 +14,7 @@ options="  Capture
 󰞅  Emojis
 󰡯  Unicode
 󰸌  Color Converter
+󰸉  Image Palette Converter
   Tasks
   Files
 󱨥  Toggle"
@@ -25,7 +26,7 @@ chosen=$(printf '%b\n' "$options" | "$SCRIPT_DIR/rofi-nerd-markup" | rofi -dmenu
     -pid "$PID_FILE" \
     -p "" \
     -theme-str '
-        window { width: 325px; }
+        window { width: 400px; }
         entry { placeholder: "Tools…"; }
         element { 
             orientation: horizontal;
@@ -61,6 +62,9 @@ case "$label" in
     ;;
   "Color Converter")
     "$SCRIPT_DIR/menu-color-converter"
+    ;;
+  "Image Palette Converter")
+    /home/dxle/.cargo/bin/lutgen-studio
     ;;
   "Tasks")
     "$SCRIPT_DIR/menu-tasks"

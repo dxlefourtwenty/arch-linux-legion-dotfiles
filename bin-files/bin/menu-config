@@ -14,6 +14,7 @@ options="󰸌  Themes
   WiFi
   Bluetooth
   Hyprland
+󰍹  Displays
   Waybar
 󰮫  Rofi
   Mako
@@ -62,6 +63,9 @@ case "$chosen" in
   *Hyprland)
     "$SCRIPT_DIR/launch-terminal-floating" 1600 900 nvim ~/.config/hypr/ &
     notify-send -t 3000 "Config" "Editing $HOME_DIR/.config/hypr/"
+    ;;
+  *Displays)
+    "$SCRIPT_DIR/menu-displays"
     ;;
   *Waybar)
     "$SCRIPT_DIR/launch-terminal-floating" 1400 800 nvim ~/.config/waybar &

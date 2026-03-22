@@ -1,0 +1,155 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+MENU_ID="menu-displays"
+PID_FILE="/tmp/menu-rofi.pid"
+MONITORS_CONF="${XDG_CONFIG_HOME:-$HOME/.config}/hypr/monitors.conf"
+
+if "$SCRIPT_DIR/rofi-toggle-pidfile" begin "$MENU_ID"; then
+    exit 0
+fi
+
+trap '"$SCRIPT_DIR/rofi-toggle-pidfile" clear "$MENU_ID"' EXIT
+
+if ! command -v hyprctl >/dev/null 2>&1 || ! command -v jq >/dev/null 2>&1; then
+    notify-send -t 4000 "Displays" "Missing dependency: hyprctl or jq"
+    exit 1
+fi
+
+if ! monitors_json="$(hyprctl -j monitors all 2>/dev/null)"; then
+    notify-send -t 4000 "Displays" "Unable to read Hyprland monitors"
+    exit 1
+fi
+
+if [[ "$(jq 'length' <<< "$monitors_json")" -eq 0 ]]; then
+    notify-send -t 4000 "Displays" "No monitors found"
+    exit 1
+fi
+
+config_line_for_monitor() {
+    local target_monitor="$1"
+    local target_family="${target_monitor%%[0-9]*}"
+    local family_match=""
+
+    [[ -f "$MONITORS_CONF" ]] || return 1
+
+    while IFS= read -r raw_line; do
+        [[ "$raw_line" =~ ^[[:space:]]*#?[[:space:]]*monitor[[:space:]]*= ]] || continue
+
+        line="$(sed -E \
+            -e 's/^[[:space:]]*#?[[:space:]]*monitor[[:space:]]*=[[:space:]]*//' \
+            -e 's/[[:space:]]+#.*$//' \
+            <<< "$raw_line")"
+
+        [[ -n "$line" ]] || continue
+
+        monitor_name="${line%%,*}"
+        monitor_config="${line#*,}"
+
+        [[ -n "$monitor_name" && -n "$monitor_config" ]] || continue
+        [[ "$monitor_config" == disable* ]] && continue
+
+        if [[ "$monitor_name" == "$target_monitor" ]]; then
+            printf '%s,%s\n' "$target_monitor" "$monitor_config"
+            return 0
+        fi
+
+        if [[ -z "$family_match" && "$monitor_name" != "$target_monitor" && "$monitor_name" == "${target_family}"[0-9]* ]]; then
+            family_match="$monitor_config"
+        fi
+    done < "$MONITORS_CONF"
+
+    if [[ -n "$family_match" ]]; then
+        printf '%s,%s\n' "$target_monitor" "$family_match"
+        return 0
+    fi
+
+    return 1
+}
+
+generated_line_for_monitor() {
+    local target_monitor="$1"
+
+    jq -r --arg name "$target_monitor" '
+        (.[] | select(.name == $name)) as $selected |
+        (
+            if ($selected.disabled or $selected.width == 0 or $selected.height == 0) then
+                ($selected.availableModes[0] // "preferred")
+            else
+                "\($selected.width)x\($selected.height)@\($selected.refreshRate)"
+            end
+        ) as $mode |
+        [ .[] | select(.name != $name and .disabled == false) | (.x + .width) ] as $occupied_right_edges |
+        "\($selected.name),\($mode),\(($occupied_right_edges | max // 0))x0,\($selected.scale)"
+    ' <<< "$monitors_json"
+}
+
+monitors=()
+display_monitors=()
+
+while IFS= read -r row; do
+    name="$(jq -r '.name' <<< "$row")"
+    model="$(jq -r '.model // empty' <<< "$row")"
+    disabled="$(jq -r '.disabled' <<< "$row")"
+
+    label="󰍹  $name"
+    if [[ -n "$model" && "$model" != "$name" ]]; then
+        label+="  $model"
+    fi
+
+    pretty="$(printf '%s\n' "$label" | "$SCRIPT_DIR/rofi-nerd-markup")"
+    if [[ "$disabled" == "false" ]]; then
+        pretty="<i>$pretty</i>"
+    fi
+
+    monitors+=("$name")
+    display_monitors+=("$pretty")
+done < <(jq -c '.[]' <<< "$monitors_json")
+
+display_monitors+=("$(printf '%s\n' "󰑐  Default Layout" | "$SCRIPT_DIR/rofi-nerd-markup")")
+
+chosen_index="$(
+    printf '%s\n' "${display_monitors[@]}" | rofi -dmenu -i -markup-rows -format i \
+        -pid "$PID_FILE" \
+        -p "" \
+        -theme-str '
+            window { width: 360px; }
+            entry { placeholder: "Displays…"; }
+            element {
+                orientation: horizontal;
+                children: [ element-text ];
+                spacing: 0px;
+                padding: 8px 2px;
+            }
+            element-text {
+                horizontal-align: 0.0;
+                padding-left: 0px;
+            }
+        '
+)"
+
+[[ "$chosen_index" =~ ^[0-9]+$ ]] || exit 0
+
+if (( chosen_index == ${#monitors[@]} )); then
+    hyprctl reload >/dev/null
+    exit 0
+fi
+
+selected_monitor="${monitors[$chosen_index]}"
+selected_disabled="$(jq -r --arg name "$selected_monitor" '.[] | select(.name == $name) | .disabled' <<< "$monitors_json")"
+
+if [[ "$selected_disabled" == "false" ]]; then
+    hyprctl keyword monitor "$selected_monitor,disable" >/dev/null
+    exit 0
+fi
+
+selected_config="$(config_line_for_monitor "$selected_monitor" || true)"
+if [[ -z "$selected_config" ]]; then
+    selected_config="$(generated_line_for_monitor "$selected_monitor")"
+fi
+
+[[ -n "$selected_config" ]] || exit 1
+
+hyprctl keyword monitor "$selected_config" >/dev/null

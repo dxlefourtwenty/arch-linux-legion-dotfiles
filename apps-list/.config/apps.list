@@ -11,9 +11,9 @@ youtube-webapp.desktop|/home/dxle/.local/share/icons/YouTube.png|YouTube
 instagram-webapp.desktop|/home/dxle/.local/share/icons/Instagram.png|Instagram
 github-webapp.desktop|/home/dxle/.local/share/icons/GitHub.png|GitHub
 localsend.desktop|/home/dxle/.local/share/icons/localsend.png|LocalSend
+lutgen-studio.desktop|/home/dxle/builds/lutgen-rs/crates/studio/assets/lutgen.png|Lutgen Studio
 org.kde.kdenlive.desktop|/usr/share/icons/hicolor/128x128/apps/kdenlive.png|Kdenlive
 virtualbox.desktop|/usr/share/icons/hicolor/128x128/mimetypes/virtualbox.png|VirtualBox
 nemo.desktop|/home/dxle/.local/share/icons/file.png|Files
 org.pulseaudio.pavucontrol.desktop|/home/dxle/.local/share/icons/volume.png|Volume
 Alacritty.desktop|/home/dxle/.local/share/icons/alacritty.png|Alacritty
-lutgen-studio.desktop|/home/dxle/builds/lutgen-rs/crates/studio/assets/lutgen.png|Lutgen Studio
