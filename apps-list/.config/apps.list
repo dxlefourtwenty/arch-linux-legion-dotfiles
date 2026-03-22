@@ -16,3 +16,4 @@ virtualbox.desktop|/usr/share/icons/hicolor/128x128/mimetypes/virtualbox.png|Vir
 nemo.desktop|/home/dxle/.local/share/icons/file.png|Files
 org.pulseaudio.pavucontrol.desktop|/home/dxle/.local/share/icons/volume.png|Volume
 Alacritty.desktop|/home/dxle/.local/share/icons/alacritty.png|Alacritty
+lutgen-studio.desktop|/home/dxle/builds/lutgen-rs/crates/studio/assets/lutgen.png|Lutgen Studio
