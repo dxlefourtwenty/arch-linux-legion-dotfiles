@@ -54,6 +54,7 @@ alias ...='cd ../..'
 alias .....='cd ../../..'
 alias ......='cd ../../../..'
 
+# fd-nvim
 alias fd-nvim='fd --type f --hidden --exclude .git | fzf | xargs -r nvim'
 
 # open image
@@ -76,3 +77,7 @@ alias mkdir='mkdir -p'
 alias ping='ping -c 10'
 alias less='less -R'
 alias ps='ps auxf'
+
+# terminal aesthetics
+alias activity='btop'
+alias um='unimatrix'
