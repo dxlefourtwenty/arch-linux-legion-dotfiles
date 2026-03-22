@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+# load your shell env (THIS is the key)
+source ~/.bashrc 2>/dev/null
+
+# launch app with that environment
+exec file-roller "$@"

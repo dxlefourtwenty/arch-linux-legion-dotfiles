@@ -42,10 +42,16 @@ rofi -dmenu -i -show-icons \
 
 [[ -z "$selection" ]] && exit 0
 
-desktop=$(
+launcher=$(
 awk -F'|' -v name="$selection" '$3==name {print $1; exit}' "$LIST"
 )
 
-[[ -z "$desktop" ]] && exit 0
+[[ -z "$launcher" ]] && exit 0
 
-setsid gtk-launch "${desktop%.desktop}" >/dev/null 2>&1 &
+if [[ "$launcher" == *.desktop ]]; then
+    setsid gtk-launch "${launcher%.desktop}" >/dev/null 2>&1 &
+elif [[ -x "$SCRIPT_DIR/$launcher" ]]; then
+    setsid "$SCRIPT_DIR/$launcher" >/dev/null 2>&1 &
+elif command -v "$launcher" >/dev/null 2>&1; then
+    setsid "$launcher" >/dev/null 2>&1 &
+fi

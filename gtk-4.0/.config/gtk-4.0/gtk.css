@@ -381,6 +381,51 @@ scale slider {
     border-radius: 50%;
 }
 
+/* ===== FIX WHITE LAYER (colloid-style) ===== */
+.background,
+.background.csd,
+window.background {
+    background-color: @base;
+    color: @text;
+}
+
+/* ===== FILE PICKER TOP AREA ===== */
+filechooser menubar {
+    background-color: @mantle;
+    color: @text;
+}
+
+/* menu items */
+filechooser menubar menuitem {
+    background: transparent;
+    color: @text;
+}
+
+filechooser menubar menuitem:hover {
+    background: @surface0;
+}
+
+/* ===== PATH BAR (colloid-style targeting) ===== */
+filechooser #pathbarbox button {
+    background: transparent;
+    color: @subtext;
+    border-radius: 6px;
+}
+
+filechooser #pathbarbox button:hover {
+    background: @surface0;
+    color: @text;
+}
+
+/* ===== GLOBAL BUTTON BEHAVIOR (important) ===== */
+button {
+    background-color: @surface0;
+}
+
+button:hover {
+    background-color: @surface1;
+}
+
 /* ===============================
    NEMO (COLLOID-STYLE CLEAN)
 ================================= */
@@ -411,6 +456,12 @@ scale slider {
 .nemo-window headerbar button:hover {
     background-color: @surface0;
     color: @text;
+}
+
+.image-button {
+    background-color: transparent;
+    color: @subtext;
+    border-radius: 8px;
 }
 
 /* ===== TOOLBAR ===== */
@@ -505,13 +556,7 @@ scale slider {
 
 /* ===== GLOBAL BUTTON STYLE (colloid-like) ===== */
 .nemo-window button {
-    background-color: alpha(currentColor, 0.05);
-    border-radius: 8px;
-}
-
-/* hover */
-.nemo-window button:hover {
-    background-color: alpha(currentColor, 0.12);
+    background-color: @surface0;
 }
 
 /* ===== ENTRY (search / rename) ===== */
@@ -527,35 +572,101 @@ scale slider {
     border-color: @accent;
 }
 
-/* ===== FIX WHITE LAYER (colloid-style) ===== */
-.background,
-.background.csd,
-window.background {
+/* ===== NEMO MENU BAR (REAL FIX) ===== */
+.nemo-window menubar,
+.nemo-window menubar.background,
+.nemo-window .toolbar menubar {
+    background-color: @mantle;
+    color: @text;
+    border: none;
+    box-shadow: none;
+}
+
+/* menu items */
+.nemo-window menubar menuitem {
+    background: transparent;
+    color: @text;
+    padding: 4px 8px;
+}
+
+/* hover */
+.nemo-window menubar menuitem:hover {
+    background-color: @surface0;
+    color: @text;
+}
+
+/* active/open */
+.nemo-window menubar menuitem:selected {
+    background-color: @accent;
+    color: @crust;
+}
+
+/* inactive window */
+.nemo-window menubar:backdrop {
+    background-color: @crust;
+    color: @subtext;
+}
+
+
+/* ===============================
+   FILE PICKER (CLEAN FIX)
+================================= */
+
+/* root */
+filechooser {
     background-color: @base;
     color: @text;
 }
 
-/* ===== FILE PICKER TOP AREA ===== */
-filechooser menubar {
+/* header */
+filechooser headerbar {
+    background-color: @mantle;
+    color: @text;
+    box-shadow: none;
+}
+
+/* header */
+filechooser headerbar.background {
+    background-color: @mantle;
+    color: @text;
+    box-shadow: none;
+}
+
+/* filename entry */
+filechooser entry {
+    background-color: @surface0;
+    color: @text;
+    border: 1px solid @surface1;
+    border-radius: 6px;
+}
+
+/* sidebar */
+filechooser placessidebar {
+    background-color: @crust;
+    color: @subtext;
+}
+
+filechooser placessidebar row:selected {
+    background-color: @accent;
+    color: @crust;
+}
+
+/* file list */
+filechooser treeview.view {
+    background-color: @base;
+    color: @text;
+}
+
+/* column header */
+filechooser treeview header button {
     background-color: @mantle;
     color: @text;
 }
 
-/* menu items */
-filechooser menubar menuitem {
-    background: transparent;
-    color: @text;
-}
-
-filechooser menubar menuitem:hover {
-    background: @surface0;
-}
-
-/* ===== PATH BAR (colloid-style targeting) ===== */
+/* path bar */
 filechooser #pathbarbox button {
     background: transparent;
     color: @subtext;
-    border-radius: 6px;
 }
 
 filechooser #pathbarbox button:hover {
@@ -563,12 +674,479 @@ filechooser #pathbarbox button:hover {
     color: @text;
 }
 
-/* ===== GLOBAL BUTTON BEHAVIOR (important) ===== */
-button {
-    background-color: alpha(currentColor, 0.05);
+/* buttons */
+filechooser button {
+    background: @surface0;
+    color: @text;
+    border-radius: 6px;
+}
+
+filechooser button:hover {
+    background: @surface1;
+}
+
+filechooser button.suggested-action {
+    background: @green;
+    color: @crust;
+}
+
+/* ===============================
+   FILE PICKER — MISSING STATES
+================================= */
+
+/* unfocused headerbar */
+filechooser headerbar:backdrop,
+filechooser headerbar.titlebar:backdrop {
+    background-color: @mantle !important;
+    color: @text !important;
+    background-image: none !important;
+    box-shadow: none !important;
+    border: none !important;
+}
+
+/* everything inside unfocused headerbar */
+filechooser headerbar:backdrop *,
+filechooser headerbar.titlebar:backdrop * {
+    color: @text !important;
+    box-shadow: none !important;
+}
+
+/* unfocused entry in headerbar */
+filechooser headerbar:backdrop entry,
+filechooser headerbar.titlebar:backdrop entry {
+    background-color: @surface0 !important;
+    color: @text !important;
+    border: 1px solid @surface1 !important;
+    background-image: none !important;
+}
+
+/* unfocused buttons in headerbar */
+filechooser headerbar:backdrop button,
+filechooser headerbar.titlebar:backdrop button {
+    background-color: @surface0 !important;
+    color: @text !important;
+    border: 1px solid @surface1 !important;
+    background-image: none !important;
+    box-shadow: none !important;
+}
+
+/* save button when unfocused */
+filechooser headerbar:backdrop button.suggested-action,
+filechooser headerbar.titlebar:backdrop button.suggested-action {
+    background-color: @green !important;
+    color: @crust !important;
+    border: none !important;
+}
+
+/* top-right toggle button */
+filechooser togglebutton,
+filechooser headerbar togglebutton,
+filechooser headerbar button.toggle {
+    background-color: @surface0 !important;
+    color: @text !important;
+    border: 1px solid @surface1 !important;
+    background-image: none !important;
+    box-shadow: none !important;
+    border-radius: 6px;
+}
+
+/* hover */
+filechooser togglebutton:hover,
+filechooser headerbar togglebutton:hover,
+filechooser headerbar button.toggle:hover {
+    background-color: @surface1 !important;
+    color: @text !important;
+}
+
+/* CHECKED state — this is the missing one */
+filechooser togglebutton:checked,
+filechooser headerbar togglebutton:checked,
+filechooser headerbar button.toggle:checked {
+    background-color: @accent !important;
+    color: @crust !important;
+    border: none !important;
+    background-image: none !important;
+    box-shadow: none !important;
+}
+
+/* CHECKED + unfocused */
+filechooser togglebutton:checked:backdrop,
+filechooser headerbar togglebutton:checked:backdrop,
+filechooser headerbar button.toggle:checked:backdrop {
+    background-color: @accent !important;
+    color: @crust !important;
+    border: none !important;
+    background-image: none !important;
+    box-shadow: none !important;
+}
+
+/* icon inside toggle */
+filechooser togglebutton image,
+filechooser headerbar togglebutton image,
+filechooser headerbar button.toggle image,
+filechooser togglebutton:checked image,
+filechooser headerbar togglebutton:checked image {
+    color: inherit !important;
+    -gtk-icon-effect: none;
+}
+
+/* ===== FORCE HEADERBAR OVERRIDE ===== */
+filechooser headerbar,
+filechooser headerbar.titlebar,
+filechooser .titlebar,
+headerbar.default-decoration,
+.titlebar.default-decoration {
+    background-color: @mantle !important;
+    background-image: none !important;
+    box-shadow: none !important;
+    border: none !important;
+}
+
+/* FORCE ALL CHILDREN */
+filechooser headerbar *,
+filechooser .titlebar * {
+    background-image: none !important;
+}
+
+/* ===============================
+   FORCE FILE PICKER = NEMO
+================================= */
+
+/* ROOT (same as nemo-window) */
+filechooser,
+filechooser.background,
+window.filechooser,
+window.background.csd {
+    background-color: @base !important;
+    color: @text !important;
+}
+
+/* HEADERBAR (match Nemo) */
+filechooser headerbar,
+filechooser headerbar.titlebar,
+window.filechooser headerbar {
+    background-color: @mantle !important;
+    color: @text !important;
+    border: none !important;
+    box-shadow: none !important;
+    background-image: none !important;
+}
+
+/* HEADERBAR CHILDREN */
+filechooser headerbar * {
+    background-image: none !important;
+    box-shadow: none !important;
+}
+
+/* ENTRY (same as nemo entry) */
+filechooser headerbar entry,
+filechooser entry {
+    background-color: @surface0 !important;
+    color: @text !important;
+    border: 1px solid @surface1 !important;
     border-radius: 8px;
 }
 
-button:hover {
-    background-color: alpha(currentColor, 0.12);
+/* SIDEBAR (same as nemo) */
+filechooser placessidebar,
+filechooser .sidebar {
+    background-color: @crust !important;
+    color: @subtext !important;
+}
+
+/* SIDEBAR SELECTION */
+filechooser placessidebar row:selected {
+    background-color: @accent !important;
+    color: @crust !important;
+}
+
+/* FILE LIST */
+filechooser treeview.view,
+filechooser .view {
+    background-color: @base !important;
+    color: @text !important;
+}
+
+/* COLUMN HEADER (match nemo) */
+filechooser treeview header button {
+    background-color: @mantle !important;
+    color: @subtext !important;
+}
+
+/* BUTTONS (match nemo behavior) */
+filechooser button {
+    background-color: @surface0 !important;
+    color: @text !important;
+    border: 1px solid @surface1 !important;
+    border-radius: 8px;
+}
+
+filechooser button:hover {
+    background-color: @surface1 !important;
+}
+
+/* SAVE BUTTON */
+filechooser button.suggested-action {
+    background-color: @green !important;
+    color: @crust !important;
+    border: none !important;
+}
+
+/* ===============================
+   FILE PICKER — EXACT WIDGET CLASSES
+================================= */
+
+/* dialog root */
+filechooser,
+filechooser.background,
+filechooser.background.csd,
+filechooser box,
+filechooser paned,
+filechooser .view {
+    background-color: @base;
+    color: @text;
+}
+
+/* headerbar itself */
+filechooser headerbar.titlebar {
+    background-color: @mantle;
+    background-image: none;
+    color: @text;
+    border: none;
+    box-shadow: none;
+}
+
+/* label inside headerbar ("Name") */
+filechooser headerbar.titlebar label {
+    color: @text;
+}
+
+/* filename entry */
+filechooser headerbar.titlebar entry {
+    background-color: @surface0;
+    color: @text;
+    border: 1px solid @surface1;
+    border-radius: 8px;
+    background-image: none;
+    box-shadow: none;
+}
+
+/* cancel button = text-button */
+filechooser headerbar.titlebar button.text-button {
+    background-color: @surface0;
+    color: @text;
+    border: 1px solid @surface1;
+    border-radius: 8px;
+    background-image: none;
+    box-shadow: none;
+}
+
+/* save button = suggested-action text-button default */
+filechooser headerbar.titlebar button.suggested-action.text-button,
+filechooser headerbar.titlebar button.suggested-action.default {
+    background-color: @green;
+    color: @crust;
+    border: none;
+    border-radius: 8px;
+    background-image: none;
+    box-shadow: none;
+}
+
+/* top-right icon toggle = image-button */
+filechooser headerbar.titlebar button.image-button,
+filechooser headerbar.titlebar togglebutton.image-button {
+    background-color: @surface0;
+    color: @text;
+    border: 1px solid @surface1;
+    border-radius: 8px;
+    background-image: none;
+    box-shadow: none;
+}
+
+/* hovered header buttons */
+filechooser headerbar.titlebar button.text-button:hover,
+filechooser headerbar.titlebar button.image-button:hover,
+filechooser headerbar.titlebar togglebutton.image-button:hover {
+    background-color: @surface1;
+    color: @text;
+}
+
+/* checked icon toggle */
+filechooser headerbar.titlebar togglebutton.image-button:checked,
+filechooser headerbar.titlebar button.image-button:checked {
+    background-color: @accent;
+    color: @crust;
+    border: none;
+}
+
+/* sidebar */
+filechooser placessidebar {
+    background-color: @crust;
+    color: @subtext;
+}
+
+filechooser placessidebar row:selected {
+    background-color: @accent;
+    color: @crust;
+}
+
+/* path bar root */
+filechooser pathbar.linked,
+filechooser .path-bar.linked {
+    background-color: transparent;
+    background-image: none;
+    box-shadow: none;
+}
+
+/* path buttons = toggle text-button */
+filechooser pathbar.linked button.toggle.text-button,
+filechooser .path-bar.linked button.toggle.text-button,
+filechooser pathbar.linked togglebutton.toggle.text-button,
+filechooser .path-bar.linked togglebutton.toggle.text-button {
+    background-color: @surface0;
+    color: @text;
+    border: 1px solid @surface1;
+    border-radius: 8px;
+    background-image: none;
+    box-shadow: none;
+}
+
+/* active/current path button */
+filechooser pathbar.linked button.toggle.text-button:checked,
+filechooser .path-bar.linked button.toggle.text-button:checked,
+filechooser pathbar.linked togglebutton.toggle.text-button:checked,
+filechooser .path-bar.linked togglebutton.toggle.text-button:checked {
+    background-color: @accent;
+    color: @crust;
+    border: none;
+}
+
+/* hover path buttons */
+filechooser pathbar.linked button.toggle.text-button:hover,
+filechooser .path-bar.linked button.toggle.text-button:hover,
+filechooser pathbar.linked togglebutton.toggle.text-button:hover,
+filechooser .path-bar.linked togglebutton.toggle.text-button:hover {
+    background-color: @surface1;
+    color: @text;
+}
+
+/* slider buttons = arrows in pathbar */
+filechooser pathbar.linked button.slider-button,
+filechooser .path-bar.linked button.slider-button {
+    background-color: @surface0;
+    color: @text;
+    border: 1px solid @surface1;
+    border-radius: 8px;
+    background-image: none;
+    box-shadow: none;
+}
+
+filechooser pathbar.linked button.slider-button:hover,
+filechooser .path-bar.linked button.slider-button:hover {
+    background-color: @surface1;
+}
+
+/* popup menu button in pathbar */
+filechooser pathbar.linked menubutton.toggle.popup > button,
+filechooser .path-bar.linked menubutton.toggle.popup > button {
+    background-color: @surface0;
+    color: @text;
+    border: 1px solid @surface1;
+    border-radius: 8px;
+    background-image: none;
+    box-shadow: none;
+}
+
+filechooser pathbar.linked menubutton.toggle.popup > button:hover,
+filechooser .path-bar.linked menubutton.toggle.popup > button:hover {
+    background-color: @surface1;
+}
+
+/* column headers */
+filechooser treeview header button {
+    background-color: @mantle;
+    color: @text;
+    border: 1px solid @surface1;
+    background-image: none;
+    box-shadow: none;
+}
+
+/* ===============================
+   NEMO TRASH BAR — ACTUAL FIX
+================================= */
+
+/* target the revealer directly (NO nemo-window prefix) */
+infobar > revealer {
+    background-color: @mantle !important;
+    background-image: none !important;
+}
+
+/* fallback: catch all revealers inside infobar */
+infobar revealer {
+    background-color: @mantle !important;
+    background-image: none !important;
+}
+
+/* kill GTK info styling */
+infobar.info {
+    background: transparent !important;
+}
+
+/* content */
+infobar label {
+    color: @text !important;
+}
+
+/* buttons */
+infobar button {
+    background-color: @surface0 !important;
+    color: @text !important;
+    border: 1px solid @surface1 !important;
+}
+
+/* ===============================
+   FILECHOOSER HEADERBAR (REAL FIX)
+================================= */
+
+filechooser headerbar.titlebar,
+filechooser headerbar,
+filechooser .titlebar {
+    background-color: @mantle !important;
+    color: @text !important;
+    background-image: none !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+filechooser headerbar.titlebar entry {
+    background-color: @surface0 !important;
+    color: @text !important;
+    border: 1px solid @surface1 !important;
+    border-radius: 8px;
+}
+
+filechooser headerbar.titlebar:backdrop {
+    background-color: @mantle !important;
+    color: @text !important;
+    background-image: none !important;
+}
+
+/* normal buttons */
+filechooser headerbar.titlebar button {
+    background-color: @surface0 !important;
+    color: @text !important;
+    border: 1px solid @surface1 !important;
+    border-radius: 8px;
+}
+
+/* hover */
+filechooser headerbar.titlebar button:hover {
+    background-color: @surface1 !important;
+}
+
+/* save button */
+filechooser headerbar.titlebar button.suggested-action {
+    background-color: @green !important;
+    color: @crust !important;
+    border: none !important;
 }
