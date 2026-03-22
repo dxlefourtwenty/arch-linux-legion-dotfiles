@@ -6,6 +6,7 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 MENU_ID="menu-displays"
 PID_FILE="/tmp/menu-rofi.pid"
 MONITORS_CONF="${XDG_CONFIG_HOME:-$HOME/.config}/hypr/monitors.conf"
+BACKUP_FILE="${XDG_RUNTIME_DIR:-/tmp}/menu-displays.monitors.conf.bak"
 
 if "$SCRIPT_DIR/rofi-toggle-pidfile" begin "$MENU_ID"; then
     exit 0
@@ -28,62 +29,53 @@ if [[ "$(jq 'length' <<< "$monitors_json")" -eq 0 ]]; then
     exit 1
 fi
 
-config_line_for_monitor() {
+set_monitor_state_in_config() {
     local target_monitor="$1"
-    local target_family="${target_monitor%%[0-9]*}"
-    local family_match=""
+    local target_state="$2"
+    local tmp_file=""
+    local changed=0
 
     [[ -f "$MONITORS_CONF" ]] || return 1
 
-    while IFS= read -r raw_line; do
-        [[ "$raw_line" =~ ^[[:space:]]*#?[[:space:]]*monitor[[:space:]]*= ]] || continue
+    tmp_file="$(mktemp)"
 
-        line="$(sed -E \
-            -e 's/^[[:space:]]*#?[[:space:]]*monitor[[:space:]]*=[[:space:]]*//' \
-            -e 's/[[:space:]]+#.*$//' \
-            <<< "$raw_line")"
+    while IFS= read -r line || [[ -n "$line" ]]; do
+        if [[ "$line" =~ ^([[:space:]]*)#?[[:space:]]*monitor[[:space:]]*=[[:space:]]*(${target_monitor},[^#]*)([[:space:]]+#.*)?$ ]]; then
+            local indent="${BASH_REMATCH[1]}"
+            local body="${BASH_REMATCH[2]}"
+            local comment="${BASH_REMATCH[3]:-}"
+            local prefix=""
 
-        [[ -n "$line" ]] || continue
+            changed=1
 
-        monitor_name="${line%%,*}"
-        monitor_config="${line#*,}"
+            if [[ "$body" == "${target_monitor},disable"* ]]; then
+                [[ "$target_state" == "enabled" ]] && prefix="#"
+            else
+                [[ "$target_state" == "disabled" ]] && prefix="#"
+            fi
 
-        [[ -n "$monitor_name" && -n "$monitor_config" ]] || continue
-        [[ "$monitor_config" == disable* ]] && continue
-
-        if [[ "$monitor_name" == "$target_monitor" ]]; then
-            printf '%s,%s\n' "$target_monitor" "$monitor_config"
-            return 0
-        fi
-
-        if [[ -z "$family_match" && "$monitor_name" != "$target_monitor" && "$monitor_name" == "${target_family}"[0-9]* ]]; then
-            family_match="$monitor_config"
+            printf '%s%smonitor=%s%s\n' "$indent" "$prefix" "$body" "$comment" >> "$tmp_file"
+        else
+            printf '%s\n' "$line" >> "$tmp_file"
         fi
     done < "$MONITORS_CONF"
 
-    if [[ -n "$family_match" ]]; then
-        printf '%s,%s\n' "$target_monitor" "$family_match"
-        return 0
+    if [[ "$changed" -eq 0 ]]; then
+        rm -f "$tmp_file"
+        return 1
     fi
 
-    return 1
+    mv "$tmp_file" "$MONITORS_CONF"
 }
 
-generated_line_for_monitor() {
-    local target_monitor="$1"
+ensure_backup() {
+    [[ -f "$BACKUP_FILE" ]] || cp "$MONITORS_CONF" "$BACKUP_FILE"
+}
 
-    jq -r --arg name "$target_monitor" '
-        (.[] | select(.name == $name)) as $selected |
-        (
-            if ($selected.disabled or $selected.width == 0 or $selected.height == 0) then
-                ($selected.availableModes[0] // "preferred")
-            else
-                "\($selected.width)x\($selected.height)@\($selected.refreshRate)"
-            end
-        ) as $mode |
-        [ .[] | select(.name != $name and .disabled == false) | (.x + .width) ] as $occupied_right_edges |
-        "\($selected.name),\($mode),\(($occupied_right_edges | max // 0))x0,\($selected.scale)"
-    ' <<< "$monitors_json"
+restore_backup() {
+    [[ -f "$BACKUP_FILE" ]] || return 1
+    cp "$BACKUP_FILE" "$MONITORS_CONF"
+    rm -f "$BACKUP_FILE"
 }
 
 monitors=()
@@ -133,23 +125,19 @@ chosen_index="$(
 [[ "$chosen_index" =~ ^[0-9]+$ ]] || exit 0
 
 if (( chosen_index == ${#monitors[@]} )); then
+    restore_backup || true
     hyprctl reload >/dev/null
     exit 0
 fi
 
 selected_monitor="${monitors[$chosen_index]}"
 selected_disabled="$(jq -r --arg name "$selected_monitor" '.[] | select(.name == $name) | .disabled' <<< "$monitors_json")"
+ensure_backup
 
 if [[ "$selected_disabled" == "false" ]]; then
-    hyprctl keyword monitor "$selected_monitor,disable" >/dev/null
-    exit 0
+    set_monitor_state_in_config "$selected_monitor" "disabled"
+else
+    set_monitor_state_in_config "$selected_monitor" "enabled"
 fi
 
-selected_config="$(config_line_for_monitor "$selected_monitor" || true)"
-if [[ -z "$selected_config" ]]; then
-    selected_config="$(generated_line_for_monitor "$selected_monitor")"
-fi
-
-[[ -n "$selected_config" ]] || exit 1
-
-hyprctl keyword monitor "$selected_config" >/dev/null
+hyprctl reload >/dev/null
