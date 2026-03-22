@@ -82,6 +82,9 @@ case "${1:-}" in
     --preview-file)
         preview_file "${2:-}"
         ;;
+    --share-file)
+        launch_localsend "$(realpath -- "${2:-}")"
+        ;;
     --pick)
         pick_file "$(realpath -m -- "${2:-$HOME}")"
         ;;

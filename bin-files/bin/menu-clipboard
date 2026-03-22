@@ -75,7 +75,7 @@ share_decoded_entry() {
 }
 
 if [[ "$SHARE_MODE" == true ]]; then
-    notify-send -t 4000 "Clipboard" "Opening Share History…"
+    notify-send -t 4000 "Share" "Opening Clipboard Manager…"
 else
     notify-send -t 4000 "Clipboard" "Opening Menu…"
 fi

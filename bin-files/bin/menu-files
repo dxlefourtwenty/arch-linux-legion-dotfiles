@@ -10,6 +10,7 @@ fi
 
 options="  Edit File
   File Explorer
+󰈙  Open PDF
 󰇮  Share with LocalSend"
 
 chosen=$(printf '%b\n' "$options" | "$SCRIPT_DIR/rofi-nerd-markup" | rofi -dmenu -i \
@@ -38,6 +39,7 @@ label="${chosen#*  }"   # remove up to the double-space after the icon
 case "$label" in
     "Edit File")      "$SCRIPT_DIR/menu-edit-file" ;;
     "File Explorer")  "$SCRIPT_DIR/menu-file-explorer" ;;
-    "Share with LocalSend") "$SCRIPT_DIR/menu-share" ;;
+    "Open PDF")       "$SCRIPT_DIR/launch-zathura-pdf" ;;
+    "Share with LocalSend") "$SCRIPT_DIR/menu-localsend-share-file" ;;
     *) exit 0 ;;
 esac
