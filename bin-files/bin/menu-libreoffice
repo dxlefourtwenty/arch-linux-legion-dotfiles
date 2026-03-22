@@ -1,0 +1,90 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+MENU_ID="menu-libreoffice"
+PID_FILE="/tmp/menu-rofi.pid"
+DESKTOP_DIR="/usr/share/applications"
+
+if "$SCRIPT_DIR/rofi-toggle-pidfile" begin "$MENU_ID"; then
+    exit 0
+fi
+
+trap '"$SCRIPT_DIR/rofi-toggle-pidfile" clear "$MENU_ID"' EXIT
+
+desktop_value() {
+    local desktop_file="$1"
+    local key="$2"
+
+    awk -F'=' -v key="$key" '
+        $0 == "[Desktop Entry]" {
+            in_entry = 1
+            next
+        }
+        /^\[/ && in_entry {
+            exit
+        }
+        in_entry && $1 == key {
+            sub(/^[^=]*=/, "")
+            print
+            exit
+        }
+    ' "$desktop_file"
+}
+
+entries=$(
+    for desktop_file in "$DESKTOP_DIR"/libreoffice*.desktop; do
+        [[ -f "$desktop_file" ]] || continue
+
+        desktop_id="${desktop_file##*/}"
+        no_display="$(desktop_value "$desktop_file" "NoDisplay")"
+        [[ "${no_display,,}" == "true" ]] && continue
+
+        name="$(desktop_value "$desktop_file" "Name")"
+        icon="$(desktop_value "$desktop_file" "Icon")"
+
+        [[ -n "$name" ]] || name="$desktop_id"
+
+        printf '%s|%s|%s\n' "$desktop_id" "$icon" "$name"
+    done | sort -t'|' -k3,3
+)
+
+[[ -n "$entries" ]] || exit 0
+
+selection=$(
+    printf '%s\n' "$entries" |
+    awk -F'|' '{
+        printf "%s\0icon\x1f%s\n", $3, $2
+    }' |
+    rofi -dmenu -i -show-icons \
+        -pid "$PID_FILE" \
+        -p "" \
+        -theme-str '
+            window { width: 375px; }
+            entry { placeholder: "LibreOffice…"; }
+            element {
+                orientation: horizontal;
+                children: [ element-icon, element-text ];
+                spacing: 8px;
+                padding: 8px 8px;
+            }
+            element-icon {
+                size: 26px;
+            }
+            element-text {
+                horizontal-align: 0.0;
+                padding: 0px 6px;
+            }
+        '
+)
+
+[[ -z "$selection" ]] && exit 0
+
+desktop_id=$(
+    printf '%s\n' "$entries" |
+    awk -F'|' -v name="$selection" '$3 == name { print $1; exit }'
+)
+
+[[ -n "$desktop_id" ]] || exit 0
+
+setsid gtk-launch "${desktop_id%.desktop}" >/dev/null 2>&1 &
