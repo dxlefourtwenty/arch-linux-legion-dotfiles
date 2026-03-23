@@ -17,4 +17,5 @@ org.kde.kdenlive.desktop|/usr/share/icons/hicolor/128x128/apps/kdenlive.png|Kden
 virtualbox.desktop|/usr/share/icons/hicolor/128x128/mimetypes/virtualbox.png|VirtualBox
 nemo.desktop|/home/dxle/.local/share/icons/file.png|Files
 org.pulseaudio.pavucontrol.desktop|/home/dxle/.local/share/icons/volume.png|Volume
+org.prismlauncher.PrismLauncher.desktop|/home/dxle/.local/share/icons/prismlauncher.png|Prism Launcher
 Alacritty.desktop|/home/dxle/.local/share/icons/alacritty.png|Alacritty
