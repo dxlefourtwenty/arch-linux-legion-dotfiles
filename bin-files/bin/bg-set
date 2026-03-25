@@ -31,4 +31,4 @@ NAME=$(echo "$NAME" | sed -E 's/^[0-9]+-//')
 FORMATTED_NAME=$(echo "$NAME" | tr '-' ' ')
 
 notify-send -t 5000 "Background" "Updated to '$FORMATTED_NAME.'"
-swww img "$SELECTED_WALL" $FLAGS
+awww img "$SELECTED_WALL" $FLAGS

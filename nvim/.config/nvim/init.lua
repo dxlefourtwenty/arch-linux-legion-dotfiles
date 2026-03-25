@@ -10,3 +10,5 @@ vim.cmd([[
   highlight EndOfBuffer guibg=NONE
   highlight SignColumn guibg=NONE
 ]])
+
+vim.opt.spell = false

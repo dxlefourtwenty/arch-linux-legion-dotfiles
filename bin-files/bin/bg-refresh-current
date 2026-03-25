@@ -6,12 +6,12 @@ SELECTED="$HOME/.config/themes/current/wallpaper.png"
 READY=0
 
 # Ensure the daemon exists, but don't let a failed restart stall theme changes.
-if ! pgrep -x swww-daemon >/dev/null 2>&1; then
-    nohup swww-daemon >/dev/null 2>&1 &
+if ! pgrep -x awww-daemon >/dev/null 2>&1; then
+    nohup awww-daemon >/dev/null 2>&1 &
 fi
 
 for _ in {1..8}; do
-    if timeout 0.25s swww query >/dev/null 2>&1; then
+    if timeout 0.25s awww query >/dev/null 2>&1; then
         READY=1
         break
     fi
@@ -21,4 +21,4 @@ done
 
 [ "$READY" -eq 1 ] || exit 0
 
-swww img "$SELECTED" $FLAGS
+awww img "$SELECTED" $FLAGS

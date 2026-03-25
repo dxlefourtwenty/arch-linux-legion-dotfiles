@@ -61,5 +61,6 @@ FORMATTED_NAME=$(echo "$1" | tr '-' ' ' | sed -E 's/\b(.)/\U\1/g')
         sleep 0.1
     done
 
+    sleep 1
     notify-send -t 5000 "Theme" "Updated to $FORMATTED_NAME." >/dev/null 2>&1 || true
 ) >/dev/null 2>&1 &

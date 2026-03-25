@@ -1,33 +1,21 @@
 #!/usr/bin/env bash
-
-SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-
-"$SCRIPT_DIR/launch-terminal-floating" 1200 800 bash -c '
 set -euo pipefail
 
-PKG_DIR="$(cd "$(dirname "$0")" && pwd)/.packages"
+PKG_DIR="$HOME/dotfiles/.packages"
 
 echo "==> Updating system..."
 sudo pacman -Syu
 
-echo
 echo "==> Updating AUR..."
 if command -v yay &> /dev/null; then
   yay -Syu
 fi
 
-echo
 echo "==> Exporting package lists..."
 
 mkdir -p "$PKG_DIR"
 
-pacman -Qqe | grep -v "\-debug$" | sort > "$PKG_DIR/pkglist.txt"
+pacman -Qqe | sort > "$PKG_DIR/pkglist.txt"
 pacman -Qqm | sort > "$PKG_DIR/aurlist.txt"
 
-echo
 echo "==> Done. Package lists updated."
-
-echo
-echo "Press any key to close..."
-read -n 1 -s
-'

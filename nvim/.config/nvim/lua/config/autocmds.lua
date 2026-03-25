@@ -76,3 +76,18 @@ vim.api.nvim_create_autocmd("FileType", {
     vim.opt_local.expandtab = true
   end
 })
+
+vim.opt.spell = false
+
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = { "text", "markdown" },
+  callback = function()
+    vim.opt_local.spell = false
+  end,
+})
+
+vim.api.nvim_create_autocmd("BufEnter", {
+  callback = function()
+    vim.opt_local.spell = false
+  end,
+})

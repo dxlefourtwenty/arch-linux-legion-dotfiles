@@ -27,7 +27,7 @@ if [ ! -x "$LIVEPAPER_BIN" ]; then
 fi
 
 run_livepaper() {
-    "$LIVEPAPER_BIN" --switch-cmd "swww img $FLAGS {}" --link "$CURRENT_LINK" "$WALLPAPER_DIR"
+    "$LIVEPAPER_BIN" --switch-cmd "awww img $FLAGS {}" --link "$CURRENT_LINK" "$WALLPAPER_DIR"
 }
 
 run_livepaper

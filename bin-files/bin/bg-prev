@@ -38,7 +38,7 @@ done
 FULL_PATH="$WALL_DIR/$PREV_FILE"
 
 # Set wallpaper
-swww img "$FULL_PATH" \
+awww img "$FULL_PATH" \
     --transition-type wipe \
     --transition-angle 225 \
     --transition-duration 3.2

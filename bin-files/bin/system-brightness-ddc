@@ -1,0 +1,195 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+STEP=5
+MIN_PERCENT=10
+MAX_PERCENT=100
+CACHE_TTL=2
+
+connector_type="${1:-}"
+label="${2:-}"
+direction="${3:-}"
+state_dir="${XDG_RUNTIME_DIR:-/tmp}/system-brightness-ddc"
+state_file="${state_dir}/${connector_type}.state"
+lock_file="${state_dir}/${connector_type}.lock"
+
+if [[ -z "$connector_type" || -z "$label" ]]; then
+    echo "usage: $(basename "$0") <connector-type> <label> [up|down]" >&2
+    exit 1
+fi
+
+mkdir -p "$state_dir"
+
+if [[ "$direction" == "up" ]]; then
+    delta=$STEP
+else
+    delta=$((-STEP))
+fi
+
+find_bus() {
+    local detect_output bus
+
+    detect_output=$(ddcutil detect --brief)
+    bus=$(
+        awk -v connector_type="$connector_type" '
+            /^Display [0-9]+/ {
+                in_display = 1
+                bus = ""
+                connector = ""
+                next
+            }
+
+            /^Invalid display/ {
+                in_display = 0
+                next
+            }
+
+            in_display && /I2C bus:/ {
+                if (match($0, /\/dev\/i2c-([0-9]+)/)) {
+                    bus = substr($0, RSTART + 9, RLENGTH - 9)
+                }
+                next
+            }
+
+            in_display && /DRM connector:/ {
+                connector = $NF
+                if (connector ~ ("-" connector_type "-")) {
+                    print bus
+                    exit
+                }
+            }
+        ' <<<"$detect_output"
+    )
+
+    if [[ -z "$bus" ]]; then
+        echo "No DDC display found for connector type '$connector_type'" >&2
+        exit 1
+    fi
+
+    printf '%s\n' "$bus"
+}
+
+read_brightness() {
+    local bus="$1" getvcp_output parsed
+
+    getvcp_output=$(ddcutil --bus="$bus" getvcp 10)
+    parsed=$(
+        sed -nE 's/.*current value = *([0-9]+), max value = *([0-9]+).*/\1 \2/p' <<<"$getvcp_output"
+    )
+
+    if [[ -z "$parsed" ]]; then
+        echo "Unable to parse brightness for bus $bus" >&2
+        exit 1
+    fi
+
+    printf '%s\n' "$parsed"
+}
+
+load_state() {
+    local state
+
+    [[ -r "$state_file" ]] || return 1
+
+    mapfile -t state <"$state_file"
+    [[ ${#state[@]} -ge 4 ]] || return 1
+
+    bus="${state[0]}"
+    device_max="${state[1]}"
+    current_percent="${state[2]}"
+    last_updated="${state[3]}"
+
+    [[ -n "$bus" && -n "$device_max" && -n "$current_percent" && -n "$last_updated" ]]
+}
+
+write_state() {
+    printf '%s\n%s\n%s\n%s\n' \
+        "$bus" \
+        "$device_max" \
+        "$current_percent" \
+        "$now" >"$state_file"
+}
+
+refresh_state() {
+    local parsed
+
+    if [[ -z "${bus:-}" ]]; then
+        bus=$(find_bus)
+    fi
+
+    if ! parsed=$(read_brightness "$bus" 2>/dev/null); then
+        bus=$(find_bus)
+        parsed=$(read_brightness "$bus")
+    fi
+
+    read -r current_value device_max <<<"$parsed"
+    current_percent=$(( (current_value * 100 + device_max / 2) / device_max ))
+}
+
+compute_target() {
+    rounded_percent=$(( (current_percent + STEP / 2) / STEP * STEP ))
+    new_percent=$((rounded_percent + delta))
+
+    if (( new_percent > MAX_PERCENT )); then
+        new_percent=$MAX_PERCENT
+    fi
+
+    if (( new_percent < MIN_PERCENT )); then
+        new_percent=$MIN_PERCENT
+    fi
+
+    new_value=$(( (new_percent * device_max + 50) / 100 ))
+
+    if (( new_value < 0 )); then
+        new_value=0
+    fi
+
+    if (( new_value > device_max )); then
+        new_value=$device_max
+    fi
+}
+
+progress_for_percent() {
+    if (( $1 >= 100 )); then
+        printf '1.0\n'
+    else
+        printf '0.%02d\n' "$1"
+    fi
+}
+
+exec 9>"$lock_file"
+flock -x 9
+
+printf -v now '%(%s)T' -1
+
+if ! load_state || (( now - last_updated > CACHE_TTL )); then
+    refresh_state
+fi
+
+compute_target
+
+if [[ "${SYSTEM_BRIGHTNESS_DRY_RUN:-0}" == "1" ]]; then
+    printf 'bus=%s current=%s/%s current_percent=%s new_percent=%s new_value=%s\n' \
+        "$bus" \
+        "${current_value:-?}" \
+        "$device_max" \
+        "$current_percent" \
+        "$new_percent" \
+        "$new_value"
+    exit 0
+fi
+
+if ! ddcutil --bus="$bus" setvcp 10 "$new_value" --noverify >/dev/null 2>&1; then
+    bus=""
+    refresh_state
+    compute_target
+    ddcutil --bus="$bus" setvcp 10 "$new_value" --noverify >/dev/null
+fi
+
+current_percent=$new_percent
+write_state
+
+swayosd-client \
+    --custom-progress "$(progress_for_percent "$new_percent")" \
+    --custom-progress-text "${label}: ${new_percent}%" \
+    --custom-icon display-brightness-symbolic

@@ -9,6 +9,7 @@ if "$SCRIPT_DIR/rofi-toggle-pidfile" begin "$MENU_ID"; then
 fi
 
 options="  Install
+󰚰  System Update
 󰂄  Battery
 󱐋  Power Profile
 󰐥  Shutdown
