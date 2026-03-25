@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+WORKSPACE_NAME="special:discordspace"
+APP_CLASS="vesktop"
+POLL_SECONDS="${POLL_SECONDS:-2}"
+
+has_discordspace_window() {
+    local clients_json
+
+    if ! clients_json="$(hyprctl -j clients 2>/dev/null)"; then
+        return 2
+    fi
+
+    if jq -e '
+        any(
+            .[];
+            (
+                ((.class // "" | ascii_downcase) == "'"$APP_CLASS"'")
+                or
+                ((.initialClass // "" | ascii_downcase) == "'"$APP_CLASS"'")
+            )
+            and
+            ((.workspace.name // "") == "'"$WORKSPACE_NAME"'")
+        )
+    ' >/dev/null 2>&1 <<<"$clients_json"; then
+        return 0
+    fi
+
+    case $? in
+        1) return 1 ;;
+        *) return 2 ;;
+    esac
+}
+
+kill_vesktop_if_detached() {
+    local status=0
+
+    has_discordspace_window || status=$?
+
+    if [ "$status" -eq 0 ]; then
+        return 0
+    fi
+
+    if [ "$status" -eq 2 ]; then
+        return 0
+    fi
+
+    pkill -9 -x vesktop >/dev/null 2>&1 || true
+}
+
+if [ "${1:-}" = "--once" ]; then
+    kill_vesktop_if_detached
+    exit 0
+fi
+
+while true; do
+    kill_vesktop_if_detached
+    sleep "$POLL_SECONDS"
+done

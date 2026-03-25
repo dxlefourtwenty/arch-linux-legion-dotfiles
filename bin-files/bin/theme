@@ -20,6 +20,9 @@ NEW_THEME="$THEME_DIR/$1"
 # Stop apps that will be restarted against the new theme, if they are running.
 # pgrep -x spotify >/dev/null && pkill -x spotify || true
 
+"$SCRIPT_DIR/reload-nemo" || true
+"$SCRIPT_DIR/reload-pavucontrol" || true
+
 # Atomic theme switch (IMPORTANT)
 ln -sfn "$NEW_THEME" "$CURRENT_LINK"
 
@@ -33,13 +36,14 @@ ln -sfn "$NEW_THEME" "$CURRENT_LINK"
 "$SCRIPT_DIR/reload-btop" || true
 "$SCRIPT_DIR/reload-cava" || true
 "$SCRIPT_DIR/reload-mako" || true
+
+"$SCRIPT_DIR/reload-discord" >/dev/null 2>&1 &
+"$SCRIPT_DIR/spicetify-set" --live "$1" >/dev/null 2>&1 &
 "$SCRIPT_DIR/reload-dashboard" || true
-"$SCRIPT_DIR/reload-nemo" || true
+
+
 "$SCRIPT_DIR/reload-celluloid" || true
 "$SCRIPT_DIR/reload-swayosd" || true
-"$SCRIPT_DIR/reload-discord" >/dev/null 2>&1 &
-
-"$SCRIPT_DIR/spicetify-set" --live "$1" >/dev/null 2>&1 &
 
 killall xdg-desktop-portal >/dev/null 2>&1 || true
 killall xdg-desktop-portal-gtk >/dev/null 2>&1 || true

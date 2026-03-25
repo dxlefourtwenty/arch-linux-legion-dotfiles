@@ -63,7 +63,7 @@ tooltip label {
 }
 
 #workspaces {
-  background: @background;
+  background: @background-alt;
   padding: 0 8px;
 }
 
@@ -71,6 +71,7 @@ tooltip label {
 	padding: 0 8px;
   font-size: 13pt;
 	color: @foreground;
+  background: @background-alt;
 }
 
 #workspaces button:hover {

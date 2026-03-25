@@ -119,6 +119,7 @@
       "on-click": "~/bin/launch-terminal-floating 1000 800 nmtui",
       "format-ethernet": "",
       "format-wifi": "<span font_desc=\"JetBrainsMono Nerd Font\">{icon}</span> {signalStrength}%",
+      "format-linked": "VPN",
       "format-disconnected": "󰞃 no signal",
       "format-icons": ["󰢿 ", "󰢼 ", "󰢽 ", "󰢾 "],
       "tooltip-format-wifi": "{essid} ({signalStrength}%)",

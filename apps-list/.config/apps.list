@@ -10,6 +10,7 @@ libreoffice-menu.desktop|/usr/share/icons/hicolor/128x128/apps/libreoffice-base.
 brave-browser.desktop|/usr/share/icons/hicolor/128x128/apps/brave-desktop.png|Brave
 youtube-webapp.desktop|/home/dxle/.local/share/icons/YouTube.png|YouTube
 instagram-webapp.desktop|/home/dxle/.local/share/icons/Instagram.png|Instagram
+tiktok-webapp.desktop|/home/dxle/.local/share/icons/TikTok-2.png|TikTok
 github-webapp.desktop|/home/dxle/.local/share/icons/GitHub.png|GitHub
 localsend.desktop|/home/dxle/.local/share/icons/localsend.png|LocalSend
 lutgen-studio.desktop|/home/dxle/builds/lutgen-rs/crates/studio/assets/lutgen.png|Lutgen Studio

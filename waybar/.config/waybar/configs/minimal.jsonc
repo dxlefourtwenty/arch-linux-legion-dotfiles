@@ -174,7 +174,7 @@
         "on-click": "~/bin/launch-terminal-floating 1000 800 nmtui",
         "format-ethernet": "{ipaddr}/{cidr}",
         "tooltip-format": "{ifname}: {ipaddr}/{cidr} {essid}",
-        "format-linked": "{ifname} (No IP)",
+        "format-linked": "<span font_desc=\"JetBrainsMono Nerd Font\">󰖂</span>",
         "format-disconnected": "Disconnected ⚠",
         "format-alt": "<span font_desc=\"JetBrainsMono Nerd Font\"></span>"
     },

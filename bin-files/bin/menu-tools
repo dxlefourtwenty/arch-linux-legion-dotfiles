@@ -8,7 +8,8 @@ if "$SCRIPT_DIR/rofi-toggle-pidfile" begin "$MENU_ID"; then
     exit 0
 fi
 
-options="  Capture
+options="󰖂  VPN
+  Capture
   Clipboard
   Share
 󰞅  Emojis
@@ -45,6 +46,9 @@ chosen=$(printf '%b\n' "$options" | "$SCRIPT_DIR/rofi-nerd-markup" | rofi -dmenu
 label="${chosen#*  }"   # remove up to the double-space after the icon
 
 case "$label" in
+  "VPN")
+    "$SCRIPT_DIR/launch-vpn"
+    ;;
   "Capture")
     "$SCRIPT_DIR/menu-capture"
     ;;

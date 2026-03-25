@@ -49,3 +49,12 @@ EOF
     eza -lla "$dir" -s newest --icons=always --color=always | head -n "$count"
   fi
 }
+
+sudo() {
+    if [ "$1" = "nvim" ]; then
+        shift
+        command sudo -e "$@"
+    else
+        command sudo "$@"
+    fi
+}

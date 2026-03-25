@@ -98,6 +98,7 @@
       "on-click": "~/bin/launch-terminal-floating 1000 800 nmtui",
       "format-ethernet": "",
       "format-wifi": "net:  {signalStrength}%",
+      "format-linked": "net:  VPN",
       "format-disconnected": "net:  no signal",
       "format-icons": ["󰢿 ", "󰢼 ", "󰢽 ", "󰢾 "],
       "tooltip-format-wifi": "{essid} ({signalStrength}%)",

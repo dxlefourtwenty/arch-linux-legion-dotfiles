@@ -3,6 +3,8 @@
 set -euo pipefail
 
 PIDFILE="/tmp/launch-screenshot-clipboard.pid"
+OUTPUT_DIR="${HOME}/files/pictures/screenshots"
+NOTIFICATION_ICON="/usr/share/icons/hicolor/scalable/apps/satty.svg"
 
 if [[ -f "$PIDFILE" ]]; then
     pid=$(cat "$PIDFILE" 2>/dev/null || true)
@@ -15,38 +17,43 @@ fi
 
 setsid bash -c '
 set -euo pipefail
+
 PIDFILE="/tmp/launch-screenshot-clipboard.pid"
+OUTPUT_DIR="${HOME}/files/pictures/screenshots"
+NOTIFICATION_ICON="/usr/share/icons/hicolor/scalable/apps/satty.svg"
 echo "$$" > "$PIDFILE"
 
 cleanup() {
+    rm -rf "${tmp_dir:-}"
     rm -f "$PIDFILE"
 }
 trap cleanup EXIT INT TERM
 
-DIR="$HOME/files/pictures/screenshots"
-mkdir -p "$DIR"
+mkdir -p "$OUTPUT_DIR"
 
-tmp=$(mktemp /tmp/satty-XXXXXX.png) || exit 1
-geometry=$(slurp) || exit 0
-[[ -z "$geometry" ]] && exit 0
+tmp_dir="$(mktemp -d /tmp/launch-screenshot-clipboard-XXXXXX)" || exit 1
+tmp_input="${tmp_dir}/capture.png"
+output_file="${OUTPUT_DIR}/screenshot-$(date +%Y-%m-%d_%H-%M-%S).png"
 
-grim -g "$geometry" "$tmp" || exit 1
+geometry="$(slurp 2>/dev/null || true)"
+[[ -n "$geometry" ]] || exit 0
 
-satty -f "$tmp" \
+grim -g "$geometry" "$tmp_input" || exit 1
+
+satty \
+    --filename "$tmp_input" \
+    --output-filename "$output_file" \
+    --actions-on-enter save-to-clipboard \
+    --save-after-copy \
+    --copy-command "wl-copy" \
+    --disable-notifications \
     --floating-hack \
-    --actions-on-enter save-to-file \
-    --early-exit || {
-    rm -f "$tmp"
-    exit 1
-}
+    --resize 1200x800 \
+    --early-exit || true
 
-wl-copy --type image/png < "$tmp"
-
-notify-send \
-    -i /usr/share/icons/hicolor/scalable/apps/satty.svg \
-    -t 3000 \
-    "Clipboard" "Screenshot appended."
-
-file="$DIR/screenshot-$(date +%Y-%m-%d_%H-%M-%S).png"
-mv "$tmp" "$file"
+if [[ -s "$output_file" ]] && command -v notify-send >/dev/null 2>&1; then
+    notify-send -i "$NOTIFICATION_ICON" -t 3000 "Screenshot" "Region saved and copied."
+fi
 ' >/dev/null 2>&1 &
+
+disown || true
