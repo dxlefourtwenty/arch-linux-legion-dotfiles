@@ -9,6 +9,7 @@ if "$SCRIPT_DIR/rofi-toggle-pidfile" begin "$MENU_ID"; then
 fi
 
 options="󰛨  Nightlight
+  Idle Lock
   Top Bar
 󰨝  Dashboard"
 
@@ -40,6 +41,9 @@ label="${chosen#*  }"   # remove up to the double-space after the icon
 case "$label" in
   "Nightlight")
     "$SCRIPT_DIR/system-toggle-nightlight"
+    ;;
+  "Idle Lock")
+    "$SCRIPT_DIR/system-toggle-idle-lock"
     ;;
   "Top Bar")
     "$SCRIPT_DIR/toggle-waybar"

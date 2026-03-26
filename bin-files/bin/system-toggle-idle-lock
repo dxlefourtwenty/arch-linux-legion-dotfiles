@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+LAUNCH_SCRIPT="${SCRIPT_DIR}/launch-hypridle"
+
+if pgrep -x hypridle >/dev/null 2>&1; then
+    pkill -x hypridle
+    notify-send -t 2500 "System" "Idle lock: OFF"
+    exit 0
+fi
+
+if [ -x "${LAUNCH_SCRIPT}" ]; then
+    "${LAUNCH_SCRIPT}"
+else
+    hypridle >/dev/null 2>&1 &
+    disown 2>/dev/null || true
+fi
+
+notify-send -t 2500 "System" "Idle lock: ON"

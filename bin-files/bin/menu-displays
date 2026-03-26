@@ -40,15 +40,21 @@ set_monitor_state_in_config() {
     tmp_file="$(mktemp)"
 
     while IFS= read -r line || [[ -n "$line" ]]; do
-        if [[ "$line" =~ ^([[:space:]]*)#?[[:space:]]*monitor[[:space:]]*=[[:space:]]*(${target_monitor},[^#]*)([[:space:]]+#.*)?$ ]]; then
+        if [[ "$line" =~ ^([[:space:]]*)#?[[:space:]]*monitor[[:space:]]*=[[:space:]]*([^#]+)([[:space:]]+#.*)?$ ]]; then
             local indent="${BASH_REMATCH[1]}"
             local body="${BASH_REMATCH[2]}"
             local comment="${BASH_REMATCH[3]:-}"
+            local monitor_id="${body%%,*}"
             local prefix=""
+
+            if [[ "$monitor_id" != "$target_monitor" ]]; then
+                printf '%s\n' "$line" >> "$tmp_file"
+                continue
+            fi
 
             changed=1
 
-            if [[ "$body" == "${target_monitor},disable"* ]]; then
+            if [[ "${body#*,}" == disable* ]]; then
                 [[ "$target_state" == "enabled" ]] && prefix="#"
             else
                 [[ "$target_state" == "disabled" ]] && prefix="#"
@@ -78,13 +84,40 @@ restore_backup() {
     rm -f "$BACKUP_FILE"
 }
 
+config_monitor_identifier() {
+    local monitor_name="$1"
+    local monitor_description="$2"
+    local desc_identifier="desc:${monitor_description}"
+
+    if rg -Fq "monitor=${desc_identifier}," "$MONITORS_CONF" || rg -Fq "#monitor=${desc_identifier}," "$MONITORS_CONF"; then
+        printf '%s\n' "$desc_identifier"
+        return 0
+    fi
+
+    printf '%s\n' "$monitor_name"
+}
+
 monitors=()
+config_monitors=()
 display_monitors=()
 
 while IFS= read -r row; do
     name="$(jq -r '.name' <<< "$row")"
+    description="$(jq -r '.description // empty' <<< "$row")"
     model="$(jq -r '.model // empty' <<< "$row")"
     disabled="$(jq -r '.disabled' <<< "$row")"
+
+    if [[ "$model" == "0x0A2D" ]]; then
+        model="Laptop"
+    fi
+
+    if [[ "$model" == "ASUS VG277Q1A" ]]; then
+        model="ASUS"
+    fi
+
+    if [[ "$model" == "KG271U N3" ]]; then
+        model="Acer"
+    fi
 
     label="󰍹  $name"
     if [[ -n "$model" && "$model" != "$name" ]]; then
@@ -97,6 +130,7 @@ while IFS= read -r row; do
     fi
 
     monitors+=("$name")
+    config_monitors+=("$(config_monitor_identifier "$name" "$description")")
     display_monitors+=("$pretty")
 done < <(jq -c '.[]' <<< "$monitors_json")
 
@@ -131,13 +165,29 @@ if (( chosen_index == ${#monitors[@]} )); then
 fi
 
 selected_monitor="${monitors[$chosen_index]}"
+selected_config_monitor="${config_monitors[$chosen_index]}"
 selected_disabled="$(jq -r --arg name "$selected_monitor" '.[] | select(.name == $name) | .disabled' <<< "$monitors_json")"
+selected_display_name="$(jq -r --arg name "$selected_monitor" '
+    .[] | select(.name == $name) |
+    if .model == "0x0A2D" then
+        "Laptop"
+    elif .model == "ASUS VG277Q1A" then
+        "ASUS"
+    elif .model == "KG271U N3" then
+        "Acer"
+    else
+        .name
+    end
+' <<< "$monitors_json")"
 ensure_backup
 
 if [[ "$selected_disabled" == "false" ]]; then
-    set_monitor_state_in_config "$selected_monitor" "disabled"
+    set_monitor_state_in_config "$selected_config_monitor" "disabled"
+    monitor_status="Disabled"
 else
-    set_monitor_state_in_config "$selected_monitor" "enabled"
+    set_monitor_state_in_config "$selected_config_monitor" "enabled"
+    monitor_status="Enabled"
 fi
 
 hyprctl reload >/dev/null
+notify-send -t 5000 "System" "Monitor: ${selected_display_name} ${monitor_status}"
