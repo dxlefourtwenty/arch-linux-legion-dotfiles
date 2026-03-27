@@ -32,9 +32,12 @@ fi
 
 # Enable bash completion
 [[ -f /usr/share/bash-completion/bash_completion ]] && source /usr/share/bash-completion/bash_completion
+bind 'set completion-ignore-case on'
 bind 'set show-all-if-ambiguous on'
+bind 'set colored-stats on'
 bind 'set menu-complete-display-prefix on'
 bind '"\t": menu-complete'
+bind '"\e[Z": menu-complete-backward'
 
 eval "$(starship init bash)"
 
