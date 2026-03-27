@@ -30,5 +30,11 @@ fi
 
 # PROMPT_COMMAND="print_newline_if_needed"
 
+# Enable bash completion
+[[ -f /usr/share/bash-completion/bash_completion ]] && source /usr/share/bash-completion/bash_completion
+bind 'set show-all-if-ambiguous on'
+bind 'set menu-complete-display-prefix on'
+bind '"\t": menu-complete'
+
 eval "$(starship init bash)"
 
