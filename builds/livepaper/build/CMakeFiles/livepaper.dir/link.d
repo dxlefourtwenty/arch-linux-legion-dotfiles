@@ -13,7 +13,7 @@ livepaper: \
   CMakeFiles/livepaper.dir/build/.qt/rcc/qrc_livepaper_raw_qml_0.cpp.o \
   CMakeFiles/livepaper.dir/build/.qt/rcc/qrc_livepaper_raw_qml_0_extra_qmldirs.cpp.o \
   /usr/lib/libQt6QuickControls2.so.6.10.2 \
-  /usr/lib/libLayerShellQtInterface.so.6.6.2 \
+  /usr/lib/libLayerShellQtInterface.so.6.6.3 \
   /usr/lib/libQt6Quick.so.6.10.2 \
   /usr/lib/libQt6OpenGL.so.6.10.2 \
   /usr/lib/libQt6Qml.so.6.10.2 \
@@ -145,7 +145,7 @@ CMakeFiles/livepaper.dir/build/.qt/rcc/qrc_livepaper_raw_qml_0_extra_qmldirs.cpp
 
 /usr/lib/libQt6QuickControls2.so.6.10.2:
 
-/usr/lib/libLayerShellQtInterface.so.6.6.2:
+/usr/lib/libLayerShellQtInterface.so.6.6.3:
 
 /usr/lib/libQt6Quick.so.6.10.2:
 

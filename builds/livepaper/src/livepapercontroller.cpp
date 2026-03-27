@@ -14,6 +14,8 @@
 namespace {
 constexpr int kApplyDebounceMs = 120;
 constexpr qreal kScrollFollowSpeed = 4.8;
+constexpr int kGalleryRepeatCopies = 5;
+constexpr int kGalleryCenterCopy = kGalleryRepeatCopies / 2;
 
 int leadingNumber(const QString &name) {
     int i = 0;
@@ -85,6 +87,23 @@ QString LivepaperController::currentLabel() const {
 void LivepaperController::setCurrentIndex(int index) {
     if (m_items.isEmpty()) return;
 
+    if (m_items.size() == 1) {
+        const bool changed = (m_currentIndex != 0) ||
+            (m_galleryTargetIndex != 0) ||
+            (qAbs(m_galleryIndex) > 0.0001);
+        if (m_currentIndex != 0) {
+            m_currentIndex = 0;
+            emit currentIndexChanged();
+        }
+        if (m_galleryTargetIndex != 0 || qAbs(m_galleryIndex) > 0.0001) {
+            m_galleryTargetIndex = 0;
+            m_galleryIndex = 0.0;
+            emit galleryIndexChanged();
+        }
+        if (changed) m_applyDebounce.start();
+        return;
+    }
+
     int normalized = index % m_items.size();
     if (normalized < 0) normalized += m_items.size();
     if (normalized == m_currentIndex && m_galleryTargetIndex >= 0) return;
@@ -105,6 +124,7 @@ void LivepaperController::setCurrentIndex(int index) {
         emit galleryIndexChanged();
     }
 
+    normalizeGalleryWindow();
     m_currentIndex = normalized;
     emit currentIndexChanged();
     m_applyDebounce.start();
@@ -236,7 +256,7 @@ void LivepaperController::loadWallpapers() {
 
     const int fromLink = findCurrentIndexFromLink();
     m_currentIndex = (fromLink >= 0) ? fromLink : 0;
-    m_galleryTargetIndex = m_items.size() + m_currentIndex;
+    m_galleryTargetIndex = centeredGalleryIndex(m_currentIndex);
     m_galleryIndex = m_galleryTargetIndex;
     emit currentIndexChanged();
     emit galleryIndexChanged();
@@ -260,7 +280,45 @@ void LivepaperController::tickGalleryScroll() {
     if (qAbs(m_galleryIndex - static_cast<qreal>(m_galleryTargetIndex)) < 0.001) {
         m_galleryIndex = m_galleryTargetIndex;
         emit galleryIndexChanged();
+        recenterGallery();
     }
+}
+
+int LivepaperController::centeredGalleryIndex(int actualIndex) const {
+    if (m_items.isEmpty()) return -1;
+    if (m_items.size() == 1) return 0;
+    return m_items.size() * kGalleryCenterCopy + actualIndex;
+}
+
+void LivepaperController::normalizeGalleryWindow() {
+    if (m_items.size() <= 1 || m_galleryTargetIndex < 0 || m_galleryIndex < 0.0) return;
+
+    const int count = m_items.size();
+    const int minIndex = count;
+    const int maxIndex = count * (kGalleryRepeatCopies - 1);
+    int shift = 0;
+
+    while (m_galleryTargetIndex + shift < minIndex) shift += count;
+    while (m_galleryTargetIndex + shift >= maxIndex) shift -= count;
+
+    if (shift == 0) return;
+
+    m_galleryTargetIndex += shift;
+    m_galleryIndex += static_cast<qreal>(shift);
+    emit galleryIndexChanged();
+}
+
+void LivepaperController::recenterGallery() {
+    if (m_items.size() <= 1 || m_currentIndex < 0) return;
+
+    const int centered = centeredGalleryIndex(m_currentIndex);
+    if (m_galleryTargetIndex == centered && qAbs(m_galleryIndex - static_cast<qreal>(centered)) < 0.0001) {
+        return;
+    }
+
+    m_galleryTargetIndex = centered;
+    m_galleryIndex = centered;
+    emit galleryIndexChanged();
 }
 
 QString LivepaperController::formatDisplayName(QString fileName) {

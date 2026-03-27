@@ -69,6 +69,9 @@ private slots:
 private:
     void loadThemeConfig();
     void loadWallpapers();
+    int centeredGalleryIndex(int actualIndex) const;
+    void normalizeGalleryWindow();
+    void recenterGallery();
     static QString formatDisplayName(QString fileName);
     int findCurrentIndexFromLink() const;
     void updateLink(const QString &targetPath);

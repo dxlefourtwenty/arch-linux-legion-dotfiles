@@ -23,6 +23,7 @@ Window {
     property bool closing: false
     property bool hadFocus: false
     property int animMs: 180
+    readonly property int galleryRepeats: realCount > 1 ? 5 : realCount
 
     function startClose() {
         if (closing) return
@@ -128,7 +129,7 @@ Window {
             id: listView
             anchors.fill: parent
             anchors.margins: 16
-            model: realCount > 0 ? realCount * 3 : 0
+            model: galleryRepeats > 0 ? realCount * galleryRepeats : 0
             orientation: ListView.Horizontal
             spacing: itemSpacing
             clip: true

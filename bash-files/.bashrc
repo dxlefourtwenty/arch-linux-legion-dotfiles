@@ -30,6 +30,17 @@ fi
 
 # PROMPT_COMMAND="print_newline_if_needed"
 
+# word movement
+bind '"\ew": forward-word'
+bind '"\eb": backward-word'
+
+# start/end of line
+bind '"\e0": beginning-of-line'
+bind '"\ee": end-of-line'
+
+# delete word forward
+bind '"\ed": kill-word'
+
 # Enable bash completion
 [[ -f /usr/share/bash-completion/bash_completion ]] && source /usr/share/bash-completion/bash_completion
 bind 'set completion-ignore-case on'

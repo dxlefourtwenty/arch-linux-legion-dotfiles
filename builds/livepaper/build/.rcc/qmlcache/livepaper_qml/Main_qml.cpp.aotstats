@@ -47,10 +47,18 @@
                         },
                         {
                             "codegenResult": 0,
+                            "column": 43,
+                            "durationMicroseconds": 0,
+                            "functionName": "galleryRepeats",
+                            "line": 26,
+                            "message": ""
+                        },
+                        {
+                            "codegenResult": 0,
                             "column": 5,
                             "durationMicroseconds": 0,
                             "functionName": "startClose",
-                            "line": 27,
+                            "line": 28,
                             "message": ""
                         },
                         {
@@ -58,7 +66,7 @@
                             "column": 12,
                             "durationMicroseconds": 0,
                             "functionName": "width",
-                            "line": 34,
+                            "line": 35,
                             "message": ""
                         },
                         {
@@ -66,7 +74,7 @@
                             "column": 13,
                             "durationMicroseconds": 0,
                             "functionName": "height",
-                            "line": 35,
+                            "line": 36,
                             "message": ""
                         },
                         {
@@ -74,7 +82,7 @@
                             "column": 22,
                             "durationMicroseconds": 0,
                             "functionName": "onActiveChanged",
-                            "line": 41,
+                            "line": 42,
                             "message": ""
                         },
                         {
@@ -82,7 +90,7 @@
                             "column": 16,
                             "durationMicroseconds": 0,
                             "functionName": "onClosing",
-                            "line": 45,
+                            "line": 46,
                             "message": ""
                         },
                         {
@@ -90,7 +98,7 @@
                             "column": 16,
                             "durationMicroseconds": 0,
                             "functionName": "onClosing",
-                            "line": 45,
+                            "line": 46,
                             "message": ""
                         },
                         {
@@ -98,7 +106,7 @@
                             "column": 22,
                             "durationMicroseconds": 0,
                             "functionName": "layer",
-                            "line": 37,
+                            "line": 38,
                             "message": ""
                         },
                         {
@@ -106,7 +114,7 @@
                             "column": 24,
                             "durationMicroseconds": 0,
                             "functionName": "anchors",
-                            "line": 38,
+                            "line": 39,
                             "message": ""
                         },
                         {
@@ -114,7 +122,7 @@
                             "column": 38,
                             "durationMicroseconds": 0,
                             "functionName": "keyboardInteractivity",
-                            "line": 40,
+                            "line": 41,
                             "message": ""
                         },
                         {
@@ -122,7 +130,7 @@
                             "column": 19,
                             "durationMicroseconds": 0,
                             "functionName": "interval",
-                            "line": 53,
+                            "line": 54,
                             "message": ""
                         },
                         {
@@ -130,7 +138,7 @@
                             "column": 22,
                             "durationMicroseconds": 0,
                             "functionName": "onTriggered",
-                            "line": 55,
+                            "line": 56,
                             "message": "Cannot access value for name Livepaper"
                         },
                         {
@@ -138,7 +146,7 @@
                             "column": 17,
                             "durationMicroseconds": 0,
                             "functionName": "target",
-                            "line": 59,
+                            "line": 60,
                             "message": "Cannot access value for name Livepaper"
                         },
                         {
@@ -146,7 +154,7 @@
                             "column": 9,
                             "durationMicroseconds": 0,
                             "functionName": "onCountChanged",
-                            "line": 61,
+                            "line": 62,
                             "message": "Cannot access value for name Livepaper"
                         },
                         {
@@ -154,7 +162,7 @@
                             "column": 9,
                             "durationMicroseconds": 0,
                             "functionName": "onCloseRequested",
-                            "line": 65,
+                            "line": 66,
                             "message": ""
                         },
                         {
@@ -162,7 +170,7 @@
                             "column": 16,
                             "durationMicroseconds": 0,
                             "functionName": "width",
-                            "line": 72,
+                            "line": 73,
                             "message": "Cannot access value for name panelWidth"
                         },
                         {
@@ -170,7 +178,7 @@
                             "column": 17,
                             "durationMicroseconds": 0,
                             "functionName": "height",
-                            "line": 73,
+                            "line": 74,
                             "message": "Cannot access value for name panelHeight"
                         },
                         {
@@ -178,7 +186,7 @@
                             "column": 40,
                             "durationMicroseconds": 0,
                             "functionName": "shownY",
-                            "line": 75,
+                            "line": 76,
                             "message": ""
                         },
                         {
@@ -186,7 +194,7 @@
                             "column": 41,
                             "durationMicroseconds": 0,
                             "functionName": "hiddenY",
-                            "line": 76,
+                            "line": 77,
                             "message": ""
                         },
                         {
@@ -194,7 +202,7 @@
                             "column": 12,
                             "durationMicroseconds": 0,
                             "functionName": "y",
-                            "line": 77,
+                            "line": 78,
                             "message": ""
                         },
                         {
@@ -202,7 +210,7 @@
                             "column": 16,
                             "durationMicroseconds": 0,
                             "functionName": "color",
-                            "line": 79,
+                            "line": 80,
                             "message": "Cannot access value for name Livepaper"
                         },
                         {
@@ -210,7 +218,7 @@
                             "column": 35,
                             "durationMicroseconds": 0,
                             "functionName": "horizontalCenter",
-                            "line": 74,
+                            "line": 75,
                             "message": ""
                         },
                         {
@@ -218,7 +226,7 @@
                             "column": 41,
                             "durationMicroseconds": 0,
                             "functionName": "duration",
-                            "line": 82,
+                            "line": 83,
                             "message": ""
                         },
                         {
@@ -226,7 +234,7 @@
                             "column": 66,
                             "durationMicroseconds": 0,
                             "functionName": "type",
-                            "line": 82,
+                            "line": 83,
                             "message": ""
                         },
                         {
@@ -234,7 +242,7 @@
                             "column": 20,
                             "durationMicroseconds": 0,
                             "functionName": "width",
-                            "line": 88,
+                            "line": 89,
                             "message": ""
                         },
                         {
@@ -242,7 +250,7 @@
                             "column": 20,
                             "durationMicroseconds": 0,
                             "functionName": "color",
-                            "line": 90,
+                            "line": 91,
                             "message": "Cannot access value for name Livepaper"
                         },
                         {
@@ -250,7 +258,7 @@
                             "column": 21,
                             "durationMicroseconds": 0,
                             "functionName": "height",
-                            "line": 97,
+                            "line": 98,
                             "message": ""
                         },
                         {
@@ -258,7 +266,7 @@
                             "column": 20,
                             "durationMicroseconds": 0,
                             "functionName": "color",
-                            "line": 98,
+                            "line": 99,
                             "message": "Cannot access value for name Livepaper"
                         },
                         {
@@ -266,7 +274,7 @@
                             "column": 16,
                             "durationMicroseconds": 0,
                             "functionName": "x",
-                            "line": 102,
+                            "line": 103,
                             "message": ""
                         },
                         {
@@ -274,7 +282,7 @@
                             "column": 21,
                             "durationMicroseconds": 0,
                             "functionName": "height",
-                            "line": 105,
+                            "line": 106,
                             "message": ""
                         },
                         {
@@ -282,7 +290,7 @@
                             "column": 20,
                             "durationMicroseconds": 0,
                             "functionName": "color",
-                            "line": 106,
+                            "line": 107,
                             "message": "Cannot access value for name Livepaper"
                         },
                         {
@@ -290,7 +298,7 @@
                             "column": 25,
                             "durationMicroseconds": 0,
                             "functionName": "onPressed",
-                            "line": 109,
+                            "line": 110,
                             "message": "Cannot access value for name Livepaper"
                         },
                         {
@@ -298,7 +306,7 @@
                             "column": 25,
                             "durationMicroseconds": 0,
                             "functionName": "onPressed",
-                            "line": 109,
+                            "line": 110,
                             "message": ""
                         },
                         {
@@ -306,7 +314,7 @@
                             "column": 32,
                             "durationMicroseconds": 0,
                             "functionName": "onCompleted",
-                            "line": 122,
+                            "line": 123,
                             "message": ""
                         },
                         {
@@ -314,15 +322,15 @@
                             "column": 20,
                             "durationMicroseconds": 0,
                             "functionName": "model",
-                            "line": 131,
-                            "message": "Cannot access value for name realCount"
+                            "line": 132,
+                            "message": "Cannot access value for name galleryRepeats"
                         },
                         {
                             "codegenResult": 0,
                             "column": 26,
                             "durationMicroseconds": 0,
                             "functionName": "orientation",
-                            "line": 132,
+                            "line": 133,
                             "message": ""
                         },
                         {
@@ -330,7 +338,7 @@
                             "column": 22,
                             "durationMicroseconds": 0,
                             "functionName": "spacing",
-                            "line": 133,
+                            "line": 134,
                             "message": "Cannot access value for name itemSpacing"
                         },
                         {
@@ -338,7 +346,7 @@
                             "column": 23,
                             "durationMicroseconds": 0,
                             "functionName": "contentX",
-                            "line": 136,
+                            "line": 137,
                             "message": "Cannot access value for name realCount"
                         },
                         {
@@ -346,7 +354,7 @@
                             "column": 27,
                             "durationMicroseconds": 0,
                             "functionName": "fill",
-                            "line": 129,
+                            "line": 130,
                             "message": ""
                         },
                         {
@@ -354,7 +362,7 @@
                             "column": 24,
                             "durationMicroseconds": 0,
                             "functionName": "width",
-                            "line": 144,
+                            "line": 145,
                             "message": "Cannot access value for name thumbSize"
                         },
                         {
@@ -362,7 +370,7 @@
                             "column": 25,
                             "durationMicroseconds": 0,
                             "functionName": "height",
-                            "line": 145,
+                            "line": 146,
                             "message": "Cannot access value for name thumbSize"
                         },
                         {
@@ -370,7 +378,7 @@
                             "column": 52,
                             "durationMicroseconds": 0,
                             "functionName": "mappedIndex",
-                            "line": 147,
+                            "line": 148,
                             "message": "Cannot access value for name index"
                         },
                         {
@@ -378,7 +386,7 @@
                             "column": 50,
                             "durationMicroseconds": 0,
                             "functionName": "selected",
-                            "line": 148,
+                            "line": 149,
                             "message": "Cannot access value for name Livepaper"
                         },
                         {
@@ -386,7 +394,7 @@
                             "column": 28,
                             "durationMicroseconds": 0,
                             "functionName": "width",
-                            "line": 151,
+                            "line": 152,
                             "message": "Cannot access value for name thumbSize"
                         },
                         {
@@ -394,7 +402,7 @@
                             "column": 29,
                             "durationMicroseconds": 0,
                             "functionName": "height",
-                            "line": 152,
+                            "line": 153,
                             "message": "Cannot access value for name thumbSize"
                         },
                         {
@@ -402,7 +410,7 @@
                             "column": 28,
                             "durationMicroseconds": 0,
                             "functionName": "color",
-                            "line": 156,
+                            "line": 157,
                             "message": "Cannot access value for name selected"
                         },
                         {
@@ -410,7 +418,7 @@
                             "column": 47,
                             "durationMicroseconds": 0,
                             "functionName": "horizontalCenter",
-                            "line": 153,
+                            "line": 154,
                             "message": ""
                         },
                         {
@@ -418,7 +426,7 @@
                             "column": 34,
                             "durationMicroseconds": 0,
                             "functionName": "top",
-                            "line": 154,
+                            "line": 155,
                             "message": ""
                         },
                         {
@@ -426,7 +434,7 @@
                             "column": 35,
                             "durationMicroseconds": 0,
                             "functionName": "width",
-                            "line": 157,
+                            "line": 158,
                             "message": "Cannot access value for name selected"
                         },
                         {
@@ -434,7 +442,7 @@
                             "column": 35,
                             "durationMicroseconds": 0,
                             "functionName": "color",
-                            "line": 158,
+                            "line": 159,
                             "message": "Cannot access value for name selected"
                         },
                         {
@@ -442,7 +450,7 @@
                             "column": 33,
                             "durationMicroseconds": 0,
                             "functionName": "source",
-                            "line": 163,
+                            "line": 164,
                             "message": "Cannot access value for name Livepaper"
                         },
                         {
@@ -450,7 +458,7 @@
                             "column": 35,
                             "durationMicroseconds": 0,
                             "functionName": "fillMode",
-                            "line": 164,
+                            "line": 165,
                             "message": ""
                         },
                         {
@@ -458,7 +466,7 @@
                             "column": 39,
                             "durationMicroseconds": 0,
                             "functionName": "fill",
-                            "line": 161,
+                            "line": 162,
                             "message": ""
                         },
                         {
@@ -466,7 +474,7 @@
                             "column": 28,
                             "durationMicroseconds": 0,
                             "functionName": "width",
-                            "line": 175,
+                            "line": 176,
                             "message": ""
                         },
                         {
@@ -474,7 +482,7 @@
                             "column": 42,
                             "durationMicroseconds": 0,
                             "functionName": "horizontalAlignment",
-                            "line": 176,
+                            "line": 177,
                             "message": ""
                         },
                         {
@@ -482,7 +490,7 @@
                             "column": 28,
                             "durationMicroseconds": 0,
                             "functionName": "elide",
-                            "line": 177,
+                            "line": 178,
                             "message": ""
                         },
                         {
@@ -490,7 +498,7 @@
                             "column": 28,
                             "durationMicroseconds": 0,
                             "functionName": "color",
-                            "line": 178,
+                            "line": 179,
                             "message": "Cannot access value for name Livepaper"
                         },
                         {
@@ -498,7 +506,7 @@
                             "column": 27,
                             "durationMicroseconds": 0,
                             "functionName": "text",
-                            "line": 180,
+                            "line": 181,
                             "message": "Cannot access value for name Livepaper"
                         },
                         {
@@ -506,7 +514,7 @@
                             "column": 34,
                             "durationMicroseconds": 0,
                             "functionName": "top",
-                            "line": 172,
+                            "line": 173,
                             "message": ""
                         },
                         {
@@ -514,7 +522,7 @@
                             "column": 40,
                             "durationMicroseconds": 0,
                             "functionName": "topMargin",
-                            "line": 173,
+                            "line": 174,
                             "message": "Cannot access value for name thumbSize"
                         },
                         {
@@ -522,7 +530,7 @@
                             "column": 47,
                             "durationMicroseconds": 0,
                             "functionName": "horizontalCenter",
-                            "line": 174,
+                            "line": 175,
                             "message": ""
                         },
                         {
@@ -530,7 +538,7 @@
                             "column": 32,
                             "durationMicroseconds": 0,
                             "functionName": "onClicked",
-                            "line": 185,
+                            "line": 186,
                             "message": "Cannot access value for name Livepaper"
                         },
                         {
@@ -538,7 +546,7 @@
                             "column": 35,
                             "durationMicroseconds": 0,
                             "functionName": "fill",
-                            "line": 184,
+                            "line": 185,
                             "message": ""
                         }
                     ],
