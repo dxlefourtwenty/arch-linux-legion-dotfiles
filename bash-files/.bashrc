@@ -50,5 +50,8 @@ bind 'set menu-complete-display-prefix on'
 bind '"\t": menu-complete'
 bind '"\e[Z": menu-complete-backward'
 
+# set up fzf fuzzy completion
+source <(fzf --bash)
+
 eval "$(starship init bash)"
 

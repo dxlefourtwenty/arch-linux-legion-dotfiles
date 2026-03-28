@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+killall xdg-desktop-portal-hyprland
+killall xdg-desktop-portal
+
+systemctl --user restart pipewire wireplumber
+systemctl --user restart xdg-desktop-portal-hyprland
+systemctl --user restart xdg-desktop-portal
