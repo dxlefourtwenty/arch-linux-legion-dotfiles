@@ -10,6 +10,7 @@ return {
   { "Mofiqul/dracula.nvim", name = "dracula" },
   { "tahayvr/matteblack.nvim", name = "matteblack" },
   { "bjarneo/firesky.nvim", name = "firesky" },
+  { "gthelding/monokai-pro.nvim", name = "monokai-pro" },
 
   {
     "LazyVim/LazyVim",

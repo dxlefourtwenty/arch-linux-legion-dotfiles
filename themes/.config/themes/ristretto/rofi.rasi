@@ -1,0 +1,8 @@
+* {
+    bg:        #2c2525EB;
+    bg-2:      #2c2525;
+    fg:        #e6d9db;
+    accent:    #fabd2f;
+    border:    #d57d63;
+    muted:     #724939;
+}

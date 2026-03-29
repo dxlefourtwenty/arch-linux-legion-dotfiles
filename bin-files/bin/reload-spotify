@@ -10,8 +10,6 @@ find_spotify_address() {
     '
 }
 
-spicetify update
-
 spotify_address="$(find_spotify_address)"
 
 if [ -z "$spotify_address" ]; then

@@ -1,0 +1,18 @@
+/* Ristretto */
+
+@define-color base        #2c2525;
+@define-color mantle      #241f1f;
+@define-color crust       #1c1818;
+
+@define-color surface0    #3a3132;
+@define-color surface1    #72696a;
+@define-color surface2    #948a8b;
+
+@define-color text        #e6d9db;
+@define-color subtext     #948a8b;
+
+@define-color accent      #fabd2f; /* gold */
+@define-color blue        #a8a9eb;
+@define-color green       #adda78;
+@define-color red         #fd6883;
+@define-color orange      #f38d70;
