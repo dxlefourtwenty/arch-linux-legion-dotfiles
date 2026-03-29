@@ -48,8 +48,8 @@ normalize_value() {
 
             if (floored < 0) {
                 floored = 0
-            } else if (floored > 20) {
-                floored = 20
+            } else if (floored > 25) {
+                floored = 25
             }
 
             print floored
