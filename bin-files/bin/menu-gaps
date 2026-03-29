@@ -1,0 +1,159 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+HYPR_CONF="${XDG_CONFIG_HOME:-$HOME/.config}/hypr/decorations.conf"
+MENU_ID="menu-gaps"
+PID_FILE="/tmp/menu-rofi.pid"
+
+if "$SCRIPT_DIR/rofi-toggle-pidfile" begin "$MENU_ID"; then
+    exit 0
+fi
+
+trap '"$SCRIPT_DIR/rofi-toggle-pidfile" clear "$MENU_ID"' EXIT
+
+get_current_gap() {
+    awk '
+        /^[[:space:]]*general[[:space:]]*\{/ {
+            in_section = 1
+            next
+        }
+
+        in_section && /^[[:space:]]*\}/ {
+            in_section = 0
+        }
+
+        in_section && /^[[:space:]]*gaps_out[[:space:]]*=/ {
+            value = $0
+            sub(/^[[:space:]]*gaps_out[[:space:]]*=[[:space:]]*/, "", value)
+            sub(/[[:space:]]*(#.*)?$/, "", value)
+            print value
+            exit
+        }
+    ' "$HYPR_CONF"
+}
+
+normalize_value() {
+    local input="$1"
+
+    awk -v value="$input" '
+        BEGIN {
+            gsub(/^[[:space:]]+|[[:space:]]+$/, "", value)
+
+            if (value !~ /^[+-]?(([0-9]+([.][0-9]*)?)|([.][0-9]+))$/) {
+                exit 1
+            }
+
+            number = value + 0
+            floored = (number >= 0 || number == int(number)) ? int(number) : int(number) - 1
+
+            if (floored < 0) {
+                floored = 0
+            } else if (floored > 30) {
+                floored = 30
+            }
+
+            print floored
+        }
+    '
+}
+
+update_values() {
+    local new_out="$1"
+    local new_in="$2"
+    local tmp_file
+
+    tmp_file="$(mktemp)"
+
+    awk -v new_out="$new_out" -v new_in="$new_in" '
+        /^[[:space:]]*general[[:space:]]*\{/ {
+            in_section = 1
+        }
+
+        in_section && !updated_out && /^[[:space:]]*gaps_out[[:space:]]*=/ {
+            sub(/=[[:space:]]*[^[:space:]#]+/, "= " new_out)
+            updated_out = 1
+        }
+
+        in_section && !updated_in && /^[[:space:]]*gaps_in[[:space:]]*=/ {
+            sub(/=[[:space:]]*[^[:space:]#]+/, "= " new_in)
+            updated_in = 1
+        }
+
+        in_section && /^[[:space:]]*\}/ {
+            in_section = 0
+        }
+
+        { print }
+
+        END {
+            if (!updated_out || !updated_in) {
+                exit 1
+            }
+        }
+    ' "$HYPR_CONF" > "$tmp_file"
+
+    mv "$tmp_file" "$HYPR_CONF"
+}
+
+[[ -f "$HYPR_CONF" ]] || {
+    notify-send -t 4000 "Gaps" "Config not found: $HYPR_CONF"
+    exit 1
+}
+
+while true; do
+    current_gap="$(get_current_gap)"
+    current_gap="${current_gap:-0}"
+
+    selected="$(
+        printf '' | rofi -dmenu -i \
+            -pid "$PID_FILE" \
+            -p "" \
+            -mesg "Current Gaps = $current_gap" \
+            -theme-str '
+                window { width: 380px; }
+                mainbox { children: [ inputbar, message, listview ]; }
+                inputbar { children: [ entry ]; }
+                entry { placeholder: "Enter Gaps…"; }
+                message {
+                    padding: 0px 8px 8px 8px;
+                }
+                textbox {
+                    horizontal-align: 0.0;
+                }
+                listview {
+                    lines: 0;
+                    spacing: 0px;
+                    padding: 0px;
+                }
+                element {
+                    orientation: horizontal;
+                    children: [ element-text ];
+                    spacing: 0px;
+                    padding: 8px 8px;
+                }
+                element-text {
+                    horizontal-align: 0.0;
+                    padding-left: 0px;
+                }
+            '
+    )"
+
+    [[ -n "$selected" ]] || exit 0
+
+    if ! new_out="$(normalize_value "$selected")"; then
+        notify-send -t 4000 "Gaps" "Enter a valid number."
+        continue
+    fi
+
+    new_in=$((new_out / 2))
+
+    update_values "$new_out" "$new_in"
+
+    if command -v hyprctl >/dev/null 2>&1; then
+        hyprctl reload >/dev/null 2>&1 || notify-send -t 4000 "Gaps" "Gaps updated, but Hyprland reload failed."
+    fi
+
+    notify-send -t 3000 "Gaps" "Set to $new_out"
+    exit 0
+done

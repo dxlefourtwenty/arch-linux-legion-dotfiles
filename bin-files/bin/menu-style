@@ -13,7 +13,8 @@ options="󰸌  Theme
   Background
 󱢈  Live Gallery
 󰍜  Waybar
-󰃇  Border"
+󰃇  Border
+󰹳  Gaps"
 
 chosen=$(printf '%b\n' "$options" | "$SCRIPT_DIR/rofi-nerd-markup" | rofi -dmenu -i \
     -markup-rows \
@@ -56,5 +57,8 @@ case "$label" in
     ;;
   "Border")
     "$SCRIPT_DIR/menu-border"
+    ;;
+  "Gaps")
+    "$SCRIPT_DIR/menu-gaps"
     ;;
 esac
