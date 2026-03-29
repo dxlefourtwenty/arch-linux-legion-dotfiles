@@ -11,6 +11,7 @@ return {
   { "tahayvr/matteblack.nvim", name = "matteblack" },
   { "bjarneo/firesky.nvim", name = "firesky" },
   { "gthelding/monokai-pro.nvim", name = "monokai-pro" },
+  { "OldJobobo/retro-82.nvim", name = "retro-82" },
 
   {
     "LazyVim/LazyVim",

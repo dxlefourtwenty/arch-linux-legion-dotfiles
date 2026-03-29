@@ -1,0 +1,41 @@
+general.live_config_reload = true
+general.ipc_socket = true
+
+[window]
+opacity = 0.92
+
+[window.padding]
+x = 10
+y = 10
+
+[font]
+size = 14.0
+
+[font.normal]
+family = "JetBrainsMono Nerd Font"
+
+[colors.primary]
+background = "#05182e" # Base
+foreground = "#f6dcac" # Text
+
+[colors.normal]
+black   = "#00172e" # surface1
+red     = "#f16830"
+green   = "#028391"
+yellow  = "#f19252" # an orange color
+blue    = "#f8c28a"
+magenta = "#65a7a1"
+cyan    = "#8cbfb8"
+white   = "#a7c9c6"
+
+[colors.bright]
+black   = "#134e5a"
+red     = "#f85525"
+green   = "#20898d"
+yellow  = "#e97b3c"
+blue    = "#faa968"
+magenta = "#3f8f8a"
+cyan    = "#8cbfb8"
+white   = "#f6dcac"
+
+

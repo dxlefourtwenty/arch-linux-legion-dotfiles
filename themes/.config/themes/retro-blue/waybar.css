@@ -1,0 +1,38 @@
+@define-color foreground #f6dcac;
+@define-color background-alt #00172e;
+@define-color background alpha(@background-alt, 0.8);
+@define-color primary #faa968;
+@define-color muted #134e5a;
+@define-color border #faa968;
+
+@define-color background-alpha rgba(0, 23, 46, 0.87);
+@define-color foreground-inactive #5d8b90;
+
+/* >>> terminal-24 >>> */
+@define-color black #00172e;
+@define-color red #f85525;
+@define-color green #028391;
+@define-color yellow #e97b3c;
+@define-color blue #faa968;
+@define-color magenta #3f8f8a;
+@define-color cyan #8cbfb8;
+@define-color white #a7c9c6;
+@define-color bright-black #134e5a;
+@define-color bright-red #f85525;
+@define-color bright-green #028391;
+@define-color bright-yellow #e97b3c;
+@define-color bright-blue #faa968;
+@define-color bright-magenta #3f8f8a;
+@define-color bright-cyan #8cbfb8;
+@define-color bright-white #f6dcac;
+@define-color dim-black #05182e;
+@define-color dim-red #f16830;
+@define-color dim-green #20898d;
+@define-color dim-yellow #f19252;
+@define-color dim-blue #f8c28a;
+@define-color dim-magenta #65a7a1;
+@define-color dim-cyan #99c4bf;
+@define-color dim-white #a7c9c6;
+/* <<< terminal-24 <<< */
+
+@define-color background-gray #093244;

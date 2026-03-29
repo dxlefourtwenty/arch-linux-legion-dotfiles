@@ -1,34 +1,31 @@
 #!/usr/bin/env bash
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-MENU_ID="menu-style"
+MENU_ID="menu-border"
 PID_FILE="/tmp/menu-rofi.pid"
 
 if "$SCRIPT_DIR/rofi-toggle-pidfile" begin "$MENU_ID"; then
     exit 0
 fi
 
-options="󰸌  Theme
-󰛖  Font
-  Background
-󱢈  Live Gallery
-󰍜  Waybar
-󰃇  Border"
+options="󰃎  Thickness
+󰝤  Rounding
+󱡓  Rounding Smoothness"
 
 chosen=$(printf '%b\n' "$options" | "$SCRIPT_DIR/rofi-nerd-markup" | rofi -dmenu -i \
     -markup-rows \
     -pid "$PID_FILE" \
     -p "" \
     -theme-str '
-        window { width: 265px; }
-        entry { placeholder: "Style…"; }
-        element { 
+        window { width: 360px; }
+        entry { placeholder: "Border…"; }
+        element {
             orientation: horizontal;
             children: [ element-text ];
             spacing: 0px;
             padding: 8px 8px;
         }
-        element-text { 
+        element-text {
             horizontal-align: 0.0;
             padding-left: 0px;
         }
@@ -36,25 +33,16 @@ chosen=$(printf '%b\n' "$options" | "$SCRIPT_DIR/rofi-nerd-markup" | rofi -dmenu
 
 "$SCRIPT_DIR/rofi-toggle-pidfile" clear "$MENU_ID"
 
-label="${chosen#*  }"   # remove up to the double-space after the icon
+label="${chosen#*  }"
 
 case "$label" in
-  "Theme")
-    "$SCRIPT_DIR/menu-theme"
+  "Thickness")
+    "$SCRIPT_DIR/menu-border-thickness"
     ;;
-  "Font")
-    "$SCRIPT_DIR/menu-font"
+  "Rounding")
+    "$SCRIPT_DIR/menu-border-radius"
     ;;
-  "Background")
-    "$SCRIPT_DIR/bg-set"
-    ;;
-  "Live Gallery")
-    "$SCRIPT_DIR/bg-live"
-    ;;
-  "Waybar")
-    "$SCRIPT_DIR/menu-waybar"
-    ;;
-  "Border")
-    "$SCRIPT_DIR/menu-border"
+  "Rounding Smoothness")
+    "$SCRIPT_DIR/menu-border-rounding-power"
     ;;
 esac
