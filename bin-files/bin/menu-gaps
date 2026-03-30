@@ -5,6 +5,15 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 HYPR_CONF="${XDG_CONFIG_HOME:-$HOME/.config}/hypr/decorations.conf"
 MENU_ID="menu-gaps"
 PID_FILE="/tmp/menu-rofi.pid"
+GAPS_MIN=0
+GAPS_MAX=30
+WAYBAR_MARGIN_MIN=2
+
+# Add more same-format Waybar JSONC files here if they should track gaps.
+WAYBAR_MARGIN_FILES=(
+    "${XDG_CONFIG_HOME:-$HOME/.config}/waybar/configs/floating.jsonc"
+    "${XDG_CONFIG_HOME:-$HOME/.config}/waybar/configs/island.jsonc"
+)
 
 if "$SCRIPT_DIR/rofi-toggle-pidfile" begin "$MENU_ID"; then
     exit 0
@@ -36,7 +45,7 @@ get_current_gap() {
 normalize_value() {
     local input="$1"
 
-    awk -v value="$input" '
+    awk -v value="$input" -v min_value="$GAPS_MIN" -v max_value="$GAPS_MAX" '
         BEGIN {
             gsub(/^[[:space:]]+|[[:space:]]+$/, "", value)
 
@@ -47,10 +56,10 @@ normalize_value() {
             number = value + 0
             floored = (number >= 0 || number == int(number)) ? int(number) : int(number) - 1
 
-            if (floored < 0) {
-                floored = 0
-            } else if (floored > 30) {
-                floored = 30
+            if (floored < min_value) {
+                floored = min_value
+            } else if (floored > max_value) {
+                floored = max_value
             }
 
             print floored
@@ -94,6 +103,37 @@ update_values() {
     ' "$HYPR_CONF" > "$tmp_file"
 
     mv "$tmp_file" "$HYPR_CONF"
+}
+
+update_waybar_margins() {
+    local config_file="$1"
+    local new_top="$2"
+    local new_bottom="$3"
+    local tmp_file
+
+    tmp_file="$(mktemp)"
+
+    awk -v new_top="$new_top" -v new_bottom="$new_bottom" '
+        /"margin-top"[[:space:]]*:/ && !updated_top {
+            sub(/"margin-top"[[:space:]]*:[[:space:]]*[-]?[0-9]+([.][0-9]+)?/, "\"margin-top\": " new_top)
+            updated_top = 1
+        }
+
+        /"margin-bottom"[[:space:]]*:/ && !updated_bottom {
+            sub(/"margin-bottom"[[:space:]]*:[[:space:]]*[-]?[0-9]+([.][0-9]+)?/, "\"margin-bottom\": " new_bottom)
+            updated_bottom = 1
+        }
+
+        { print }
+
+        END {
+            if (!updated_top || !updated_bottom) {
+                exit 1
+            }
+        }
+    ' "$config_file" > "$tmp_file"
+
+    mv "$tmp_file" "$config_file"
 }
 
 [[ -f "$HYPR_CONF" ]] || {
@@ -147,13 +187,27 @@ while true; do
     fi
 
     new_in=$((new_out / 2))
+    new_margin_top=$((new_out < WAYBAR_MARGIN_MIN ? WAYBAR_MARGIN_MIN : new_out))
+    new_margin_bottom=$((new_out < WAYBAR_MARGIN_MIN ? WAYBAR_MARGIN_MIN - new_out : 0))
 
     update_values "$new_out" "$new_in"
+
+    for waybar_config in "${WAYBAR_MARGIN_FILES[@]}"; do
+        if [[ ! -f "$waybar_config" ]]; then
+            notify-send -t 4000 "Gaps" "Waybar config not found: $waybar_config"
+            continue
+        fi
+
+        if ! update_waybar_margins "$waybar_config" "$new_margin_top" "$new_margin_bottom"; then
+            notify-send -t 4000 "Gaps" "Failed to update Waybar config: $waybar_config"
+        fi
+    done
 
     if command -v hyprctl >/dev/null 2>&1; then
         hyprctl reload >/dev/null 2>&1 || notify-send -t 4000 "Gaps" "Gaps updated, but Hyprland reload failed."
     fi
 
+    ~/bin/reload-waybar
     notify-send -t 3000 "Gaps" "Set to $new_out"
     exit 0
 done

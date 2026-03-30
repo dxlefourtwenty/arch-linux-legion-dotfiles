@@ -5,6 +5,8 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 HYPR_CONF="${XDG_CONFIG_HOME:-$HOME/.config}/hypr/decorations.conf"
 MENU_ID="menu-border-thickness"
 PID_FILE="/tmp/menu-rofi.pid"
+BORDER_THICKNESS_MIN=0
+BORDER_THICKNESS_MAX=5
 
 if "$SCRIPT_DIR/rofi-toggle-pidfile" begin "$MENU_ID"; then
     exit 0
@@ -35,7 +37,7 @@ get_current_value() {
 normalize_value() {
     local input="$1"
 
-    awk -v value="$input" '
+    awk -v value="$input" -v min_value="$BORDER_THICKNESS_MIN" -v max_value="$BORDER_THICKNESS_MAX" '
         BEGIN {
             gsub(/^[[:space:]]+|[[:space:]]+$/, "", value)
 
@@ -46,10 +48,10 @@ normalize_value() {
             number = value + 0
             floored = (number >= 0 || number == int(number)) ? int(number) : int(number) - 1
 
-            if (floored < 0) {
-                floored = 0
-            } else if (floored > 5) {
-                floored = 5
+            if (floored < min_value) {
+                floored = min_value
+            } else if (floored > max_value) {
+                floored = max_value
             }
 
             print floored

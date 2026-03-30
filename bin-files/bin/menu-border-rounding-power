@@ -5,6 +5,8 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 HYPR_CONF="${XDG_CONFIG_HOME:-$HOME/.config}/hypr/decorations.conf"
 MENU_ID="menu-border-rounding-power"
 PID_FILE="/tmp/menu-rofi.pid"
+BORDER_ROUNDING_POWER_MIN=0
+BORDER_ROUNDING_POWER_MAX=10.0
 
 if "$SCRIPT_DIR/rofi-toggle-pidfile" begin "$MENU_ID"; then
     exit 0
@@ -35,7 +37,7 @@ get_current_value() {
 normalize_value() {
     local input="$1"
 
-    awk -v value="$input" '
+    awk -v value="$input" -v min_value="$BORDER_ROUNDING_POWER_MIN" -v max_value="$BORDER_ROUNDING_POWER_MAX" '
         BEGIN {
             gsub(/^[[:space:]]+|[[:space:]]+$/, "", value)
 
@@ -45,10 +47,10 @@ normalize_value() {
 
             number = value + 0
 
-            if (number < 0) {
-                number = 0
-            } else if (number > 10) {
-                number = 10
+            if (number < min_value) {
+                number = min_value
+            } else if (number > max_value) {
+                number = max_value
             }
 
             if (number == int(number)) {

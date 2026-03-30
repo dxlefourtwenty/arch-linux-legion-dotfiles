@@ -4,6 +4,7 @@
     // "position": "bottom", // Waybar position (top|bottom|left|right)
     // "width": 1280, // Waybar width
     "margin-top": 10,
+    "margin-bottom": 0,
     "output":"HDMI-A-1", 
     // "spacing": 4, // Gaps between modules (4px)
     // Choose the order of the modules
