@@ -1,0 +1,474 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
+HYPR_ANIMATIONS_CONF="${XDG_CONFIG_HOME:-$HOME/.config}/hypr/animations.conf"
+HYPR_DECORATIONS_CONF="${XDG_CONFIG_HOME:-$HOME/.config}/hypr/decorations.conf"
+HYPR_KEYBINDINGS_CONF="${XDG_CONFIG_HOME:-$HOME/.config}/hypr/keybindings.conf"
+WAYBAR_STYLE_LINK="${XDG_CONFIG_HOME:-$HOME/.config}/waybar/style.css"
+THEMES_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/themes"
+STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/toggle-zen-mode"
+STATE_FILE="${STATE_DIR}/state"
+
+WAYBAR_MARGIN_MIN=2
+WAYBAR_MARGIN_FILES=(
+    "${XDG_CONFIG_HOME:-$HOME/.config}/waybar/configs/floating.jsonc"
+    "${XDG_CONFIG_HOME:-$HOME/.config}/waybar/configs/island.jsonc"
+)
+
+ZEN_ANIMATIONS_ENABLED="no"
+ZEN_GAPS_OUT=0
+ZEN_GAPS_IN=0
+ZEN_WAYBAR_STYLE="minimal"
+ZEN_THEME_NAME="matte-black"
+ZEN_SWITCH_THEME="yes"
+ZEN_BINDINGS_MODE="comment"
+ZEN_BINDINGS_START_MARKER="### zen mode separator"
+ZEN_BINDINGS_END_MARKER="# terminals"
+
+notify() {
+    notify-send -t 4000 "Zen Mode" "$1" >/dev/null 2>&1 || true
+}
+
+require_file() {
+    local path="$1"
+
+    [[ -f "$path" ]] || {
+        notify "Missing config: $path"
+        exit 1
+    }
+}
+
+resolve_link_basename() {
+    local link_path="$1"
+    local suffix="${2:-}"
+    local resolved=""
+    local name=""
+
+    resolved="$(readlink -f "$link_path" 2>/dev/null || true)"
+    [[ -n "$resolved" ]] || return 0
+
+    name="$(basename "$resolved")"
+    if [[ -n "$suffix" ]]; then
+        name="${name%"$suffix"}"
+    fi
+
+    printf '%s\n' "$name"
+}
+
+get_animation_enabled() {
+    awk '
+        /^[[:space:]]*animations[[:space:]]*\{/ {
+            in_section = 1
+            next
+        }
+
+        in_section && /^[[:space:]]*\}/ {
+            in_section = 0
+        }
+
+        in_section && match($0, /^[[:space:]]*enabled[[:space:]]*=[[:space:]]*([^[:space:],#]+)/, captures) {
+            print captures[1]
+            exit
+        }
+    ' "$HYPR_ANIMATIONS_CONF"
+}
+
+set_animation_enabled() {
+    local new_value="$1"
+    local tmp_file=""
+
+    tmp_file="$(mktemp)"
+
+    awk -v new_value="$new_value" '
+        /^[[:space:]]*animations[[:space:]]*\{/ {
+            in_section = 1
+        }
+
+        in_section && !updated && /^[[:space:]]*enabled[[:space:]]*=/ {
+            sub(/=[[:space:]]*[^[:space:],#]+/, "= " new_value)
+            updated = 1
+        }
+
+        in_section && /^[[:space:]]*\}/ {
+            in_section = 0
+        }
+
+        { print }
+
+        END {
+            if (!updated) {
+                exit 1
+            }
+        }
+    ' "$HYPR_ANIMATIONS_CONF" > "$tmp_file"
+
+    mv "$tmp_file" "$HYPR_ANIMATIONS_CONF"
+}
+
+get_gap_values() {
+    awk '
+        /^[[:space:]]*general[[:space:]]*\{/ {
+            in_section = 1
+            next
+        }
+
+        in_section && /^[[:space:]]*\}/ {
+            in_section = 0
+        }
+
+        in_section && /^[[:space:]]*gaps_out[[:space:]]*=/ {
+            value = $0
+            sub(/^[[:space:]]*gaps_out[[:space:]]*=[[:space:]]*/, "", value)
+            sub(/[[:space:]]*(#.*)?$/, "", value)
+            gaps_out = value
+        }
+
+        in_section && /^[[:space:]]*gaps_in[[:space:]]*=/ {
+            value = $0
+            sub(/^[[:space:]]*gaps_in[[:space:]]*=[[:space:]]*/, "", value)
+            sub(/[[:space:]]*(#.*)?$/, "", value)
+            gaps_in = value
+        }
+
+        END {
+            if (gaps_out == "" || gaps_in == "") {
+                exit 1
+            }
+
+            printf "%s,%s\n", gaps_out, gaps_in
+        }
+    ' "$HYPR_DECORATIONS_CONF"
+}
+
+set_gap_values() {
+    local new_out="$1"
+    local new_in="$2"
+    local tmp_file=""
+
+    tmp_file="$(mktemp)"
+
+    awk -v new_out="$new_out" -v new_in="$new_in" '
+        /^[[:space:]]*general[[:space:]]*\{/ {
+            in_section = 1
+        }
+
+        in_section && !updated_out && /^[[:space:]]*gaps_out[[:space:]]*=/ {
+            sub(/=[[:space:]]*[^[:space:]#]+/, "= " new_out)
+            updated_out = 1
+        }
+
+        in_section && !updated_in && /^[[:space:]]*gaps_in[[:space:]]*=/ {
+            sub(/=[[:space:]]*[^[:space:]#]+/, "= " new_in)
+            updated_in = 1
+        }
+
+        in_section && /^[[:space:]]*\}/ {
+            in_section = 0
+        }
+
+        { print }
+
+        END {
+            if (!updated_out || !updated_in) {
+                exit 1
+            }
+        }
+    ' "$HYPR_DECORATIONS_CONF" > "$tmp_file"
+
+    mv "$tmp_file" "$HYPR_DECORATIONS_CONF"
+}
+
+update_waybar_margins() {
+    local config_file="$1"
+    local new_top="$2"
+    local new_bottom="$3"
+    local tmp_file=""
+
+    tmp_file="$(mktemp)"
+
+    awk -v new_top="$new_top" -v new_bottom="$new_bottom" '
+        /"margin-top"[[:space:]]*:/ && !updated_top {
+            sub(/"margin-top"[[:space:]]*:[[:space:]]*[-]?[0-9]+([.][0-9]+)?/, "\"margin-top\": " new_top)
+            updated_top = 1
+        }
+
+        /"margin-bottom"[[:space:]]*:/ && !updated_bottom {
+            sub(/"margin-bottom"[[:space:]]*:[[:space:]]*[-]?[0-9]+([.][0-9]+)?/, "\"margin-bottom\": " new_bottom)
+            updated_bottom = 1
+        }
+
+        { print }
+
+        END {
+            if (!updated_top || !updated_bottom) {
+                exit 1
+            }
+        }
+    ' "$config_file" > "$tmp_file"
+
+    mv "$tmp_file" "$config_file"
+}
+
+sync_gap_related_waybar_margins() {
+    local gaps_out="$1"
+    local margin_top=0
+    local margin_bottom=0
+    local config_file=""
+
+    margin_top=$((gaps_out < WAYBAR_MARGIN_MIN ? WAYBAR_MARGIN_MIN : gaps_out))
+    margin_bottom=$((gaps_out < WAYBAR_MARGIN_MIN ? WAYBAR_MARGIN_MIN - gaps_out : 0))
+
+    for config_file in "${WAYBAR_MARGIN_FILES[@]}"; do
+        [[ -f "$config_file" ]] || continue
+        update_waybar_margins "$config_file" "$margin_top" "$margin_bottom"
+    done
+}
+
+get_keybinding_comment_states() {
+    awk -v start_marker="$ZEN_BINDINGS_START_MARKER" -v end_marker="$ZEN_BINDINGS_END_MARKER" '
+        tolower($0) == tolower(start_marker) {
+            in_block = 1
+            next
+        }
+
+        in_block && tolower($0) == tolower(end_marker) {
+            exit
+        }
+
+        in_block && /^[[:space:]]*#?[[:space:]]*bind[a-z]*[[:space:]]*=/ {
+            if ($0 ~ /^[[:space:]]*#/) {
+                states[++count] = "1"
+            } else {
+                states[++count] = "0"
+            }
+        }
+
+        END {
+            if (count == 0) {
+                exit 1
+            }
+
+            for (i = 1; i <= count; i++) {
+                printf "%s%s", states[i], (i < count ? "," : ORS)
+            }
+        }
+    ' "$HYPR_KEYBINDINGS_CONF"
+}
+
+set_keybinding_comment_states() {
+    local mode="$1"
+    local states_csv="${2:-}"
+    local tmp_file=""
+
+    tmp_file="$(mktemp)"
+
+    awk -v start_marker="$ZEN_BINDINGS_START_MARKER" -v end_marker="$ZEN_BINDINGS_END_MARKER" -v mode="$mode" -v states_csv="$states_csv" '
+        BEGIN {
+            saved_count = split(states_csv, saved_states, /,/)
+        }
+
+        tolower($0) == tolower(start_marker) {
+            in_block = 1
+            print
+            next
+        }
+
+        in_block && tolower($0) == tolower(end_marker) {
+            in_block = 0
+            print
+            next
+        }
+
+        in_block && /^[[:space:]]*#?[[:space:]]*bind[a-z]*[[:space:]]*=/ {
+            bind_index++
+            line = $0
+            match(line, /^[[:space:]]*/)
+            indent = substr(line, RSTART, RLENGTH)
+            rest = substr(line, RLENGTH + 1)
+            sub(/^#[[:space:]]*/, "", rest)
+
+            should_comment = 1
+            if (mode == "restore") {
+                if (bind_index > saved_count) {
+                    exit 1
+                }
+
+                should_comment = (saved_states[bind_index] == "1")
+            } else if (mode == "uncomment") {
+                should_comment = 0
+            }
+
+            if (should_comment) {
+                print indent "#" rest
+            } else {
+                print indent rest
+            }
+            next
+        }
+
+        { print }
+
+        END {
+            if (mode == "restore" && bind_index != saved_count) {
+                exit 1
+            }
+
+            if (bind_index == 0) {
+                exit 1
+            }
+        }
+    ' "$HYPR_KEYBINDINGS_CONF" > "$tmp_file"
+
+    mv "$tmp_file" "$HYPR_KEYBINDINGS_CONF"
+}
+
+write_state_file() {
+    local animations_enabled="$1"
+    local gaps_out="$2"
+    local gaps_in="$3"
+    local waybar_style="$4"
+    local theme_name="$5"
+    local theme_restore_enabled="$6"
+    local keybinding_states="$7"
+
+    mkdir -p "$STATE_DIR"
+
+    {
+        printf 'saved_animation_enabled=%q\n' "$animations_enabled"
+        printf 'saved_gaps_out=%q\n' "$gaps_out"
+        printf 'saved_gaps_in=%q\n' "$gaps_in"
+        printf 'saved_waybar_style=%q\n' "$waybar_style"
+        printf 'saved_theme_name=%q\n' "$theme_name"
+        printf 'saved_theme_restore_enabled=%q\n' "$theme_restore_enabled"
+        printf 'saved_keybinding_states=%q\n' "$keybinding_states"
+    } > "$STATE_FILE"
+}
+
+restore_state_file() {
+    [[ -f "$STATE_FILE" ]] || return 1
+    # shellcheck disable=SC1090
+    source "$STATE_FILE"
+}
+
+apply_waybar_style() {
+    local style_name="$1"
+
+    [[ -n "$style_name" ]] || return 0
+    "$SCRIPT_DIR/waybar-style" "$style_name"
+    "$SCRIPT_DIR/reload-waybar" || true
+    "$SCRIPT_DIR/reload-dashboard" || true
+}
+
+apply_theme_if_needed() {
+    local theme_name="$1"
+
+    [[ -n "$theme_name" ]] || return 0
+    THEME_SUPPRESS_NOTIFY=1 "$SCRIPT_DIR/theme" "$theme_name" >/dev/null 2>&1 || true
+}
+
+reload_hyprland() {
+    if command -v hyprctl >/dev/null 2>&1; then
+        hyprctl reload >/dev/null 2>&1 || true
+    fi
+}
+
+validate_bindings_mode() {
+    case "$ZEN_BINDINGS_MODE" in
+        comment|uncomment)
+            ;;
+        *)
+            notify "Invalid ZEN_BINDINGS_MODE: $ZEN_BINDINGS_MODE"
+            exit 1
+            ;;
+    esac
+}
+
+apply_zen_mode() {
+    local current_animation_enabled=""
+    local current_gap_values=""
+    local current_gaps_out=""
+    local current_gaps_in=""
+    local current_waybar_style=""
+    local current_theme_name=""
+    local current_keybinding_states=""
+    local theme_restore_enabled="0"
+
+    require_file "$HYPR_ANIMATIONS_CONF"
+    require_file "$HYPR_DECORATIONS_CONF"
+    require_file "$HYPR_KEYBINDINGS_CONF"
+    validate_bindings_mode
+
+    current_animation_enabled="$(get_animation_enabled)"
+    current_gap_values="$(get_gap_values)"
+    IFS=',' read -r current_gaps_out current_gaps_in <<< "$current_gap_values"
+    current_waybar_style="$(resolve_link_basename "$WAYBAR_STYLE_LINK" ".css")"
+    current_theme_name="$(resolve_link_basename "$THEMES_DIR/current")"
+    current_keybinding_states="$(get_keybinding_comment_states)"
+
+    if [[ "$ZEN_SWITCH_THEME" == "yes" ]]; then
+        theme_restore_enabled="1"
+    fi
+
+    write_state_file \
+        "$current_animation_enabled" \
+        "$current_gaps_out" \
+        "$current_gaps_in" \
+        "$current_waybar_style" \
+        "$current_theme_name" \
+        "$theme_restore_enabled" \
+        "$current_keybinding_states"
+
+    set_animation_enabled "$ZEN_ANIMATIONS_ENABLED"
+    set_gap_values "$ZEN_GAPS_OUT" "$ZEN_GAPS_IN"
+    sync_gap_related_waybar_margins "$ZEN_GAPS_OUT"
+    set_keybinding_comment_states "$ZEN_BINDINGS_MODE"
+    apply_waybar_style "$ZEN_WAYBAR_STYLE"
+
+    if [[ "$ZEN_SWITCH_THEME" == "yes" ]]; then
+        apply_theme_if_needed "$ZEN_THEME_NAME"
+    fi
+
+    reload_hyprland
+    notify $'Enabled\nuse SUPER + Z to un-toggle'
+}
+
+restore_zen_mode() {
+    local saved_animation_enabled=""
+    local saved_gaps_out=""
+    local saved_gaps_in=""
+    local saved_waybar_style=""
+    local saved_theme_name=""
+    local saved_theme_restore_enabled=""
+    local saved_keybinding_states=""
+
+    restore_state_file || {
+        notify "No saved state to restore"
+        exit 1
+    }
+
+    require_file "$HYPR_ANIMATIONS_CONF"
+    require_file "$HYPR_DECORATIONS_CONF"
+    require_file "$HYPR_KEYBINDINGS_CONF"
+
+    set_gap_values "$saved_gaps_out" "$saved_gaps_in"
+    sync_gap_related_waybar_margins "$saved_gaps_out"
+    set_animation_enabled "$saved_animation_enabled"
+    set_keybinding_comment_states "restore" "$saved_keybinding_states"
+    apply_waybar_style "$saved_waybar_style"
+
+    if [[ "$saved_theme_restore_enabled" == "1" ]]; then
+        apply_theme_if_needed "$saved_theme_name"
+    fi
+
+    reload_hyprland
+    rm -f "$STATE_FILE"
+    notify "Disabled"
+}
+
+if [[ -f "$STATE_FILE" ]]; then
+    restore_zen_mode
+else
+    apply_zen_mode
+fi

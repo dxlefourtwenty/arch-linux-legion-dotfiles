@@ -11,7 +11,8 @@ fi
 options="󰛨  Nightlight
   Idle Lock
   Top Bar
-󰨝  Dashboard"
+󰨝  Dashboard
+󰗌  Zen Mode"
 
 HOME_DIR="/home/dxle"
 
@@ -50,5 +51,8 @@ case "$label" in
     ;;
   "Dashboard")
     "$SCRIPT_DIR/toggle-dashboard"
+    ;;
+  "Zen Mode")
+    "$SCRIPT_DIR/toggle-zen-mode"
     ;;
 esac

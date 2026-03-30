@@ -49,18 +49,20 @@ killall xdg-desktop-portal >/dev/null 2>&1 || true
 killall xdg-desktop-portal-gtk >/dev/null 2>&1 || true
 killall xdg-desktop-portal-hyprland >/dev/null 2>&1 || true
 
-# Pretty notification
-FORMATTED_NAME=$(echo "$1" | tr '-' ' ' | sed -E 's/\b(.)/\U\1/g')
+if [[ "${THEME_SUPPRESS_NOTIFY:-0}" != "1" ]]; then
+    # Pretty notification
+    FORMATTED_NAME=$(echo "$1" | tr '-' ' ' | sed -E 's/\b(.)/\U\1/g')
 
-(
-    # Start mako if needed, then wait until it is alive.
-    pgrep -x mako >/dev/null || "$SCRIPT_DIR/launch-mako" || true
+    (
+        # Start mako if needed, then wait until it is alive.
+        pgrep -x mako >/dev/null || "$SCRIPT_DIR/launch-mako" || true
 
-    for i in {1..20}; do
-        pgrep -x mako >/dev/null && break
-        sleep 0.1
-    done
+        for i in {1..20}; do
+            pgrep -x mako >/dev/null && break
+            sleep 0.1
+        done
 
-    sleep 1
-    notify-send -t 5000 "Theme" "Updated to $FORMATTED_NAME." >/dev/null 2>&1 || true
-) >/dev/null 2>&1 &
+        sleep 1
+        notify-send -t 5000 "Theme" "Updated to $FORMATTED_NAME." >/dev/null 2>&1 || true
+    ) >/dev/null 2>&1 &
+fi
