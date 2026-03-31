@@ -41,6 +41,7 @@ export DOWNLOADS=~/files/downloads
 export PICTURES=~/files/pictures
 export SCREENSHOTS=~/files/pictures/screenshots/
 export DOCUMENTS=~/files/documents
+export TRASH=~/.local/share/Trash
 
 export ICONS=~/.local/share/icons
 export GLOBAL_ICONS=/usr/share/icons
