@@ -17,6 +17,11 @@ alias nv='nvim'
 alias neovim='nvim'
 alias bashenv='nvim ~/.bash_env'
 
+# zsh
+alias relzsh='source ~/.zshrc'
+alias rel-z='source ~/.zshrc'
+alias relz='source ~/.zshrc'
+
 # git
 alias git-log='git log --oneline --abbrev-commit --all --graph --decorate --color'
 alias lg='lazygit'

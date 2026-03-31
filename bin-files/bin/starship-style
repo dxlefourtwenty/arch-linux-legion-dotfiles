@@ -1,0 +1,53 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+STYLE_NAME="${1:-}"
+CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}"
+STARSHIP_CONFIG="${CONFIG_DIR}/starship.toml"
+STARSHIP_STYLES_DIR="${CONFIG_DIR}/starship-styles"
+STARSHIP_STYLE="${STARSHIP_STYLES_DIR}/${STYLE_NAME}.toml"
+
+refresh_parent_zsh_prompt() {
+  local parent_comm=""
+
+  if [[ -r "/proc/${PPID}/comm" ]]; then
+    read -r parent_comm < "/proc/${PPID}/comm" || true
+  elif command -v ps >/dev/null 2>&1; then
+    parent_comm="$(ps -o comm= -p "${PPID}" 2>/dev/null | tr -d '[:space:]')"
+  fi
+
+  [[ "${parent_comm}" == "zsh" ]] || return 0
+  kill -USR1 "${PPID}" >/dev/null 2>&1 || true
+}
+
+refresh_terminal_zsh_prompts() {
+  local pid=""
+
+  while read -r pid; do
+    [[ -n "${pid}" ]] || continue
+    kill -WINCH "${pid}" >/dev/null 2>&1 || true
+  done < <(
+    ps -eo pid=,comm=,tty= |
+      awk '$2 == "zsh" && $3 != "?" { print $1 }'
+  )
+}
+
+if [[ -z "${STYLE_NAME}" ]]; then
+  echo "Usage: starship-style <style>"
+  exit 1
+fi
+
+if [[ ! -d "${STARSHIP_STYLES_DIR}" ]]; then
+  echo "Missing styles directory: ${STARSHIP_STYLES_DIR}"
+  exit 1
+fi
+
+if [[ ! -f "${STARSHIP_STYLE}" ]]; then
+  echo "Missing style file: ${STARSHIP_STYLE}"
+  exit 1
+fi
+
+ln -sfn "${STARSHIP_STYLE}" "${STARSHIP_CONFIG}"
+refresh_parent_zsh_prompt
+refresh_terminal_zsh_prompts

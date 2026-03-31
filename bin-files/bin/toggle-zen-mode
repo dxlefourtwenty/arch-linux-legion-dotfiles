@@ -6,6 +6,7 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 HYPR_ANIMATIONS_CONF="${XDG_CONFIG_HOME:-$HOME/.config}/hypr/animations.conf"
 HYPR_DECORATIONS_CONF="${XDG_CONFIG_HOME:-$HOME/.config}/hypr/decorations.conf"
 HYPR_KEYBINDINGS_CONF="${XDG_CONFIG_HOME:-$HOME/.config}/hypr/keybindings.conf"
+STARSHIP_CONFIG_LINK="${XDG_CONFIG_HOME:-$HOME/.config}/starship.toml"
 WAYBAR_STYLE_LINK="${XDG_CONFIG_HOME:-$HOME/.config}/waybar/style.css"
 THEMES_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/themes"
 STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/toggle-zen-mode"
@@ -20,6 +21,7 @@ WAYBAR_MARGIN_FILES=(
 ZEN_ANIMATIONS_ENABLED="no"
 ZEN_GAPS_OUT=0
 ZEN_GAPS_IN=0
+ZEN_STARSHIP_STYLE="minimal"
 ZEN_WAYBAR_STYLE="minimal"
 ZEN_THEME_NAME="matte-black"
 ZEN_SWITCH_THEME="yes"
@@ -328,10 +330,11 @@ write_state_file() {
     local animations_enabled="$1"
     local gaps_out="$2"
     local gaps_in="$3"
-    local waybar_style="$4"
-    local theme_name="$5"
-    local theme_restore_enabled="$6"
-    local keybinding_states="$7"
+    local starship_style="$4"
+    local waybar_style="$5"
+    local theme_name="$6"
+    local theme_restore_enabled="$7"
+    local keybinding_states="$8"
 
     mkdir -p "$STATE_DIR"
 
@@ -339,6 +342,7 @@ write_state_file() {
         printf 'saved_animation_enabled=%q\n' "$animations_enabled"
         printf 'saved_gaps_out=%q\n' "$gaps_out"
         printf 'saved_gaps_in=%q\n' "$gaps_in"
+        printf 'saved_starship_style=%q\n' "$starship_style"
         printf 'saved_waybar_style=%q\n' "$waybar_style"
         printf 'saved_theme_name=%q\n' "$theme_name"
         printf 'saved_theme_restore_enabled=%q\n' "$theme_restore_enabled"
@@ -359,6 +363,13 @@ apply_waybar_style() {
     "$SCRIPT_DIR/waybar-style" "$style_name"
     "$SCRIPT_DIR/reload-waybar" || true
     "$SCRIPT_DIR/reload-dashboard" || true
+}
+
+apply_starship_style() {
+    local style_name="$1"
+
+    [[ -n "$style_name" ]] || return 0
+    "$SCRIPT_DIR/starship-style" "$style_name"
 }
 
 apply_theme_if_needed() {
@@ -390,6 +401,7 @@ apply_zen_mode() {
     local current_gap_values=""
     local current_gaps_out=""
     local current_gaps_in=""
+    local current_starship_style=""
     local current_waybar_style=""
     local current_theme_name=""
     local current_keybinding_states=""
@@ -403,6 +415,7 @@ apply_zen_mode() {
     current_animation_enabled="$(get_animation_enabled)"
     current_gap_values="$(get_gap_values)"
     IFS=',' read -r current_gaps_out current_gaps_in <<< "$current_gap_values"
+    current_starship_style="$(resolve_link_basename "$STARSHIP_CONFIG_LINK" ".toml")"
     current_waybar_style="$(resolve_link_basename "$WAYBAR_STYLE_LINK" ".css")"
     current_theme_name="$(resolve_link_basename "$THEMES_DIR/current")"
     current_keybinding_states="$(get_keybinding_comment_states)"
@@ -415,6 +428,7 @@ apply_zen_mode() {
         "$current_animation_enabled" \
         "$current_gaps_out" \
         "$current_gaps_in" \
+        "$current_starship_style" \
         "$current_waybar_style" \
         "$current_theme_name" \
         "$theme_restore_enabled" \
@@ -430,6 +444,8 @@ apply_zen_mode() {
         apply_theme_if_needed "$ZEN_THEME_NAME"
     fi
 
+    apply_starship_style "$ZEN_STARSHIP_STYLE"
+
     reload_hyprland
     notify $'Enabled\nuse SUPER + Z to un-toggle'
 }
@@ -438,6 +454,7 @@ restore_zen_mode() {
     local saved_animation_enabled=""
     local saved_gaps_out=""
     local saved_gaps_in=""
+    local saved_starship_style=""
     local saved_waybar_style=""
     local saved_theme_name=""
     local saved_theme_restore_enabled=""
@@ -461,6 +478,8 @@ restore_zen_mode() {
     if [[ "$saved_theme_restore_enabled" == "1" ]]; then
         apply_theme_if_needed "$saved_theme_name"
     fi
+
+    apply_starship_style "$saved_starship_style"
 
     reload_hyprland
     rm -f "$STATE_FILE"

@@ -12,6 +12,7 @@ options="󰸌  Theme
 󰛖  Font
   Background
 󱢈  Live Gallery
+  Terminal Prompt
 󰍜  Waybar
 󰃇  Border
 󰹳  Gaps"
@@ -21,7 +22,7 @@ chosen=$(printf '%b\n' "$options" | "$SCRIPT_DIR/rofi-nerd-markup" | rofi -dmenu
     -pid "$PID_FILE" \
     -p "" \
     -theme-str '
-        window { width: 265px; }
+        window { width: 310px; }
         entry { placeholder: "Style…"; }
         element { 
             orientation: horizontal;
@@ -51,6 +52,9 @@ case "$label" in
     ;;
   "Live Gallery")
     "$SCRIPT_DIR/bg-live"
+    ;;
+  "Terminal Prompt")
+    "$SCRIPT_DIR/menu-starship"
     ;;
   "Waybar")
     "$SCRIPT_DIR/menu-waybar"
