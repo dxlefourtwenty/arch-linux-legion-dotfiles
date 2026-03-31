@@ -400,3 +400,8 @@ label:focus {
 #custom-bluetooth {
     padding-left: 10px;
 }
+
+#custom-expo {
+    padding-right: 8px;
+    padding-left: 4px;
+}

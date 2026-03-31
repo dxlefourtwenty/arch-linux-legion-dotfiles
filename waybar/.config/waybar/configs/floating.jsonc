@@ -13,7 +13,8 @@
     // Choose the order of the modules
     "modules-left": [
         "custom/menu",
-        "hyprland/workspaces"
+        "hyprland/workspaces",
+        "custom/expo"
     ],
     "modules-center": [
         "clock"
@@ -56,6 +57,11 @@
         "persistent-workspaces": {
             "HDMI-A-1": [ 1,2,3,4,5 ],
         },
+    },
+    "custom/expo": {
+        "format": "<span font_desc=\"JetBrainsMono Nerd Font\"> </span>",
+        "tooltip-format": "Workspace Overview",
+        "on-click": "~/bin/hypr-toggle-expo"
     },
     "keyboard-state": {
         "numlock": true,

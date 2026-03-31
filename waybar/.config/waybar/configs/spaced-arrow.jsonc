@@ -8,6 +8,9 @@
 		"hyprland/workspaces",
     "custom/right-arrow-dark",
     "custom/right-arrow-light",
+    "custom/expo",
+    "custom/right-arrow-dark",
+    "custom/right-arrow-light",
     "custom/wallpapers",
 		"custom/menu",
 		"custom/right-arrow-dark"
@@ -198,6 +201,11 @@
         "persistent-workspaces": {
             "HDMI-A-1": [ 1,2,3,4,5 ],
         },
+  },
+  "custom/expo": {
+      "format": "<span font_desc=\"JetBrainsMono Nerd Font\"> </span>",
+      "tooltip-format": "Workspace Overview",
+      "on-click": "~/bin/hypr-toggle-expo"
   },
   "sway/window": {
       "format": "{}",

@@ -163,3 +163,8 @@ tooltip label {
 #custom-menu {
   padding-right: 5px;
 }
+
+#custom-expo {
+  background: @background;
+  padding: 0 5px 0 10px;
+}

@@ -203,13 +203,15 @@
 		// "format": "",
 		"format": "<span font_desc=\"JetBrainsMono Nerd Font\"></span>",
 		// "format": "",
-		"tooltip": false
+		"tooltip": false,
+    "on-click": "~/bin/hypr-toggle-expo"
 	},
 
   "custom/arrow11": {
 		// "format": "",
 		"format": "<span font_desc=\"JetBrainsMono Nerd Font\"></span>",
 		// "format": "",
+    "on-click": "~/bin/hypr-toggle-expo",
 		"tooltip": false
 	},
 

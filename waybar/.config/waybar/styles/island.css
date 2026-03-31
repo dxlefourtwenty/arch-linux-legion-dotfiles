@@ -370,3 +370,9 @@ button {
 #custom-bluetooth {
     padding-right: 5px; 
 }
+
+#custom-expo {
+    color: @blue;
+    padding-left: 12px;
+    padding-right: 8px;
+}
