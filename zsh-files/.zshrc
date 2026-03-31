@@ -77,6 +77,3 @@ ZSH_HIGHLIGHT_STYLES[arg0]='fg=default'
 ZSH_HIGHLIGHT_STYLES[command]='fg=default'
 ZSH_HIGHLIGHT_STYLES[precommand]='fg=default'
 
-if [[ -z $DISPLAY ]] && [[ $(tty) == /dev/tty1 ]]; then
-  exec start-hyprland
-fi
