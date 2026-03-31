@@ -1,0 +1,34 @@
+#!/usr/bin/env sh
+
+WALLPAPER_DIR="$HOME/.config/themes/current/wallpapers"
+FLAGS="--transition-type=grow --transition-duration 3.2"
+
+# Get current theme from symlink
+THEME_PATH=$(readlink -f "$HOME/.config/themes/current")
+THEME_RAW=$(basename "$THEME_PATH")
+
+# Format theme name
+THEME=$(echo "$THEME_RAW" \
+    | tr '-' ' ' \
+    | sed -E 's/\b(.)/\U\1/g')
+
+notify-send -t 2000 "Background" "Opened $THEME gallery."
+
+SELECTED_WALL=$(~/builds/hellpaper/hellpaper "$WALLPAPER_DIR")
+
+[ -z "$SELECTED_WALL" ] && exit 0
+
+ln -sf "$SELECTED_WALL" "$HOME/.config/themes/current/wallpaper.png"
+
+# Extract filename
+FILENAME=$(basename "$SELECTED_WALL")
+NAME="${FILENAME%.*}"
+
+# Remove leading digits + dash
+NAME=$(echo "$NAME" | sed -E 's/^[0-9]+-//')
+
+# Replace dashes with spaces
+FORMATTED_NAME=$(echo "$NAME" | tr '-' ' ')
+
+notify-send -t 5000 "Background" "Updated to '$FORMATTED_NAME.'"
+awww img "$SELECTED_WALL" $FLAGS

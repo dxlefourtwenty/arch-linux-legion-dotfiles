@@ -47,7 +47,7 @@ case "$label" in
     "$SCRIPT_DIR/menu-font"
     ;;
   "Background")
-    "$SCRIPT_DIR/menu-background"
+    "$SCRIPT_DIR/bg-set"
     ;;
   "Live Gallery")
     "$SCRIPT_DIR/bg-live"

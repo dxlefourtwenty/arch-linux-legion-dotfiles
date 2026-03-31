@@ -1,34 +1,277 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
+set -euo pipefail
 
-WALLPAPER_DIR="$HOME/.config/themes/current/wallpapers"
-FLAGS="--transition-type=grow --transition-duration 3.2"
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+THEME_LINK="${XDG_CONFIG_HOME:-$HOME/.config}/themes/current"
+THEME_PATH="$(readlink -f "$THEME_LINK" 2>/dev/null || printf '%s' "$THEME_LINK")"
+THEME_RAW="$(basename "$THEME_PATH")"
+WALLPAPER_DIR="$THEME_PATH/wallpapers"
+WALLPAPER_DIR_RESOLVED="$(readlink -f "$WALLPAPER_DIR" 2>/dev/null || printf '%s' "$WALLPAPER_DIR")"
+CURRENT_LINK="$THEME_LINK/wallpaper.png"
+KITTY_CONF="${XDG_CONFIG_HOME:-$HOME/.config}/kitty/kitty.conf"
+ROFI_THEME="${XDG_CONFIG_HOME:-$HOME/.config}/rofi/theme.rasi"
+MENU_ID="menu-background"
+PID_FILE="/tmp/menu-rofi.pid"
+AWWW_ARGS=(--transition-type=grow --transition-duration 3.2)
 
-# Get current theme from symlink
-THEME_PATH=$(readlink -f "$HOME/.config/themes/current")
-THEME_RAW=$(basename "$THEME_PATH")
+if "$SCRIPT_DIR/rofi-toggle-pidfile" begin "$MENU_ID"; then
+    exit 0
+fi
 
-# Format theme name
-THEME=$(echo "$THEME_RAW" \
-    | tr '-' ' ' \
-    | sed -E 's/\b(.)/\U\1/g')
+tmp_dir="$(mktemp -d)"
+cleanup() {
+    rm -rf "$tmp_dir"
+    "$SCRIPT_DIR/rofi-toggle-pidfile" clear "$MENU_ID"
+}
+trap cleanup EXIT
 
-notify-send -t 2000 "Background" "Opened $THEME gallery."
+format_theme_display() {
+    printf '%s\n' "$1" | sed -E '
+        s/rose-pine/Rosé Pine/;
+        s/[-_]/ /g;
+        s/\b(.)/\U\1/g
+    '
+}
 
-SELECTED_WALL=$(~/builds/hellpaper/hellpaper "$WALLPAPER_DIR")
+format_wallpaper_name() {
+    local filename stem
 
-[ -z "$SELECTED_WALL" ] && exit 0
+    filename="$(basename "$1")"
+    stem="${filename%.*}"
 
-ln -sf "$SELECTED_WALL" "$HOME/.config/themes/current/wallpaper.png"
+    printf '%s\n' "$stem" | sed -E '
+        s/^[0-9]+[-_]*//;
+        s/[-_]+/ /g;
+        s/\b(.)/\U\1/g
+    '
+}
 
-# Extract filename
-FILENAME=$(basename "$SELECTED_WALL")
-NAME="${FILENAME%.*}"
+escape_markup() {
+    printf '%s\n' "$1" | sed \
+        -e 's/&/\&amp;/g' \
+        -e 's/</\&lt;/g' \
+        -e 's/>/\&gt;/g'
+}
 
-# Remove leading digits + dash
-NAME=$(echo "$NAME" | sed -E 's/^[0-9]+-//')
+escape_rofi_string() {
+    printf '%s\n' "$1" | sed \
+        -e 's/\\/\\\\/g' \
+        -e 's/"/\\"/g'
+}
 
-# Replace dashes with spaces
-FORMATTED_NAME=$(echo "$NAME" | tr '-' ' ')
+current_menu_font() {
+    local font_name
 
-notify-send -t 5000 "Background" "Updated to '$FORMATTED_NAME.'"
-awww img "$SELECTED_WALL" $FLAGS
+    if [[ -f "$KITTY_CONF" ]]; then
+        font_name="$(sed -n 's/^font_family[[:space:]]\+//p' "$KITTY_CONF" | head -n 1)"
+        [[ -n "$font_name" ]] && {
+            printf '%s\n' "$font_name"
+            return
+        }
+    fi
+
+    if [[ -f "$ROFI_THEME" ]]; then
+        font_name="$(sed -n 's/^[[:space:]]*font:[[:space:]]*"\(.*\)[[:space:]][0-9][0-9.]*";/\1/p' "$ROFI_THEME" | head -n 1)"
+        [[ -n "$font_name" ]] && {
+            printf '%s\n' "$font_name"
+            return
+        }
+    fi
+
+    printf 'CaskaydiaMono Nerd Font\n'
+}
+
+thumbnail_size() {
+    local monitor_width candidate
+
+    monitor_width="$(
+        hyprctl monitors 2>/dev/null | awk '
+            /^[[:space:]]*[0-9]+x[0-9]+@/ {
+                split($1, dims, "x")
+                print dims[1]
+                exit
+            }
+        '
+    )"
+
+    if [[ "$monitor_width" =~ ^[0-9]+$ ]]; then
+        candidate=$((monitor_width * 2 / 15))
+        (( candidate < 168 )) && candidate=168
+        (( candidate > 264 )) && candidate=264
+        printf '%s\n' "$candidate"
+        return
+    fi
+
+    printf '216\n'
+}
+
+thumbnail_path_for() {
+    local image_path="$1"
+    local thumb_size="$2"
+    local cache_dir="$3"
+    local filename thumb_path
+
+    filename="$(basename "$image_path")"
+    thumb_path="$cache_dir/${filename}.png"
+
+    if [[ ! -f "$thumb_path" || "$image_path" -nt "$thumb_path" ]]; then
+        if command -v magick >/dev/null 2>&1; then
+            magick "$image_path" \
+                -auto-orient \
+                -strip \
+                -thumbnail "${thumb_size}x${thumb_size}^" \
+                -gravity center \
+                -extent "${thumb_size}x${thumb_size}" \
+                "$thumb_path" >/dev/null 2>&1 || {
+                printf '%s\n' "$image_path"
+                return
+            }
+            printf '%s\n' "$thumb_path"
+            return
+        fi
+
+        if command -v convert >/dev/null 2>&1; then
+            convert "$image_path" \
+                -auto-orient \
+                -strip \
+                -thumbnail "${thumb_size}x${thumb_size}^" \
+                -gravity center \
+                -extent "${thumb_size}x${thumb_size}" \
+                "$thumb_path" >/dev/null 2>&1 || {
+                printf '%s\n' "$image_path"
+                return
+            }
+            printf '%s\n' "$thumb_path"
+            return
+        fi
+
+        printf '%s\n' "$image_path"
+        return
+    fi
+
+    printf '%s\n' "$thumb_path"
+}
+
+apply_wallpaper() {
+    local wallpaper_path="$1"
+
+    if ! pgrep -x awww-daemon >/dev/null 2>&1; then
+        nohup awww-daemon >/dev/null 2>&1 &
+        sleep 0.15
+    fi
+
+    awww img "$wallpaper_path" "${AWWW_ARGS[@]}" >/dev/null 2>&1 || true
+}
+
+[[ -d "$WALLPAPER_DIR_RESOLVED" ]] || {
+    notify-send -t 4000 "Background" "Wallpapers directory not found: $WALLPAPER_DIR"
+    exit 1
+}
+
+mapfile -d '' -t WALLPAPERS < <(
+    while IFS= read -r -d '' wallpaper_name; do
+        printf '%s\0' "$WALLPAPER_DIR_RESOLVED/$wallpaper_name"
+    done < <(
+        find "$WALLPAPER_DIR_RESOLVED" -maxdepth 1 -type f \
+            \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \) \
+            -printf '%f\0' | sort -zV
+    )
+)
+
+if [[ ${#WALLPAPERS[@]} -eq 0 ]]; then
+    notify-send -t 4000 "Background" "No wallpapers were found in $WALLPAPER_DIR"
+    exit 0
+fi
+
+CURRENT_WALLPAPER="$(readlink -f "$CURRENT_LINK" 2>/dev/null || true)"
+THEME_PRETTY="$(format_theme_display "$THEME_RAW")"
+THUMB_SIZE="$(thumbnail_size)"
+THUMB_FRAME_SIZE=$((THUMB_SIZE + 4))
+CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/menu-background/$THEME_RAW/$THUMB_SIZE"
+MENU_INPUT="$tmp_dir/menu-input"
+MENU_FONT="$(escape_rofi_string "$(current_menu_font)")"
+
+mkdir -p "$CACHE_DIR"
+notify-send -t 2000 "Background" "Opened $THEME_PRETTY gallery."
+
+for wallpaper_path in "${WALLPAPERS[@]}"; do
+    display_name="$(format_wallpaper_name "$wallpaper_path")"
+    markup_name="$(escape_markup "$display_name")"
+    thumbnail_path="$(thumbnail_path_for "$wallpaper_path" "$THUMB_SIZE" "$CACHE_DIR")"
+
+    if [[ "$wallpaper_path" == "$CURRENT_WALLPAPER" ]]; then
+        markup_name="<i>$markup_name</i>"
+    fi
+
+    printf '%s\0icon\x1f%s\n' "$markup_name" "$thumbnail_path" >> "$MENU_INPUT"
+done
+
+CHOSEN_INDEX="$(
+    rofi -dmenu -i \
+        -pid "$PID_FILE" \
+        -p "" \
+        -format i \
+        -markup-rows \
+        -no-custom \
+        -show-icons \
+        -theme-str "
+            window { width: 1150px; }
+            entry { placeholder: \"Select Background…\"; }
+            listview {
+                columns: 4;
+                lines: 2;
+                spacing: 0;
+                cycle: false;
+                dynamic: false;
+                fixed-columns: true;
+                scrollbar: false;
+                flow: horizontal;
+                layout: vertical;
+            }
+            element {
+                orientation: vertical;
+                children: [ thumb-box, element-text ];
+                spacing: 4px;
+                padding: 8px 8px;
+            }
+            thumb-box {
+                expand: false;
+                children: [ element-icon ];
+                padding: 0px;
+                margin: 0px;
+                border: 2px;
+                border-color: transparent;
+                border-radius: 0px;
+            }
+            thumb-box selected {
+                border-color: var(border);
+            }
+            element-icon {
+                expand: false;
+                size: ${THUMB_SIZE}px;
+                border-radius: 0px;
+                padding: 0px;
+                margin: 0px;
+            }
+            element-text {
+                horizontal-align: 0.5;
+                width: ${THUMB_FRAME_SIZE}px;
+                font: \"${MENU_FONT} 11\";
+                padding: 0px;
+                margin: 0 10px;
+            }
+        " < "$MENU_INPUT"
+)"
+
+[[ -n "$CHOSEN_INDEX" ]] || exit 0
+
+SELECTED_WALLPAPER="${WALLPAPERS[CHOSEN_INDEX]:-}"
+[[ -n "$SELECTED_WALLPAPER" ]] || exit 0
+[[ "$SELECTED_WALLPAPER" != "$CURRENT_WALLPAPER" ]] || exit 0
+
+ln -sfn "$SELECTED_WALLPAPER" "$CURRENT_LINK"
+
+formatted_name="$(format_wallpaper_name "$SELECTED_WALLPAPER")"
+
+apply_wallpaper "$SELECTED_WALLPAPER"
+notify-send -t 5000 "Background" "Updated to '$formatted_name'."
