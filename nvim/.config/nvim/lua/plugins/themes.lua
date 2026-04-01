@@ -12,6 +12,7 @@ return {
   { "bjarneo/firesky.nvim", name = "firesky" },
   { "gthelding/monokai-pro.nvim", name = "monokai-pro" },
   { "OldJobobo/retro-82.nvim", name = "retro-82" },
+  { "bjarneo/aether.nvim", name = "aether" },
 
   {
     "LazyVim/LazyVim",

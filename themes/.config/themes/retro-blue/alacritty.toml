@@ -1,25 +1,9 @@
-general.live_config_reload = true
-general.ipc_socket = true
-
-[window]
-opacity = 0.92
-
-[window.padding]
-x = 10
-y = 10
-
-[font]
-size = 14.0
-
-[font.normal]
-family = "JetBrainsMono Nerd Font"
-
 [colors.primary]
 background = "#05182e" # Base
 foreground = "#f6dcac" # Text
 
 [colors.normal]
-black   = "#00172e" # surface1
+black   = "#0a2747" # surface1
 red     = "#f16830"
 green   = "#028391"
 yellow  = "#f19252" # an orange color

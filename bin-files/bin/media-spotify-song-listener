@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+
+last_id=""
+last_pos=0
+last_len=0
+
+while IFS='|' read -r status id length pos track; do
+  [[ "$status" != "Playing" ]] && continue
+
+  length_s=$(( ${length:-0} / 1000000 ))
+  pos_s=$(( ${pos:-0} / 1000000 ))
+
+  if [[ "$id" != "$last_id" ]]; then
+    if [[ -n "$last_id" && "$last_len" -gt 0 ]]; then
+      percent=$(( last_pos * 100 / last_len ))
+
+      if [[ "$percent" -ge 90 ]]; then
+        art="$(playerctl -p spotify metadata mpris:artUrl)"
+        img="/tmp/spotify-cover.jpg"
+
+        curl -sL "$art" | magick - -resize 32x32 "$img"
+
+        notify-send -i "$img" "Now Playing" "$track"
+      fi
+    fi
+
+    last_id="$id"
+    last_len="$length_s"
+  fi
+
+  last_pos="$pos_s"
+done < <(playerctl -p spotify metadata --format '{{status}}|{{mpris:trackid}}|{{mpris:length}}|{{position}}|{{artist}} - {{title}}' --follow)

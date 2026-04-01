@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+
+current_id="$(playerctl -p spotify metadata mpris:trackid 2>/dev/null || echo "")"
+
+playerctl -p spotify next
+
+for _ in {1..50}; do
+  new_id="$(playerctl -p spotify metadata mpris:trackid 2>/dev/null || echo "")"
+  [[ "$new_id" != "$current_id" && -n "$new_id" ]] && break
+  sleep 0.1
+done
+
+track="$(playerctl -p spotify metadata --format '{{artist}} - {{title}}')"
+
+art="$(playerctl -p spotify metadata mpris:artUrl)"
+img="/tmp/spotify-cover.jpg"
+curl -sL "$art" | magick - -resize 32x32 "$img"
+
+notify-send -i "$img" -t 2500 "Playing Next" "$track"

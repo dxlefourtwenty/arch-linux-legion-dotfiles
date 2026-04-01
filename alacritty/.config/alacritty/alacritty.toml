@@ -1,6 +1,22 @@
 general.live_config_reload = true
+general.ipc_socket = true
 
 general.import = [
   "~/.config/themes/current/alacritty.toml"
 ]
+
+[window]
+opacity = 0.92
+
+[window.padding]
+x = 10
+y = 10
+
+[font]
+size = 14.0
+
+[font.normal]
+family = "CaskaydiaMono Nerd Font"
+
+
 

@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+status="$(playerctl -p spotify status 2>/dev/null || echo "Stopped")"
+
+case "$status" in
+  Playing)
+    # get current track BEFORE pausing
+    track="$(playerctl -p spotify metadata --format '{{artist}} - {{title}}')"
+
+    art="$(playerctl -p spotify metadata mpris:artUrl)"
+    img="/tmp/spotify-cover.jpg"
+    curl -sL "$art" | magick - -resize 32x32 "$img"
+
+    playerctl -p spotify pause
+    notify-send -i "$img" -t 2500 "Paused" "$track"
+    ;;
+
+  Paused|Stopped)
+    playerctl -p spotify play
+
+    # wait until actually playing
+    for _ in {1..50}; do
+      new_status="$(playerctl -p spotify status 2>/dev/null || echo "")"
+      [[ "$new_status" == "Playing" ]] && break
+      sleep 0.1
+    done
+
+    track="$(playerctl -p spotify metadata --format '{{artist}} - {{title}}')"
+
+    art="$(playerctl -p spotify metadata mpris:artUrl)"
+    img="/tmp/spotify-cover.jpg"
+    curl -sL "$art" | magick - -resize 32x32 "$img"
+
+    notify-send -i "$img" -t 2500 "Resuming…" "$track"
+    ;;
+esac

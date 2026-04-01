@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+art="$(playerctl -p spotify metadata mpris:artUrl)"
+track="$(playerctl -p spotify metadata --format '{{artist}} - {{title}}')"
+
+img="/tmp/spotify-cover.jpg"
+curl -sL "$art" | magick - -resize 32x32 "$img"
+
+notify-send -i "$img" -t 5000 "Currently Playing" "$track"
+
+

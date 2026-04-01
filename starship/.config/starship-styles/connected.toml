@@ -98,17 +98,17 @@ style = 'bold fg:green bg:color_bg'
 
 [git_status]
 format = '([$all_status$ahead_behind]($style))'
-style = 'bold fg:bright-black bg:color_bg'
-conflicted = '~${count} '
+style = 'bold fg:blue bg:color_bg'
+conflicted = '[~${count} ](bold fg:red bg:color_bg)'
 stashed = '*${count} '
 ahead = '⇡${count} '
 behind = '⇣${count} '
 diverged = '⇠${behind_count} ⇢${ahead_count} '
-untracked = '?${count} '
-modified = '!${count} '
-staged = '+${count} '
+untracked = '[?${count} ](bold fg:purple bg:color_bg)'
+modified = '[!${count} ](bold fg:bright-purple bg:color_bg)'
+staged = '[+${count} ](bold fg:green bg:color_bg)'
 renamed = '»${count} '
-deleted = '✘${count} '
+deleted = '[✘${count} ](bold fg:bright-red bg:color_bg)'
 
 [direnv]
 format = '[$symbol$loaded/$allowed ]($style)'

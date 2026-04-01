@@ -44,6 +44,7 @@ fi
 WAYBAR_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/waybar"
 DASHBOARD_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/dashboard"
 KITTY_CONF="${XDG_CONFIG_HOME:-$HOME/.config}/kitty/kitty.conf"
+ALACRITTY_CONF="${XDG_CONFIG_HOME:-$HOME/.config}/alacritty/alacritty.toml"
 ROFI_THEME="${XDG_CONFIG_HOME:-$HOME/.config}/rofi/theme.rasi"
 MAKO_CONF="${XDG_CONFIG_HOME:-$HOME/.config}/mako/config"
 
@@ -65,6 +66,13 @@ waybar_font_stack() {
     else
         printf '"%s"' "$FONT_NAME"
     fi
+}
+
+set_alacritty_font() {
+    local file="$1"
+    local family="$2"
+
+    FONT_NAME="$family" perl -0pi -e 's/(\[font\.normal\][^\[]*?family\s*=\s*")[^"]*(")/$1$ENV{FONT_NAME}$2/s' "$file"
 }
 
 for file in "$WAYBAR_DIR"/styles/*.css; do
@@ -89,6 +97,11 @@ for file in "$DASHBOARD_DIR"/styles/*.qml; do
 done
 
 FONT_NAME="$FONT_NAME" perl -0pi -e 's/^font_family\s+.*/font_family $ENV{FONT_NAME}/m' "$KITTY_CONF"
+
+if [[ -f "$ALACRITTY_CONF" ]]; then
+    set_alacritty_font "$ALACRITTY_CONF" "$FONT_NAME"
+fi
+
 FONT_NAME="$FONT_NAME" perl -0pi -e 's/font:\s*"[^"]*?(\s+\d+(?:\.\d+)?)";/font: "$ENV{FONT_NAME}$1";/' "$ROFI_THEME"
 
 if [[ "$INCLUDE_MAKO" -eq 1 && -f "$MAKO_CONF" ]]; then
