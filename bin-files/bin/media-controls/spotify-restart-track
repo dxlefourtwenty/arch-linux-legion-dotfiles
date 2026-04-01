@@ -3,11 +3,11 @@ set -euo pipefail
 
 status="$(playerctl -p spotify status 2>/dev/null || echo "Stopped")"
 
-track="$(playerctl -p spotify metadata --format '{{artist}} - {{title}}' 2>/dev/null || echo "")"
+track="$(playerctl -p spotify metadata --format '<b><i>{{title}}</i></b> \n{{artist}}' 2>/dev/null || echo "")"
 
 art="$(playerctl -p spotify metadata mpris:artUrl)"
 img="/tmp/spotify-cover.jpg"
-curl -sL "$art" | magick - -resize 32x32 "$img"
+curl -sL "$art" | magick - -resize 64x64 "$img"
 
 playerctl -p spotify position 0
 

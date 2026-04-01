@@ -6,11 +6,11 @@ status="$(playerctl -p spotify status 2>/dev/null || echo "Stopped")"
 case "$status" in
   Playing)
     # get current track BEFORE pausing
-    track="$(playerctl -p spotify metadata --format '{{artist}} - {{title}}')"
+    track="$(playerctl -p spotify metadata --format '<b><i>{{title}}</i></b> \n{{artist}}')"
 
     art="$(playerctl -p spotify metadata mpris:artUrl)"
     img="/tmp/spotify-cover.jpg"
-    curl -sL "$art" | magick - -resize 32x32 "$img"
+    curl -sL "$art" | magick - -resize 64x64 "$img"
 
     playerctl -p spotify pause
     notify-send -i "$img" -t 2500 "Paused" "$track"
@@ -26,11 +26,11 @@ case "$status" in
       sleep 0.1
     done
 
-    track="$(playerctl -p spotify metadata --format '{{artist}} - {{title}}')"
+    track="$(playerctl -p spotify metadata --format '<b><i>{{title}}</i></b> \n{{artist}}')"
 
     art="$(playerctl -p spotify metadata mpris:artUrl)"
     img="/tmp/spotify-cover.jpg"
-    curl -sL "$art" | magick - -resize 32x32 "$img"
+    curl -sL "$art" | magick - -resize 64x64 "$img"
 
     notify-send -i "$img" -t 2500 "Resuming…" "$track"
     ;;
