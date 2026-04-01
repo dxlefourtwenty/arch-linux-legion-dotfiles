@@ -1,18 +1,15 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+source "$script_dir/spotify-notify-lib"
+
 status="$(playerctl -p spotify status 2>/dev/null || echo "Stopped")"
-
-track="$(playerctl -p spotify metadata --format '<b><i>{{title}}</i></b> \n{{artist}}' 2>/dev/null || echo "")"
-
-art="$(playerctl -p spotify metadata mpris:artUrl)"
-img="/tmp/spotify-cover.jpg"
-curl -sL "$art" | magick - -resize 64x64 "$img"
 
 playerctl -p spotify position 0
 
 if [[ "$status" == "Playing" ]]; then
-  notify-send -i "$img" -t 2500 "Replaying…" "$track"
+  spotify_notify_track "Replaying…" 2500
 else
-  notify-send -i "$img" -t 2500 "Reset" "$track"
+  spotify_notify_track "Reset" 2500
 fi

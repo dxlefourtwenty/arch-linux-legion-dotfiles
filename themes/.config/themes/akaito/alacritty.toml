@@ -11,7 +11,7 @@ yellow  = "#a8611f"
 blue    = "#a32f1a"
 magenta = "#9c3521"
 cyan    = "#755833"
-white   = "#080503"
+white   = "#D55D40"
 
 [colors.bright]
 black   = "#9f8253"
@@ -21,7 +21,7 @@ yellow  = "#e48e3e"
 blue    = "#e84d31"
 magenta = "#de553a"
 cyan    = "#b8884c"
-white   = "#4d2e1a"
+white   = "#CF593B"
 
 [colors.cursor]
 cursor = "#4d2e1a"

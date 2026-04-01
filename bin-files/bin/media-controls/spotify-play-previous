@@ -1,6 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+source "$script_dir/spotify-notify-lib"
+
 current_id="$(playerctl -p spotify metadata mpris:trackid 2>/dev/null || echo "")"
 
 # force real previous
@@ -14,10 +17,4 @@ for _ in {1..50}; do
   sleep 0.1
 done
 
-track="$(playerctl -p spotify metadata --format '<b><i>{{title}}</i></b> \n{{artist}}')"
-
-art="$(playerctl -p spotify metadata mpris:artUrl)"
-img="/tmp/spotify-cover.jpg"
-curl -sL "$art" | magick - -resize 64x64 "$img"
-
-notify-send -i "$img" -t 2500 "Playing Previous" "$track"
+spotify_notify_track "Playing Previous" 2500

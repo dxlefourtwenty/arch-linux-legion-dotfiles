@@ -1,0 +1,73 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+PLAYERCTL_BIN="${PLAYERCTL_BIN:-/usr/bin/playerctl}"
+CURL_BIN="${CURL_BIN:-/usr/bin/curl}"
+MAGICK_BIN="${MAGICK_BIN:-/usr/bin/magick}"
+NOTIFY_SEND_BIN="${NOTIFY_SEND_BIN:-/usr/bin/notify-send}"
+SPOTIFY_PLAYER="${SPOTIFY_PLAYER:-spotify}"
+SPOTIFY_NOTIFY_ICON="${SPOTIFY_NOTIFY_ICON:-/tmp/spotify-cover.jpg}"
+SPOTIFY_NOTIFY_DRY_RUN="${SPOTIFY_NOTIFY_DRY_RUN:-0}"
+
+spotify_escape_markup() {
+  local value="${1-}"
+
+  value=${value//&/\&amp;}
+  value=${value//</\&lt;}
+  value=${value//>/\&gt;}
+  value=${value//\"/\&quot;}
+  value=${value//\'/\&apos;}
+
+  printf '%s' "$value"
+}
+
+spotify_track_markup() {
+  local title
+  local artist
+
+  title="$("$PLAYERCTL_BIN" -p "$SPOTIFY_PLAYER" metadata --format '{{title}}' 2>/dev/null || printf '')"
+  artist="$("$PLAYERCTL_BIN" -p "$SPOTIFY_PLAYER" metadata --format '{{artist}}' 2>/dev/null || printf '')"
+
+  printf '<b><i>%s</i></b>\n%s' \
+    "$(spotify_escape_markup "$title")" \
+    "$(spotify_escape_markup "$artist")"
+}
+
+spotify_cover_image() {
+  local art_url
+
+  art_url="$("$PLAYERCTL_BIN" -p "$SPOTIFY_PLAYER" metadata mpris:artUrl 2>/dev/null || printf '')"
+  [[ -n "$art_url" ]] || return 1
+
+  "$CURL_BIN" -fsSL "$art_url" | "$MAGICK_BIN" - -resize 64x64 "$SPOTIFY_NOTIFY_ICON"
+  printf '%s\n' "$SPOTIFY_NOTIFY_ICON"
+}
+
+spotify_notify_track() {
+  local summary="$1"
+  local timeout="${2:-2500}"
+  local body
+  local icon
+
+  body="$(spotify_track_markup)"
+  icon=""
+
+  if ! icon="$(spotify_cover_image 2>/dev/null)"; then
+    icon=""
+  fi
+
+  if [[ "$SPOTIFY_NOTIFY_DRY_RUN" == "1" ]]; then
+    printf 'summary=%s\n' "$summary"
+    printf 'timeout=%s\n' "$timeout"
+    printf 'icon=%s\n' "$icon"
+    printf 'body=%s\n' "$body"
+    return 0
+  fi
+
+  if [[ -n "$icon" ]]; then
+    "$NOTIFY_SEND_BIN" -i "$icon" -t "$timeout" "$summary" "$body"
+    return 0
+  fi
+
+  "$NOTIFY_SEND_BIN" -t "$timeout" "$summary" "$body"
+}

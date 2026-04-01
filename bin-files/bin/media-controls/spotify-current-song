@@ -1,12 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-art="$(playerctl -p spotify metadata mpris:artUrl)"
-track="$(playerctl -p spotify metadata --format '<b><i>{{title}}</i></b> \n{{artist}}')"
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+source "$script_dir/spotify-notify-lib"
 
-img="/tmp/spotify-cover.jpg"
-curl -sL "$art" | magick - -resize 64x64 "$img"
-
-notify-send -i "$img" -t 5000 "Currently Playing" "$track"
-
+spotify_notify_track "Currently Playing" 5000
 

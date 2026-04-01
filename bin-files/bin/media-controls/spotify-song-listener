@@ -1,4 +1,8 @@
 #!/usr/bin/env bash
+set -euo pipefail
+
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+source "$script_dir/spotify-notify-lib"
 
 last_id=""
 last_pos=0
@@ -15,14 +19,7 @@ while IFS='|' read -r status id length pos track; do
       percent=$(( last_pos * 100 / last_len ))
 
       if [[ "$percent" -ge 90 ]]; then
-        art="$(playerctl -p spotify metadata mpris:artUrl)"
-        img="/tmp/spotify-cover.jpg"
-
-        curl -sL "$art" | magick - -resize 64x64 "$img"
-
-        track_noti="$(playerctl -p spotify metadata --format '<b><i>{{title}}</i></b> \n{{artist}}' 2>/dev/null || echo "")"
-
-        notify-send -i "$img" "Now Playing" "$track_noti"
+        spotify_notify_track "Now Playing"
       fi
     fi
 
