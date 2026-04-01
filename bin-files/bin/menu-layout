@@ -1,0 +1,246 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+ROFI_BIN="/usr/bin/rofi"
+NOTIFY_BIN="/usr/bin/notify-send"
+AWK_BIN="/usr/bin/awk"
+MKTEMP_BIN="/usr/bin/mktemp"
+MV_BIN="/usr/bin/mv"
+HYPRCTL_BIN="/usr/bin/hyprctl"
+READLINK_BIN="/usr/bin/readlink"
+HYPR_CONF="${XDG_CONFIG_HOME:-$HOME/.config}/hypr/decorations.conf"
+MENU_ID="menu-layouts"
+PID_FILE="/tmp/menu-rofi.pid"
+DRY_RUN=0
+SELECTED_LAYOUT=""
+LAYOUTS=("dwindle" "scrolling" "master")
+
+usage() {
+    printf 'Usage: %s [--layout master|dwindle|scrolling] [--config PATH] [--dry-run]\n' "$(basename "$0")"
+}
+
+notify() {
+    "$NOTIFY_BIN" -t 4000 "Layout" "$1" >/dev/null 2>&1 || true
+}
+
+is_valid_layout() {
+    local candidate="$1"
+    local layout=""
+
+    for layout in "${LAYOUTS[@]}"; do
+        [[ "$candidate" == "$layout" ]] && return 0
+    done
+
+    return 1
+}
+
+format_layout_display() {
+    case "$1" in
+        master)
+            printf 'Master\n'
+            ;;
+        dwindle)
+            printf 'Dwindle\n'
+            ;;
+        scrolling)
+            printf 'Scrolling\n'
+            ;;
+        *)
+            printf '%s\n' "$1"
+            ;;
+    esac
+}
+
+require_config() {
+    [[ -f "$HYPR_CONF" ]] || {
+        notify "Config not found: $HYPR_CONF"
+        exit 1
+    }
+}
+
+resolve_config_path() {
+    local resolved_path=""
+
+    resolved_path="$("$READLINK_BIN" -f "$HYPR_CONF" 2>/dev/null || true)"
+    [[ -n "$resolved_path" ]] && HYPR_CONF="$resolved_path"
+}
+
+get_current_layout() {
+    "$AWK_BIN" '
+        /^[[:space:]]*general[[:space:]]*\{/ {
+            in_section = 1
+            next
+        }
+
+        in_section && /^[[:space:]]*\}/ {
+            in_section = 0
+        }
+
+        in_section && /^[[:space:]]*layout[[:space:]]*=/ {
+            value = $0
+            sub(/^[[:space:]]*layout[[:space:]]*=[[:space:]]*/, "", value)
+            sub(/[[:space:]]*(#.*)?$/, "", value)
+            print value
+            exit
+        }
+    ' "$HYPR_CONF"
+}
+
+choose_layout() {
+    local current_layout="$1"
+    local display_layouts=()
+    local layout=""
+    local pretty=""
+    local chosen_index=""
+
+    for layout in "${LAYOUTS[@]}"; do
+        pretty="$(format_layout_display "$layout")"
+
+        if [[ "$layout" == "$current_layout" ]]; then
+            pretty="<i>$pretty</i>"
+        fi
+
+        display_layouts+=("$pretty")
+    done
+
+    chosen_index="$(
+        printf '%s\n' "${display_layouts[@]}" | "$ROFI_BIN" -dmenu -i -markup-rows -format i \
+            -pid "$PID_FILE" \
+            -p "" \
+            -theme-str '
+                window { width: 250px; }
+                entry { placeholder: "Layout…"; }
+                element {
+                    orientation: horizontal;
+                    children: [ element-text ];
+                    spacing: 0px;
+                    padding: 8px 8px;
+                }
+                element-text {
+                    horizontal-align: 0.0;
+                    padding-left: 0px;
+                    margin: 0 2px;
+                }
+            '
+    )" || return 1
+
+    [[ "$chosen_index" =~ ^[0-9]+$ ]] || return 1
+    [[ "$chosen_index" -lt "${#LAYOUTS[@]}" ]] || return 1
+
+    printf '%s\n' "${LAYOUTS[chosen_index]}"
+}
+
+update_layout() {
+    local new_layout="$1"
+    local tmp_file=""
+
+    tmp_file="$("$MKTEMP_BIN")"
+
+    "$AWK_BIN" -v new_layout="$new_layout" '
+        /^[[:space:]]*general[[:space:]]*\{/ {
+            in_section = 1
+        }
+
+        in_section && !updated && /^[[:space:]]*layout[[:space:]]*=/ {
+            sub(/=[[:space:]]*[^[:space:]#]+/, "= " new_layout)
+            updated = 1
+        }
+
+        in_section && /^[[:space:]]*\}/ {
+            in_section = 0
+        }
+
+        { print }
+
+        END {
+            if (!updated) {
+                exit 1
+            }
+        }
+    ' "$HYPR_CONF" > "$tmp_file"
+
+    "$MV_BIN" "$tmp_file" "$HYPR_CONF"
+}
+
+reload_hyprland() {
+    [[ -x "$HYPRCTL_BIN" ]] || return 0
+    "$HYPRCTL_BIN" reload >/dev/null 2>&1
+}
+
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --layout)
+            [[ $# -ge 2 ]] || {
+                usage
+                exit 1
+            }
+            SELECTED_LAYOUT="$2"
+            shift 2
+            ;;
+        --config)
+            [[ $# -ge 2 ]] || {
+                usage
+                exit 1
+            }
+            HYPR_CONF="$2"
+            shift 2
+            ;;
+        --dry-run)
+            DRY_RUN=1
+            shift
+            ;;
+        -h|--help)
+            usage
+            exit 0
+            ;;
+        *)
+            usage
+            exit 1
+            ;;
+    esac
+done
+
+resolve_config_path
+require_config
+
+CURRENT_LAYOUT="$(get_current_layout)"
+[[ -n "$CURRENT_LAYOUT" ]] || {
+    notify "Failed to detect current layout."
+    exit 1
+}
+
+if [[ -z "$SELECTED_LAYOUT" ]]; then
+    if "$SCRIPT_DIR/rofi-toggle-pidfile" begin "$MENU_ID"; then
+        exit 0
+    fi
+
+    trap '"$SCRIPT_DIR/rofi-toggle-pidfile" clear "$MENU_ID"' EXIT
+
+    SELECTED_LAYOUT="$(choose_layout "$CURRENT_LAYOUT" || true)"
+    [[ -n "$SELECTED_LAYOUT" ]] || exit 0
+fi
+
+is_valid_layout "$SELECTED_LAYOUT" || {
+    notify "Invalid layout: $SELECTED_LAYOUT"
+    exit 1
+}
+
+[[ "$SELECTED_LAYOUT" != "$CURRENT_LAYOUT" ]] || exit 0
+
+if [[ "$DRY_RUN" -eq 1 ]]; then
+    printf 'Would set layout to %s in %s\n' "$SELECTED_LAYOUT" "$HYPR_CONF"
+    exit 0
+fi
+
+update_layout "$SELECTED_LAYOUT" || {
+    notify "Failed to update layout."
+    exit 1
+}
+
+if ! reload_hyprland; then
+    notify "Set to $(format_layout_display "$SELECTED_LAYOUT"), but reload failed."
+    exit 1
+fi
+
+notify "Set to $(format_layout_display "$SELECTED_LAYOUT")"

@@ -2,8 +2,8 @@
 
 # bash and nvim
 alias vim='nvim'
-alias edit-bash='nvim ~/.bashrc'
-alias rel-bash='source ~/.bashrc'
+alias edit-bash='nvim ~/.zshrc'
+alias rel-bash='source ~/.zshrc'
 alias bashrc='edit-bash'
 alias vsbashrc='code ~/.bashrc'
 alias editbash='edit-bash'
@@ -21,6 +21,7 @@ alias bashenv='nvim ~/.bash_env'
 alias relzsh='source ~/.zshrc'
 alias rel-z='source ~/.zshrc'
 alias relz='source ~/.zshrc'
+alias edit-z'nvim ~/.zshrc'
 
 # git
 alias git-log='git log --oneline --abbrev-commit --all --graph --decorate --color'
@@ -78,6 +79,7 @@ alias start='~/bin/open-file'
 alias cp='cp -i'
 alias mv='mv -i'
 alias rm='trash -v'
+alias trash-empty='trash-empty --trash-dir ~/.local/share/Trash'
 alias mkdir='mkdir -p'
 alias ping='ping -c 10'
 alias less='less -R'

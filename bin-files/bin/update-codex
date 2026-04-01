@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+set -e
+
+echo "Updating Codex..."
+
+sudo npm install -g @openai/codex@latest
+
+echo "Verifying version..."
+codex --version
+
+echo "Done."

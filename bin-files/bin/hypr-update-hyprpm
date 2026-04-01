@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+
+hyprpm update
+hyprpm reload -v
