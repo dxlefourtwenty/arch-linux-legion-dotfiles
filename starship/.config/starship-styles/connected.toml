@@ -12,8 +12,7 @@ $fill\
 ($status[╱ ](fg:color_fg bg:color_bg))\
 ($cmd_duration[╱ ](fg:color_fg bg:color_bg))\
 ((fg:color_fg bg:color_bg)$git_branch)\
-$git_status\
-[╱ ](fg:color_fg bg:color_bg)\
+($git_status[╱ ](fg:color_fg bg:color_bg))\
 ($direnv[╱ ](fg:color_fg bg:color_bg))\
 ($package[╱ ](fg:color_fg bg:color_bg))\
 ($c[╱ ](fg:color_fg bg:color_bg))\
