@@ -21,7 +21,7 @@ alias bashenv='nvim ~/.bash_env'
 alias relzsh='source ~/.zshrc'
 alias rel-z='source ~/.zshrc'
 alias relz='source ~/.zshrc'
-alias edit-z'nvim ~/.zshrc'
+alias edit-z='nvim ~/.zshrc'
 
 # git
 alias git-log='git log --oneline --abbrev-commit --all --graph --decorate --color'

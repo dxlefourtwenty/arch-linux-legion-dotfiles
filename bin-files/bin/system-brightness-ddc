@@ -190,6 +190,7 @@ current_percent=$new_percent
 write_state
 
 swayosd-client \
+    --monitor HDMI-A-1 \
     --custom-progress "$(progress_for_percent "$new_percent")" \
     --custom-progress-text "${label}: ${new_percent}%" \
     --custom-icon display-brightness-symbolic

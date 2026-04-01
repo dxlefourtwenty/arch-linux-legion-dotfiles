@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+
+# default values
+DESCRIPTION=""
+ARGS=()
+
+# parse args
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --description)
+      DESCRIPTION="$2"
+      shift 2
+      ;;
+    *)
+      ARGS+=("$1")
+      shift
+      ;;
+  esac
+done
+
+# if description provided → resolve monitor name
+if [ -n "$DESCRIPTION" ]; then
+  MONITOR=$(hyprctl monitors -j | jq -r \
+    ".[] | select(.description | contains(\"$DESCRIPTION\")).name" | head -n1)
+
+  if [ -n "$MONITOR" ]; then
+    ARGS=(--monitor "$MONITOR" "${ARGS[@]}")
+  else
+    echo "swayosd-client: no monitor matched description '$DESCRIPTION'" >&2
+    exit 1
+  fi
+fi
+
+# call real binary
+command swayosd-client "${ARGS[@]}"

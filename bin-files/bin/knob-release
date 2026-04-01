@@ -4,5 +4,5 @@ pressed_file="/tmp/knob_pressed"
 
 if [ -f "$pressed_file" ]; then
     rm "$pressed_file"
-    swayosd-client --output-volume mute-toggle
+    ~/bin/system-volume --description "Acer Technologies KG271U" --output-volume mute-toggle
 fi
