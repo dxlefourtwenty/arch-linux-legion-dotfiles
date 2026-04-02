@@ -8,25 +8,33 @@ last_id=""
 last_pos=0
 last_len=0
 
-while IFS='|' read -r status id length pos track; do
+spotify_track_change_notify() {
+  local previous_id="$1"
+  local summary=""
+
+  [[ -n "$previous_id" ]] || return 0
+
+  if summary="$(spotify_track_change_take_mark "$previous_id" 2>/dev/null)"; then
+    sleep 0.5
+    spotify_notify_track "$summary" 6500 || true
+    return 0
+  fi
+
+  sleep 0.5
+  spotify_notify_track "Now Playing" 6500 || true
+}
+
+while IFS='|' read -r status id length pos; do
   [[ "$status" != "Playing" ]] && continue
 
   length_s=$(( ${length:-0} / 1000000 ))
   pos_s=$(( ${pos:-0} / 1000000 ))
 
   if [[ "$id" != "$last_id" ]]; then
-    if [[ -n "$last_id" && "$last_len" -gt 0 ]]; then
-      percent=$(( last_pos * 100 / last_len ))
-
-      if [[ "$percent" -ge 90 ]]; then
-        sleep 0.5
-        spotify_notify_track "Now Playing" 6500 || true
-      fi
-    fi
-
+    spotify_track_change_notify "$last_id"
     last_id="$id"
     last_len="$length_s"
   fi
 
   last_pos="$pos_s"
-done < <(playerctl -p spotify metadata --format '{{status}}|{{mpris:trackid}}|{{mpris:length}}|{{position}}|{{artist}} - {{title}}' --follow)
+done < <("$PLAYERCTL_BIN" -p "$SPOTIFY_PLAYER" metadata --format '{{status}}|{{mpris:trackid}}|{{mpris:length}}|{{position}}' --follow)

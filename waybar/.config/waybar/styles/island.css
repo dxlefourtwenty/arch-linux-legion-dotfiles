@@ -226,12 +226,12 @@ button {
 #pulseaudio {
     background-color: transparent;
     color: @bright-yellow;
-    padding-right: 0;
+    padding-right: 5px;
 }
 
 #pulseaudio.muted {
     background-color: transparent;
-    color: @foreground;
+    color: @red;
 }
 
 #wireplumber {
@@ -374,5 +374,5 @@ button {
 #custom-expo {
     color: @blue;
     padding-left: 12px;
-    padding-right: 8px;
+    padding-right: 6px;
 }

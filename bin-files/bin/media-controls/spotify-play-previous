@@ -7,6 +7,7 @@ source "$script_dir/spotify-notify-lib"
 current_id="$(playerctl -p spotify metadata mpris:trackid 2>/dev/null || echo "")"
 
 # force real previous
+spotify_track_change_mark "Playing Previous" "$current_id"
 playerctl -p spotify position 0
 sleep 0.1
 playerctl -p spotify previous
@@ -16,5 +17,3 @@ for _ in {1..50}; do
   [[ "$new_id" != "$current_id" && -n "$new_id" ]] && break
   sleep 0.1
 done
-
-spotify_notify_track "Playing Previous" 5000

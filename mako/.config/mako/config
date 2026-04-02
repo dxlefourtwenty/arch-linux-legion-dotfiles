@@ -2,13 +2,17 @@ include=~/.config/themes/current/mako
 
 # Position
 anchor=top-right
-margin=30
+margin=0,0,15,0
+outer-margin=30
 output=HDMI-A-1
 
 border-size=2
 border-radius=0
 padding=12
 width=300
+markup=1
+
+format=<b>%s</b>\n%b
 
 # Font
 font=Liberation Sans 11
