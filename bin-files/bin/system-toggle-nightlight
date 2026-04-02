@@ -5,6 +5,18 @@ set -euo pipefail
 FILTER=3700
 STATE_FILE="${XDG_RUNTIME_DIR:-/tmp}/system-toggle-nightlight.state"
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+NOTIFY_SEND_BIN="${NOTIFY_SEND_BIN:-/usr/bin/notify-send}"
+NIGHTLIGHT_NOTIFY_APP_NAME="${NIGHTLIGHT_NOTIFY_APP_NAME:-system-toggle-nightlight}"
+NIGHTLIGHT_NOTIFY_STACK_TAG="${NIGHTLIGHT_NOTIFY_STACK_TAG:-system-toggle-nightlight}"
+
+notify() {
+  "$NOTIFY_SEND_BIN" \
+    -a "$NIGHTLIGHT_NOTIFY_APP_NAME" \
+    -h "string:x-dunst-stack-tag:$NIGHTLIGHT_NOTIFY_STACK_TAG" \
+    -t 2000 \
+    "System" \
+    "$1"
+}
 
 ensure_hyprsunset() {
   if pgrep -x hyprsunset >/dev/null 2>&1; then
@@ -28,11 +40,11 @@ fi
 
 if [ "$state" = "on" ]; then
   hyprctl hyprsunset identity
-  notify-send -t 2000 "System" "Nightlight: Off"
+  notify "Night-light: <b>OFF</b>"
   printf 'off\n' > "$STATE_FILE"
 else
   ensure_hyprsunset
   hyprctl hyprsunset temperature "$FILTER"
-  notify-send -t 2000 "System" "Nightlight: On"
+  notify "Night-light: <b>ON</b>"
   printf 'on\n' > "$STATE_FILE"
 fi

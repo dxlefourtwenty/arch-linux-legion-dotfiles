@@ -11,6 +11,9 @@ WAYBAR_STYLE_LINK="${XDG_CONFIG_HOME:-$HOME/.config}/waybar/style.css"
 THEMES_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/themes"
 STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/toggle-zen-mode"
 STATE_FILE="${STATE_DIR}/state"
+NOTIFY_SEND_BIN="${NOTIFY_SEND_BIN:-/usr/bin/notify-send}"
+ZEN_NOTIFY_APP_NAME="${ZEN_NOTIFY_APP_NAME:-toggle-zen-mode}"
+ZEN_NOTIFY_STACK_TAG="${ZEN_NOTIFY_STACK_TAG:-toggle-zen-mode}"
 
 WAYBAR_MARGIN_MIN=2
 WAYBAR_MARGIN_FILES=(
@@ -30,7 +33,13 @@ ZEN_BINDINGS_START_MARKER="### zen mode separator"
 ZEN_BINDINGS_END_MARKER="# terminals"
 
 notify() {
-    notify-send -t 4000 "Zen Mode" "$1" >/dev/null 2>&1 || true
+    sleep 1
+    "$NOTIFY_SEND_BIN" \
+        -a "$ZEN_NOTIFY_APP_NAME" \
+        -h "string:x-dunst-stack-tag:$ZEN_NOTIFY_STACK_TAG" \
+        -t 4000 \
+        "Zen Mode" \
+        "$1" >/dev/null 2>&1 || true
 }
 
 require_file() {
@@ -447,7 +456,7 @@ apply_zen_mode() {
     apply_starship_style "$ZEN_STARSHIP_STYLE"
 
     reload_hyprland
-    notify $'Enabled\nuse SUPER + Z to un-toggle'
+    notify $'Enabled\nUse SUPER + Z to disable.'
 }
 
 restore_zen_mode() {
