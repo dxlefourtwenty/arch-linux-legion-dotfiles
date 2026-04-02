@@ -1,0 +1,20 @@
+return {
+  colors = {
+    base00 = "#020202",
+    base01 = "#aca7a7",
+    base02 = "#020202",
+    base03 = "#aca7a7",
+    base04 = "#C3C3C3",
+    base05 = "#d1cfcf",
+    base06 = "#d1cfcf",
+    base07 = "#C3C3C3",
+    base08 = "#9a8e8e",
+    base09 = "#c6bebe",
+    base0A = "#a89e9e",
+    base0B = "#a19797",
+    base0C = "#aea5a5",
+    base0D = "#afa6a6",
+    base0E = "#9f9595",
+    base0F = "#d4cece",
+  },
+}

@@ -1,14 +1,8 @@
 return {
-	{
-		"Mofiqul/dracula.nvim",
-		opts = {
-			transparent_bg = true,
-		},
-	},
-	{
-		"LazyVim/LazyVim",
-		opts = {
-			colorscheme = "dracula",
-		},
-	},
+  {
+    "Mofiqul/dracula.nvim",
+    opts = {
+      transparent_bg = true,
+    },
+  },
 }

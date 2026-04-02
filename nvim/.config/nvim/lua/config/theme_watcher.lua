@@ -34,8 +34,9 @@ local function check(force)
   end
 end
 
--- initial load
-check(true)
+local function apply_initial_theme()
+  check(true)
+end
 
 local function on_fs_event(err, filename)
   if err then
@@ -64,3 +65,5 @@ timer:start(300, 300, function()
     check(false)
   end)
 end)
+
+apply_initial_theme()

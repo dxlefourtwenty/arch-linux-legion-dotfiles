@@ -3,15 +3,7 @@ return {
     "tahayvr/matteblack.nvim",
     lazy = false,
     priority = 1000,
-  },
-  {
-    "LazyVim/LazyVim",
-    opts = {
-      colorscheme = "matteblack",
-    },
     config = function(_, opts)
-      require("lazyvim.config").setup(opts)
-
       local function clear_bg()
         local groups = {
           "Normal",
@@ -42,8 +34,6 @@ return {
         callback = clear_bg,
       })
 
-      -- 🔥 THIS IS THE IMPORTANT PART 🔥
-      -- clear window-local winhighlight for sidebars
       vim.api.nvim_create_autocmd("WinEnter", {
         callback = function()
           local ft = vim.bo.filetype

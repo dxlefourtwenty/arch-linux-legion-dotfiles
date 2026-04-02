@@ -1,0 +1,18 @@
+/* Catppuccin Mocha */
+
+@define-color base        #020202;
+@define-color mantle      #0b0b0b;
+@define-color crust       #121111;
+
+@define-color surface0    #1b1919;
+@define-color surface1    #2a2727;
+@define-color surface2    #3a3636;
+
+@define-color text        #d1cfcf;
+@define-color subtext     #8a8888;
+
+@define-color accent      #afa6a6; /* mauve */
+@define-color blue        #dbd6d6;
+@define-color green       #a19797;
+@define-color red         #9a8e8e;
+@define-color orange      #a89e9e;

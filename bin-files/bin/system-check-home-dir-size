@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+if [[ "$1" =~ ^[0-9]+$ ]]; then
+    sudo du -h --max-depth=1 ~ | sort -hr | head -"$1"
+else
+    echo "Invalid argument."
+    echo "Input must be an positive integer."
+fi
+
