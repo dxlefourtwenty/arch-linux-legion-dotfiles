@@ -4,10 +4,22 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 LAUNCH_SCRIPT="${SCRIPT_DIR}/launch-hypridle"
+NOTIFY_SEND_BIN="${NOTIFY_SEND_BIN:-/usr/bin/notify-send}"
+IDLE_LOCK_NOTIFY_APP_NAME="${IDLE_LOCK_NOTIFY_APP_NAME:-system-toggle-idle-lock}"
+IDLE_LOCK_NOTIFY_STACK_TAG="${IDLE_LOCK_NOTIFY_STACK_TAG:-system-toggle-idle-lock}"
+
+notify() {
+    "$NOTIFY_SEND_BIN" \
+        -a "$IDLE_LOCK_NOTIFY_APP_NAME" \
+        -h "string:x-dunst-stack-tag:$IDLE_LOCK_NOTIFY_STACK_TAG" \
+        -t 2500 \
+        "System" \
+        "$1"
+}
 
 if pgrep -x hypridle >/dev/null 2>&1; then
     pkill -x hypridle
-    notify-send -t 2500 "System" "Idle lock: OFF"
+    notify "Idle lock: <b>OFF</b>"
     exit 0
 fi
 
@@ -18,4 +30,4 @@ else
     disown 2>/dev/null || true
 fi
 
-notify-send -t 2500 "System" "Idle lock: ON"
+notify "Idle lock: <b>ON</b>"

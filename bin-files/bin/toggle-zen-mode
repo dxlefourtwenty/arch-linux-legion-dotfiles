@@ -38,8 +38,21 @@ notify() {
         -a "$ZEN_NOTIFY_APP_NAME" \
         -h "string:x-dunst-stack-tag:$ZEN_NOTIFY_STACK_TAG" \
         -t 4000 \
-        "Zen Mode" \
+        "Focus" \
         "$1" >/dev/null 2>&1 || true
+}
+
+refresh_parent_zsh_prompt() {
+    local parent_comm=""
+
+    if [[ -r "/proc/${PPID}/comm" ]]; then
+        read -r parent_comm < "/proc/${PPID}/comm" || true
+    elif command -v ps >/dev/null 2>&1; then
+        parent_comm="$(ps -o comm= -p "${PPID}" 2>/dev/null | tr -d '[:space:]')"
+    fi
+
+    [[ "$parent_comm" == "zsh" ]] || return 0
+    kill -USR1 "$PPID" >/dev/null 2>&1 || true
 }
 
 require_file() {
@@ -379,6 +392,7 @@ apply_starship_style() {
 
     [[ -n "$style_name" ]] || return 0
     "$SCRIPT_DIR/starship-style" "$style_name"
+    refresh_parent_zsh_prompt
 }
 
 apply_theme_if_needed() {
@@ -456,7 +470,7 @@ apply_zen_mode() {
     apply_starship_style "$ZEN_STARSHIP_STYLE"
 
     reload_hyprland
-    notify $'Enabled\nUse SUPER + Z to disable.'
+    notify $'Zen Mode: <b>ON</b>\nUse SUPER + Z to disable.'
 }
 
 restore_zen_mode() {
@@ -492,7 +506,7 @@ restore_zen_mode() {
 
     reload_hyprland
     rm -f "$STATE_FILE"
-    notify "Disabled"
+    notify "Zen Mode: <b>OFF</b>"
 }
 
 if [[ -f "$STATE_FILE" ]]; then

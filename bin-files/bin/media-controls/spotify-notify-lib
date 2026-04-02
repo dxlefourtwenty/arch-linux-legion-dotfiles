@@ -39,12 +39,62 @@ spotify_escape_markup() {
   printf '%s' "$value"
 }
 
+spotify_track_artists() {
+  local artists_raw
+  local entry
+  local piece
+  local joined_artists
+  local metadata_output
+  local trimmed_piece
+  local count=0
+  local -a artists=()
+  local -a entries=()
+  local -a pieces=()
+
+  metadata_output="$("$PLAYERCTL_BIN" -p "$SPOTIFY_PLAYER" metadata 2>/dev/null || printf '')"
+  artists_raw="$(printf '%s\n' "$metadata_output" | "$AWK_BIN" '$1 == "xesam:artist" { $1=""; sub(/^[[:space:]]+/, ""); print; exit }')"
+
+  if [[ -z "$artists_raw" ]]; then
+    artists_raw="$("$PLAYERCTL_BIN" -p "$SPOTIFY_PLAYER" metadata --format '{{artist}}' 2>/dev/null || printf '')"
+  fi
+
+  mapfile -t entries <<< "$artists_raw"
+
+  for entry in "${entries[@]}"; do
+    IFS=',' read -r -a pieces <<< "$entry"
+
+    for piece in "${pieces[@]}"; do
+      trimmed_piece="${piece#"${piece%%[![:space:]]*}"}"
+      trimmed_piece="${trimmed_piece%"${trimmed_piece##*[![:space:]]}"}"
+
+      [[ -n "$trimmed_piece" ]] || continue
+
+      artists+=("$trimmed_piece")
+      count=$(( count + 1 ))
+
+      if [[ "$count" -ge 3 ]]; then
+        joined_artists="$(IFS=', '; printf '%s' "${artists[*]}")"
+        printf '%s\n' "$joined_artists"
+        return 0
+      fi
+    done
+  done
+
+  if [[ "${#artists[@]}" -gt 0 ]]; then
+    joined_artists="$(IFS=', '; printf '%s' "${artists[*]}")"
+    printf '%s\n' "$joined_artists"
+    return 0
+  fi
+
+  printf '\n'
+}
+
 spotify_track_markup() {
   local title
   local artist
 
   title="$("$PLAYERCTL_BIN" -p "$SPOTIFY_PLAYER" metadata --format '{{title}}' 2>/dev/null || printf '')"
-  artist="$("$PLAYERCTL_BIN" -p "$SPOTIFY_PLAYER" metadata --format '{{artist}}' 2>/dev/null || printf '')"
+  artist="$(spotify_track_artists)"
 
   printf '<b><i>%s</i></b>\n%s' \
     "$(spotify_escape_markup "$title")" \
