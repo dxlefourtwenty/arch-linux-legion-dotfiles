@@ -1,2 +1,7 @@
 #!/usr/bin/env bash
-pkill -SIGUSR2 waybar
+
+if pgrep -x waybar >/dev/null; then
+    pkill -SIGUSR2 waybar
+else
+    nohup waybar >/dev/null 2>&1 &
+fi

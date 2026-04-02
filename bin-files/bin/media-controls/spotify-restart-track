@@ -9,7 +9,7 @@ status="$(playerctl -p spotify status 2>/dev/null || echo "Stopped")"
 playerctl -p spotify position 0
 
 if [[ "$status" == "Playing" ]]; then
-  spotify_notify_track "Replaying…" 2500
+  spotify_notify_track "Replaying…" 3000
 else
-  spotify_notify_track "Reset" 2500
+  spotify_notify_track "Reset" 3000
 fi

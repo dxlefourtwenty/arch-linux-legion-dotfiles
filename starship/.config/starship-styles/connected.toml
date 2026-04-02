@@ -87,7 +87,8 @@ read_only_style = 'bold fg:cyan bg:color_bg'
 read_only = "󰌾 "
 home_symbol = '~'
 truncate_to_repo = false
-fish_style_pwd_dir_length = 100
+truncation_symbol = "…/"
+truncation_length = 4
 
 [git_branch]
 format = '[$symbol$branch(:$remote_branch) ]($style)'

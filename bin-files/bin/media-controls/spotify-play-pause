@@ -9,7 +9,7 @@ status="$(playerctl -p spotify status 2>/dev/null || echo "Stopped")"
 case "$status" in
   Playing)
     playerctl -p spotify pause
-    spotify_notify_track "Paused" 2500
+    spotify_notify_track "Paused" 3000
     ;;
 
   Paused|Stopped)
@@ -22,6 +22,6 @@ case "$status" in
       sleep 0.1
     done
 
-    spotify_notify_track "Resuming…" 2500
+    spotify_notify_track "Resuming…" 3000
     ;;
 esac

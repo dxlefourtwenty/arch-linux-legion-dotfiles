@@ -5,9 +5,15 @@ PLAYERCTL_BIN="${PLAYERCTL_BIN:-/usr/bin/playerctl}"
 CURL_BIN="${CURL_BIN:-/usr/bin/curl}"
 MAGICK_BIN="${MAGICK_BIN:-/usr/bin/magick}"
 NOTIFY_SEND_BIN="${NOTIFY_SEND_BIN:-/usr/bin/notify-send}"
+FLOCK_BIN="${FLOCK_BIN:-/usr/bin/flock}"
+MKDIR_BIN="${MKDIR_BIN:-/usr/bin/mkdir}"
 SPOTIFY_PLAYER="${SPOTIFY_PLAYER:-spotify}"
 SPOTIFY_NOTIFY_ICON="${SPOTIFY_NOTIFY_ICON:-/tmp/spotify-cover.jpg}"
 SPOTIFY_NOTIFY_DRY_RUN="${SPOTIFY_NOTIFY_DRY_RUN:-0}"
+SPOTIFY_NOTIFY_APP_NAME="${SPOTIFY_NOTIFY_APP_NAME:-spotify-media-controls}"
+SPOTIFY_NOTIFY_STACK_TAG="${SPOTIFY_NOTIFY_STACK_TAG:-spotify-media-controls}"
+SPOTIFY_NOTIFY_STATE_DIR="${SPOTIFY_NOTIFY_STATE_DIR:-/tmp/spotify-media-controls-notify}"
+SPOTIFY_NOTIFY_LOCK_FILE="${SPOTIFY_NOTIFY_LOCK_FILE:-$SPOTIFY_NOTIFY_STATE_DIR/notification.lock}"
 
 spotify_escape_markup() {
   local value="${1-}"
@@ -43,11 +49,35 @@ spotify_cover_image() {
   printf '%s\n' "$SPOTIFY_NOTIFY_ICON"
 }
 
+spotify_notify_args() {
+  local summary="$1"
+  local body="$2"
+  local timeout="$3"
+  local icon="${4-}"
+  local -a args
+
+  args=(
+    -a "$SPOTIFY_NOTIFY_APP_NAME"
+    -h "string:x-dunst-stack-tag:$SPOTIFY_NOTIFY_STACK_TAG"
+    -t "$timeout"
+  )
+
+  if [[ -n "$icon" ]]; then
+    args+=(-i "$icon")
+  fi
+
+  args+=("$summary" "$body")
+  printf '%s\0' "${args[@]}"
+}
+
 spotify_notify_track() {
   local summary="$1"
   local timeout="${2:-2500}"
   local body
   local icon
+  local lock_fd
+  local -a preview_args
+  local -a notify_args
 
   body="$(spotify_track_markup)"
   icon=""
@@ -57,17 +87,21 @@ spotify_notify_track() {
   fi
 
   if [[ "$SPOTIFY_NOTIFY_DRY_RUN" == "1" ]]; then
+    mapfile -d '' -t preview_args < <(spotify_notify_args "$summary" "$body" "$timeout" "$icon")
     printf 'summary=%s\n' "$summary"
     printf 'timeout=%s\n' "$timeout"
     printf 'icon=%s\n' "$icon"
     printf 'body=%s\n' "$body"
+    printf 'stack_tag=%s\n' "$SPOTIFY_NOTIFY_STACK_TAG"
+    printf 'app_name=%s\n' "$SPOTIFY_NOTIFY_APP_NAME"
+    printf 'notify_args=%q ' "$NOTIFY_SEND_BIN" "${preview_args[@]}"
+    printf '\n'
     return 0
   fi
 
-  if [[ -n "$icon" ]]; then
-    "$NOTIFY_SEND_BIN" -i "$icon" -t "$timeout" "$summary" "$body"
-    return 0
-  fi
-
-  "$NOTIFY_SEND_BIN" -t "$timeout" "$summary" "$body"
+  "$MKDIR_BIN" -p "$SPOTIFY_NOTIFY_STATE_DIR"
+  exec {lock_fd}> "$SPOTIFY_NOTIFY_LOCK_FILE"
+  "$FLOCK_BIN" -x "$lock_fd"
+  mapfile -d '' -t notify_args < <(spotify_notify_args "$summary" "$body" "$timeout" "$icon")
+  "$NOTIFY_SEND_BIN" "${notify_args[@]}"
 }

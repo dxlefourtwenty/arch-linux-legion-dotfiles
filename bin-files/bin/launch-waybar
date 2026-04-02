@@ -1,3 +1,7 @@
 #!/usr/bin/env bash
 
-nohup waybar >/dev/null 2>&1 &
+#!/usr/bin/env bash
+
+if ! pgrep -u "$USER" -x waybar >/dev/null; then
+    nohup waybar >/dev/null 2>&1 &
+fi
