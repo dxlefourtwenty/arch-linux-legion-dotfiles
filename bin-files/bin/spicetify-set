@@ -88,6 +88,14 @@ case "$MODE" in
         THEME="text"
         FLAVOR="RetroBlue"
         ;;
+    akaito)
+        THEME="text"
+        FLAVOR="Akaito"
+        ;;
+    manga)
+        THEME="text"
+        FLAVOR="Manga"
+        ;;
     *)
         echo "Unknown mode: $MODE"
         exit 1
