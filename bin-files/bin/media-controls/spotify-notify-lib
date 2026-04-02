@@ -51,6 +51,50 @@ spotify_track_markup() {
     "$(spotify_escape_markup "$artist")"
 }
 
+spotify_format_mmss() {
+  local total_seconds="${1:-0}"
+  local minutes
+  local seconds
+
+  if [[ "$total_seconds" -lt 0 ]]; then
+    total_seconds=0
+  fi
+
+  minutes=$(( total_seconds / 60 ))
+  seconds=$(( total_seconds % 60 ))
+
+  printf '%02d:%02d' "$minutes" "$seconds"
+}
+
+spotify_track_time_label() {
+  local position_us
+  local length_us
+  local position_s
+  local length_s
+
+  position_us="$("$PLAYERCTL_BIN" -p "$SPOTIFY_PLAYER" metadata --format '{{position}}' 2>/dev/null || printf '0')"
+  length_us="$("$PLAYERCTL_BIN" -p "$SPOTIFY_PLAYER" metadata --format '{{mpris:length}}' 2>/dev/null || printf '0')"
+
+  [[ "$position_us" =~ ^[0-9]+$ ]] || position_us=0
+  [[ "$length_us" =~ ^[0-9]+$ ]] || length_us=0
+
+  position_s=$(( position_us / 1000000 ))
+  length_s=$(( length_us / 1000000 ))
+
+  printf '%s/%s' \
+    "$(spotify_format_mmss "$position_s")" \
+    "$(spotify_format_mmss "$length_s")"
+}
+
+spotify_notify_track_with_timestamp() {
+  local summary="$1"
+  local timeout="${2:-2500}"
+  local time_label
+
+  time_label="$(spotify_track_time_label)"
+  spotify_notify_track "$summary [$time_label]" "$timeout"
+}
+
 spotify_cover_image() {
   local art_url
   local icon_key
