@@ -20,7 +20,7 @@ while IFS='|' read -r status id length pos track; do
 
       if [[ "$percent" -ge 90 ]]; then
         sleep 0.5
-        spotify_notify_track "Now Playing" 6500
+        spotify_notify_track "Now Playing" 6500 || true
       fi
     fi
 
