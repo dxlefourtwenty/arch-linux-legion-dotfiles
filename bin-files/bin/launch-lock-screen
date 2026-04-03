@@ -1,11 +1,52 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-pgrep -x swaylock && exit 0
+usage() {
+    printf 'Usage: %s [--delay SECONDS]\n' "${0##*/}"
+}
+
+delay_seconds=0
+
+while [ "$#" -gt 0 ]; do
+    case "$1" in
+        --delay)
+            if [ "$#" -lt 2 ]; then
+                usage >&2
+                exit 1
+            fi
+            delay_seconds="$2"
+            shift 2
+            ;;
+        -h|--help)
+            usage
+            exit 0
+            ;;
+        *)
+            usage >&2
+            exit 1
+            ;;
+    esac
+done
+
+case "$delay_seconds" in
+    ''|*[!0-9]*)
+        usage >&2
+        exit 1
+        ;;
+esac
+
+if [ "$delay_seconds" -gt 0 ]; then
+    /usr/bin/sleep "$delay_seconds"
+fi
+
+if /usr/bin/pgrep -x swaylock >/dev/null 2>&1; then
+    exit 0
+fi
 
 source ~/.config/swaylock/colors.sh
 
-exec swaylock \
+/usr/bin/swaylock \
+  --daemonize \
   --screenshots \
   --effect-blur 8x6 \
   --clock \

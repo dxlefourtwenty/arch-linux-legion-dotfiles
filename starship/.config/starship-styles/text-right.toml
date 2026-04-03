@@ -2,17 +2,17 @@
 format = """\
 [╭╴](fg:arrow)\
 $username\
-( at $directory)\
+(at $directory)\
 $cmd_duration\
 $fill \
-$git_branch \
-via \
+(via $git_branch) \
+(via \
 $python\
 $conda\
 $nodejs\
 $c\
 $rust\
-$java\
+$java)\
 \n[╰─](fg:arrow)$character\
 """
 # Add the modules you need
@@ -94,12 +94,12 @@ time_format = "%H:%M"
 style = "bold fg:time"
 
 [cmd_duration]
-format = " took [ $duration]($style) "
+format = "took [ $duration]($style) "
 style = "bold fg:duration"
 min_time = 500
 
 [git_branch]
-format = "[$symbol$branch]($style) "
+format = "[$symbol$branch]($style)"
 style = "bold fg:git"
 symbol = " "
 

@@ -14,10 +14,10 @@ MENU_ID="menu-layouts"
 PID_FILE="/tmp/menu-rofi.pid"
 DRY_RUN=0
 SELECTED_LAYOUT=""
-LAYOUTS=("dwindle" "scrolling" "master")
+LAYOUTS=("dwindle" "scrolling" "master" "monocle")
 
 usage() {
-    printf 'Usage: %s [--layout master|dwindle|scrolling] [--config PATH] [--dry-run]\n' "$(basename "$0")"
+    printf 'Usage: %s [--layout master|dwindle|scrolling|monocle] [--config PATH] [--dry-run]\n' "$(basename "$0")"
 }
 
 notify() {
@@ -45,6 +45,9 @@ format_layout_display() {
             ;;
         scrolling)
             printf 'Scrolling\n'
+            ;;
+        monocle)
+            printf 'Monocle\n'
             ;;
         *)
             printf '%s\n' "$1"

@@ -181,18 +181,6 @@
       "detectPlugin": false
     },
     {
-      "type": "theme",
-      "keyIcon": "󰉼"
-    },
-    {
-      "type": "icons",
-      "keyIcon": ""
-    },
-    {
-      "type": "font",
-      "keyIcon": ""
-    },
-    {
       "type": "cursor",
       "keyIcon": "󰆿"
     },
