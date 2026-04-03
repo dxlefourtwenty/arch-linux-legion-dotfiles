@@ -34,16 +34,31 @@ format_theme_display() {
 }
 
 format_wallpaper_name() {
-    local filename stem
+    format_wallpaper_name_with_mode "$1" "show-live"
+}
 
-    filename="$(basename "$1")"
+format_wallpaper_name_with_mode() {
+    local wallpaper_path="$1"
+    local mode="${2:-show-live}"
+    local filename stem ext formatted
+
+    filename="$(basename "$wallpaper_path")"
     stem="${filename%.*}"
+    ext="${filename##*.}"
 
-    printf '%s\n' "$stem" | sed -E '
+    formatted="$(
+        printf '%s\n' "$stem" | sed -E '
         s/^[0-9]+[-_]*//;
         s/[-_]+/ /g;
         s/\b(.)/\U\1/g
     '
+    )"
+
+    if [[ "$mode" == "show-live" && "${ext,,}" == "gif" ]]; then
+        formatted="${formatted} (Live)"
+    fi
+
+    printf '%s\n' "$formatted"
 }
 
 escape_markup() {
@@ -109,14 +124,20 @@ thumbnail_path_for() {
     local image_path="$1"
     local thumb_size="$2"
     local cache_dir="$3"
-    local filename thumb_path
+    local filename thumb_path ext source_path
 
     filename="$(basename "$image_path")"
     thumb_path="$cache_dir/${filename}.png"
+    ext="${filename##*.}"
+    source_path="$image_path"
+
+    if [[ "${ext,,}" == "gif" ]]; then
+        source_path="${image_path}[0]"
+    fi
 
     if [[ ! -f "$thumb_path" || "$image_path" -nt "$thumb_path" ]]; then
         if command -v magick >/dev/null 2>&1; then
-            magick "$image_path" \
+            magick "$source_path" \
                 -auto-orient \
                 -strip \
                 -thumbnail "${thumb_size}x${thumb_size}^" \
@@ -131,7 +152,7 @@ thumbnail_path_for() {
         fi
 
         if command -v convert >/dev/null 2>&1; then
-            convert "$image_path" \
+            convert "$source_path" \
                 -auto-orient \
                 -strip \
                 -thumbnail "${thumb_size}x${thumb_size}^" \
@@ -173,7 +194,7 @@ mapfile -d '' -t WALLPAPERS < <(
         printf '%s\0' "$WALLPAPER_DIR_RESOLVED/$wallpaper_name"
     done < <(
         find "$WALLPAPER_DIR_RESOLVED" -maxdepth 1 -type f \
-            \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' \) \
+            \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' -o -iname '*.gif' \) \
             -printf '%f\0' | sort -zV
     )
 )
@@ -271,7 +292,7 @@ SELECTED_WALLPAPER="${WALLPAPERS[CHOSEN_INDEX]:-}"
 
 ln -sfn "$SELECTED_WALLPAPER" "$CURRENT_LINK"
 
-formatted_name="$(format_wallpaper_name "$SELECTED_WALLPAPER")"
+formatted_name="$(format_wallpaper_name_with_mode "$SELECTED_WALLPAPER" "plain")"
 
 apply_wallpaper "$SELECTED_WALLPAPER"
 notify-send -t 5000 "Background" "Updated to '$formatted_name'."

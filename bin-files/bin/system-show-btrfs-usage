@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+
+paths=(
+  "/home"
+  "/var/log"
+  "/var/cache/pacman/pkg"
+)
+
+for p in "${paths[@]}"; do
+  out=$(sudo btrfs qgroup show -reF "$p" 2>/dev/null | awk 'NR==3')
+
+  ref=$(echo "$out" | awk '{print $2}')
+  max=$(echo "$out" | awk '{print $4}')
+
+  # remove GiB/MiB units for percentage calc
+  ref_num=$(echo "$ref" | sed 's/GiB//;s/MiB//')
+  max_num=$(echo "$max" | sed 's/GiB//;s/MiB//')
+
+  # convert MiB to GiB if needed
+  if [[ "$ref" == *MiB ]]; then
+    ref_num=$(awk "BEGIN {print $ref_num/1024}")
+  fi
+  if [[ "$max" == *MiB ]]; then
+    max_num=$(awk "BEGIN {print $max_num/1024}")
+  fi
+
+  percent="N/A"
+  if [[ "$max" != "none" ]]; then
+    percent=$(awk "BEGIN {printf \"%.1f%%\", ($ref_num/$max_num)*100}")
+  fi
+
+  printf "%-30s %10s / %-10s (%s)\n" "$p" "$ref" "$max" "$percent"
+done

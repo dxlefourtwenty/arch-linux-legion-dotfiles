@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+echo "Cleaning pacman cache (keeping 1 version per package)..."
+sudo paccache -rk1
+
+echo
+echo "Rescanning Btrfs quotas..."
+sudo btrfs quota rescan -w /
+
+echo
+echo "New cache usage:"
+sudo btrfs qgroup show -reF /var/cache/pacman/pkg
