@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+# --- defaults ---
+COLORS=32
+OUTPUT=""
+
+# --- parse flags ---
+while getopts ":o:c:" opt; do
+  case $opt in
+    o) OUTPUT="$OPTARG" ;;
+    c) COLORS="$OPTARG" ;;
+    *) 
+      echo "Usage: gif-remap [-o output.gif] [-c colors] <input.gif> <palette_image>"
+      exit 1
+      ;;
+  esac
+done
+
+shift $((OPTIND - 1))
+
+# --- required args ---
+if [[ $# -lt 2 ]]; then
+  echo "Usage: gif-remap [-o output.gif] [-c colors] <input.gif> <palette_image>"
+  exit 1
+fi
+
+INPUT="$1"
+PALETTE_IMG="$2"
+
+# --- default output name ---
+if [[ -z "$OUTPUT" ]]; then
+  OUTPUT="remapped_${INPUT##*/}"
+fi
+
+# --- temp files ---
+TMP_DIR="$(mktemp -d)"
+GIF_PALETTE="$TMP_DIR/gif_palette.png"
+SHIFTED_PALETTE="$TMP_DIR/shifted_palette.png"
+
+trap 'rm -rf "$TMP_DIR"' EXIT
+
+echo "[1/3] Extracting palette from GIF..."
+magick "$INPUT" \
+  -coalesce -append \
+  -colors "$COLORS" \
+  -unique-colors \
+  "$GIF_PALETTE"
+
+echo "[2/3] Shifting palette using image palette..."
+magick "$GIF_PALETTE" "$PALETTE_IMG" -clut "$SHIFTED_PALETTE"
+
+echo "[3/3] Applying palette to GIF..."
+magick "$INPUT" \
+  -coalesce \
+  -alpha remove -alpha off \
+  -dither None \
+  -remap "$SHIFTED_PALETTE" \
+  -layers optimize \
+  "$OUTPUT"
+
+echo "Done -> $OUTPUT"

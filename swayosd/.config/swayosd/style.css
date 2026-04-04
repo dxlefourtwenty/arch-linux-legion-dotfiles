@@ -1,8 +1,9 @@
 @import "swayosd.css";
 
-window {
+window#osd {
   border-radius: 0;
-  opacity: 0.90;
+  opacity: 0.88;
+  padding: 12px 10px;
   border: 2px solid @border-color;
 
   background-color: @background-color;
@@ -17,10 +18,21 @@ label {
 
 image {
   color: @image;
+  padding-left: 5px;
 }
 
-progressbar {
-  border-radius: 0;
+window#osd progressbar,
+window#osd segmentedprogress {
+  min-height: 5px;
+  padding-left: 5px;
+  border-radius: 10px;
+}
+
+window#osd trough,
+window#osd progress,
+window#osd segment,
+window#osd segment.active {
+  min-height: inherit;
 }
 
 progress {

@@ -32,4 +32,6 @@ if [ -n "$DESCRIPTION" ]; then
 fi
 
 # call real binary
-command swayosd-client "${ARGS[@]}"
+command swayosd-client --duration 2000 "${ARGS[@]}"
+
+

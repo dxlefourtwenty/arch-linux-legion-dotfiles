@@ -1,49 +1,358 @@
 #!/usr/bin/env bash
 
-WALL_DIR=$(readlink -f "$HOME/.config/themes/current/wallpapers")
-CURRENT_LINK="$HOME/.config/themes/current/wallpaper.png"
+set -euo pipefail
 
-# Ensure directory exists
-[ -d "$WALL_DIR" ] || exit 1
+readonly AWWW_BIN="${AWWW_BIN:-/usr/bin/awww}"
+readonly FIND_BIN="${FIND_BIN:-/usr/bin/find}"
+readonly LN_BIN="${LN_BIN:-/usr/bin/ln}"
+readonly NOTIFY_SEND_BIN="${NOTIFY_SEND_BIN:-/usr/bin/notify-send}"
+readonly READLINK_BIN="${READLINK_BIN:-/usr/bin/readlink}"
+readonly SORT_BIN="${SORT_BIN:-/usr/bin/sort}"
 
-# Get current filename
-CURRENT_FILE=$(basename "$(readlink -f "$CURRENT_LINK")")
+readonly CONFIG_DIR="${XDG_CONFIG_HOME:-${HOME}/.config}/background"
+readonly CONFIG_FILE="$("${READLINK_BIN}" -f "${BG_PREV_CONFIG_FILE:-${CONFIG_DIR}/bg-prev.conf}" 2>/dev/null || printf '%s' "${BG_PREV_CONFIG_FILE:-${CONFIG_DIR}/bg-prev.conf}")"
+readonly WALL_DIR="$("${READLINK_BIN}" -f "${HOME}/.config/themes/current/wallpapers")"
+readonly CURRENT_LINK="${HOME}/.config/themes/current/wallpaper.png"
+readonly DEFAULT_TRANSITION="${BG_TRANSITION:-wipe}"
+readonly DEFAULT_TRANSITION_DURATION="${BG_TRANSITION_DURATION:-3.2}"
+readonly DEFAULT_TRANSITION_ANGLE="${BG_TRANSITION_ANGLE:-225}"
+readonly DEFAULT_TRANSITION_STEP="${BG_TRANSITION_STEP:-2}"
+readonly DEFAULT_TRANSITION_FPS="${BG_TRANSITION_FPS:-60}"
+readonly DEFAULT_TRANSITION_POS="${BG_TRANSITION_POS:-center}"
+readonly DEFAULT_TRANSITION_BEZIER="${BG_TRANSITION_BEZIER:-.54,0,.34,.99}"
+readonly DEFAULT_TRANSITION_WAVE="${BG_TRANSITION_WAVE:-20,20}"
 
-# Extract leading number, but tolerate non-numbered names
-CURRENT_NUM=$(printf '%s\n' "$CURRENT_FILE" | grep -o '^[0-9]\+' || true)
-CURRENT_NUM=${CURRENT_NUM:-0}
+TRANSITION_TYPE="${DEFAULT_TRANSITION}"
+TRANSITION_DURATION="${DEFAULT_TRANSITION_DURATION}"
+TRANSITION_ANGLE="${DEFAULT_TRANSITION_ANGLE}"
+TRANSITION_STEP="${DEFAULT_TRANSITION_STEP}"
+TRANSITION_FPS="${DEFAULT_TRANSITION_FPS}"
+TRANSITION_POS="${DEFAULT_TRANSITION_POS}"
+TRANSITION_BEZIER="${DEFAULT_TRANSITION_BEZIER}"
+TRANSITION_WAVE="${DEFAULT_TRANSITION_WAVE}"
+DRY_RUN=0
 
-# Build sorted numeric list
-mapfile -t FILES < <(
-    find "$WALL_DIR" -maxdepth 1 -type f \( -iname "*.png" -o -iname "*.jpg" -o -iname "*.jpeg" \) \
-    -printf "%f\n" \
-    | sort -n
-)
+usage() {
+    printf 'Usage: %s [--transition TYPE] [--transition-duration SECONDS] [--transition-angle ANGLE] [--transition-step STEP] [--transition-fps FPS] [--transition-pos POS] [--transition-bezier CURVE] [--transition-wave SIZE] [--dry-run]\n' "${0##*/}"
+}
 
-[ ${#FILES[@]} -eq 0 ] && exit 1
+require_binary() {
+    local binary_path="$1"
 
-# Default to last (wrap case)
-PREV_FILE="${FILES[-1]}"
+    [[ -x "${binary_path}" ]] || {
+        printf 'Missing required binary: %s\n' "${binary_path}" >&2
+        exit 1
+    }
+}
 
-# Walk forward and remember last valid lower
-for FILE in "${FILES[@]}"; do
-    NUM=$(printf '%s\n' "$FILE" | grep -o '^[0-9]\+' || true)
-    [ -z "$NUM" ] && continue
+is_number() {
+    local raw_value="$1"
+    [[ "${raw_value}" =~ ^([0-9]+([.][0-9]+)?|[.][0-9]+)$ ]]
+}
 
-    if [[ "$NUM" -lt "$CURRENT_NUM" ]]; then
-        PREV_FILE="$FILE"
+is_integer() {
+    local raw_value="$1"
+    [[ "${raw_value}" =~ ^[0-9]+$ ]]
+}
+
+trim_value() {
+    local raw_value="$1"
+
+    raw_value="${raw_value#"${raw_value%%[![:space:]]*}"}"
+    raw_value="${raw_value%"${raw_value##*[![:space:]]}"}"
+    printf '%s\n' "${raw_value}"
+}
+
+load_config() {
+    [[ -f "${CONFIG_FILE}" ]] || return 0
+
+    local line=""
+    local key=""
+    local value=""
+
+    while IFS= read -r line || [[ -n "${line}" ]]; do
+        [[ -n "${line}" ]] || continue
+        [[ "${line}" =~ ^[[:space:]]*# ]] && continue
+        [[ "${line}" == *"="* ]] || continue
+
+        key="${line%%=*}"
+        value="${line#*=}"
+        key="${key//[[:space:]]/}"
+        value="$(trim_value "${value}")"
+
+        case "${key}" in
+            transition)
+                TRANSITION_TYPE="${value}"
+                ;;
+            transition-duration)
+                TRANSITION_DURATION="${value}"
+                ;;
+            transition-angle)
+                TRANSITION_ANGLE="${value}"
+                ;;
+            transition-step)
+                TRANSITION_STEP="${value}"
+                ;;
+            transition-fps)
+                TRANSITION_FPS="${value}"
+                ;;
+            transition-pos)
+                TRANSITION_POS="${value}"
+                ;;
+            transition-bezier)
+                TRANSITION_BEZIER="${value}"
+                ;;
+            transition-wave)
+                TRANSITION_WAVE="${value}"
+                ;;
+        esac
+    done < "${CONFIG_FILE}"
+}
+
+parse_args() {
+    while (($# > 0)); do
+        case "$1" in
+            --transition)
+                (($# >= 2)) || {
+                    usage >&2
+                    exit 1
+                }
+                TRANSITION_TYPE="$2"
+                shift
+                ;;
+            --transition-duration)
+                (($# >= 2)) || {
+                    usage >&2
+                    exit 1
+                }
+                TRANSITION_DURATION="$2"
+                shift
+                ;;
+            --transition-angle)
+                (($# >= 2)) || {
+                    usage >&2
+                    exit 1
+                }
+                TRANSITION_ANGLE="$2"
+                shift
+                ;;
+            --transition-step)
+                (($# >= 2)) || {
+                    usage >&2
+                    exit 1
+                }
+                TRANSITION_STEP="$2"
+                shift
+                ;;
+            --transition-fps)
+                (($# >= 2)) || {
+                    usage >&2
+                    exit 1
+                }
+                TRANSITION_FPS="$2"
+                shift
+                ;;
+            --transition-pos)
+                (($# >= 2)) || {
+                    usage >&2
+                    exit 1
+                }
+                TRANSITION_POS="$2"
+                shift
+                ;;
+            --transition-bezier)
+                (($# >= 2)) || {
+                    usage >&2
+                    exit 1
+                }
+                TRANSITION_BEZIER="$2"
+                shift
+                ;;
+            --transition-wave)
+                (($# >= 2)) || {
+                    usage >&2
+                    exit 1
+                }
+                TRANSITION_WAVE="$2"
+                shift
+                ;;
+            -n|--dry-run)
+                DRY_RUN=1
+                ;;
+            -h|--help)
+                usage
+                exit 0
+                ;;
+            *)
+                usage >&2
+                exit 1
+                ;;
+        esac
+        shift
+    done
+}
+
+validate_settings() {
+    [[ -d "${WALL_DIR}" ]] || exit 1
+    [[ -n "${TRANSITION_TYPE}" ]] || {
+        printf 'Transition must not be empty.\n' >&2
+        exit 1
+    }
+
+    is_number "${TRANSITION_DURATION}" || {
+        printf 'Transition duration must be a non-negative number of seconds.\n' >&2
+        exit 1
+    }
+
+    is_number "${TRANSITION_ANGLE}" || {
+        printf 'Transition angle must be a number.\n' >&2
+        exit 1
+    }
+
+    is_integer "${TRANSITION_STEP}" || {
+        printf 'Transition step must be an integer between 0 and 255.\n' >&2
+        exit 1
+    }
+
+    (( TRANSITION_STEP >= 0 && TRANSITION_STEP <= 255 )) || {
+        printf 'Transition step must be between 0 and 255.\n' >&2
+        exit 1
+    }
+
+    is_integer "${TRANSITION_FPS}" || {
+        printf 'Transition fps must be an integer between 1 and 255.\n' >&2
+        exit 1
+    }
+
+    (( TRANSITION_FPS >= 1 && TRANSITION_FPS <= 255 )) || {
+        printf 'Transition fps must be between 1 and 255.\n' >&2
+        exit 1
+    }
+
+    [[ -n "${TRANSITION_POS}" ]] || {
+        printf 'Transition pos must not be empty.\n' >&2
+        exit 1
+    }
+
+    [[ -n "${TRANSITION_BEZIER}" ]] || {
+        printf 'Transition bezier must not be empty.\n' >&2
+        exit 1
+    }
+
+    [[ -n "${TRANSITION_WAVE}" ]] || {
+        printf 'Transition wave must not be empty.\n' >&2
+        exit 1
+    }
+}
+
+get_current_file() {
+    local current_target=""
+
+    current_target="$("${READLINK_BIN}" -f "${CURRENT_LINK}")"
+    printf '%s\n' "${current_target##*/}"
+}
+
+extract_leading_number() {
+    local file_name="$1"
+
+    if [[ "${file_name}" =~ ^([0-9]+) ]]; then
+        printf '%s\n' "${BASH_REMATCH[1]}"
+        return
     fi
-done
 
-FULL_PATH="$WALL_DIR/$PREV_FILE"
+    printf '\n'
+}
 
-# Set wallpaper
-awww img "$FULL_PATH" \
-    --transition-type wipe \
-    --transition-angle 225 \
-    --transition-duration 3.2
+list_files() {
+    mapfile -t FILES < <(
+        "${FIND_BIN}" "${WALL_DIR}" -maxdepth 1 -type f \
+            \( -iname '*.png' -o -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.gif' \) \
+            -printf '%f\n' | "${SORT_BIN}" -n
+    )
 
-# Update symlink
-ln -sf "$FULL_PATH" "$CURRENT_LINK"
+    ((${#FILES[@]} > 0)) || exit 1
+}
 
-notify-send -t 2500 "Background" "Updated to previous."
+select_previous_file() {
+    local current_file="$1"
+    local current_num=""
+    local file_name=""
+    local file_num=""
+
+    current_num="$(extract_leading_number "${current_file}")"
+    [[ -n "${current_num}" ]] || current_num="0"
+    PREV_FILE="${FILES[-1]}"
+
+    for file_name in "${FILES[@]}"; do
+        file_num="$(extract_leading_number "${file_name}")"
+        [[ -n "${file_num}" ]] || continue
+
+        if [[ "${file_num}" -lt "${current_num}" ]]; then
+            PREV_FILE="${file_name}"
+        fi
+    done
+}
+
+apply_wallpaper() {
+    local full_path="$1"
+
+    if ((DRY_RUN)); then
+        printf '%s img %s --transition-type %s --transition-angle %s --transition-duration %s --transition-step %s --transition-fps %s --transition-pos %s --transition-bezier %s --transition-wave %s\n' \
+            "${AWWW_BIN}" \
+            "${full_path}" \
+            "${TRANSITION_TYPE}" \
+            "${TRANSITION_ANGLE}" \
+            "${TRANSITION_DURATION}" \
+            "${TRANSITION_STEP}" \
+            "${TRANSITION_FPS}" \
+            "${TRANSITION_POS}" \
+            "${TRANSITION_BEZIER}" \
+            "${TRANSITION_WAVE}"
+        printf '%s -sf %s %s\n' "${LN_BIN}" "${full_path}" "${CURRENT_LINK}"
+        return
+    fi
+
+    "${AWWW_BIN}" img "${full_path}" \
+        --transition-type "${TRANSITION_TYPE}" \
+        --transition-angle "${TRANSITION_ANGLE}" \
+        --transition-duration "${TRANSITION_DURATION}" \
+        --transition-step "${TRANSITION_STEP}" \
+        --transition-fps "${TRANSITION_FPS}" \
+        --transition-pos "${TRANSITION_POS}" \
+        --transition-bezier "${TRANSITION_BEZIER}" \
+        --transition-wave "${TRANSITION_WAVE}"
+
+    "${LN_BIN}" -sf "${full_path}" "${CURRENT_LINK}"
+}
+
+notify_change() {
+    if [[ "${BG_NOTIFY:-1}" != "0" ]] && (( ! DRY_RUN )); then
+        "${NOTIFY_SEND_BIN}" -t 2500 "Background" "Updated to previous."
+    fi
+}
+
+main() {
+    local current_file=""
+    local full_path=""
+
+    require_binary "${AWWW_BIN}"
+    require_binary "${FIND_BIN}"
+    require_binary "${LN_BIN}"
+    require_binary "${NOTIFY_SEND_BIN}"
+    require_binary "${READLINK_BIN}"
+    require_binary "${SORT_BIN}"
+
+    load_config
+    parse_args "$@"
+    validate_settings
+
+    current_file="$(get_current_file)"
+    list_files
+    select_previous_file "${current_file}"
+
+    full_path="${WALL_DIR}/${PREV_FILE}"
+    apply_wallpaper "${full_path}"
+    notify_change
+}
+
+main "$@"

@@ -1,0 +1,556 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+readonly AWK_BIN="${AWK_BIN:-/usr/bin/awk}"
+readonly BASH_BIN="${BASH_BIN:-/usr/bin/bash}"
+readonly KILL_BIN="${KILL_BIN:-/usr/bin/kill}"
+readonly MKDIR_BIN="${MKDIR_BIN:-/usr/bin/mkdir}"
+readonly NOHUP_BIN="${NOHUP_BIN:-/usr/bin/nohup}"
+readonly NOTIFY_SEND_BIN="${NOTIFY_SEND_BIN:-/usr/bin/notify-send}"
+readonly RM_BIN="${RM_BIN:-/usr/bin/rm}"
+readonly SLEEP_BIN="${SLEEP_BIN:-/usr/bin/sleep}"
+
+readonly SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+readonly SCRIPT_PATH="${SCRIPT_DIR}/$(basename -- "${BASH_SOURCE[0]}")"
+readonly BG_NEXT_SCRIPT="${SCRIPT_DIR}/bg-next"
+readonly BG_PREV_SCRIPT="${SCRIPT_DIR}/bg-prev"
+
+readonly CONFIG_DIR="${XDG_CONFIG_HOME:-${HOME}/.config}/background"
+readonly CONFIG_FILE="$("${READLINK_BIN:-/usr/bin/readlink}" -f "${BG_SLIDESHOW_CONFIG_FILE:-${CONFIG_DIR}/slideshow.conf}" 2>/dev/null || printf '%s' "${BG_SLIDESHOW_CONFIG_FILE:-${CONFIG_DIR}/slideshow.conf}")"
+readonly STATE_DIR="${BG_SLIDESHOW_STATE_DIR:-${XDG_RUNTIME_DIR:-/tmp}/bg-slideshow}"
+readonly PID_FILE="${STATE_DIR}/slideshow.pid"
+readonly DEFAULT_DURATION_SECONDS="${BG_SLIDESHOW_DEFAULT_DURATION:-300}"
+readonly DEFAULT_TRANSITION="${BG_SLIDESHOW_DEFAULT_TRANSITION:-wipe}"
+readonly DEFAULT_TRANSITION_DURATION="${BG_SLIDESHOW_DEFAULT_TRANSITION_DURATION:-3.2}"
+readonly DEFAULT_TRANSITION_ANGLE="${BG_SLIDESHOW_DEFAULT_TRANSITION_ANGLE:-}"
+readonly DEFAULT_TRANSITION_STEP="${BG_SLIDESHOW_DEFAULT_TRANSITION_STEP:-2}"
+readonly DEFAULT_TRANSITION_FPS="${BG_SLIDESHOW_DEFAULT_TRANSITION_FPS:-60}"
+readonly DEFAULT_TRANSITION_POS="${BG_SLIDESHOW_DEFAULT_TRANSITION_POS:-center}"
+readonly DEFAULT_TRANSITION_BEZIER="${BG_SLIDESHOW_DEFAULT_TRANSITION_BEZIER:-.54,0,.34,.99}"
+readonly DEFAULT_TRANSITION_WAVE="${BG_SLIDESHOW_DEFAULT_TRANSITION_WAVE:-20,20}"
+
+DURATION_SECONDS="${DEFAULT_DURATION_SECONDS}"
+TRANSITION_TYPE="${DEFAULT_TRANSITION}"
+TRANSITION_DURATION="${DEFAULT_TRANSITION_DURATION}"
+TRANSITION_ANGLE="${DEFAULT_TRANSITION_ANGLE}"
+TRANSITION_STEP="${DEFAULT_TRANSITION_STEP}"
+TRANSITION_FPS="${DEFAULT_TRANSITION_FPS}"
+TRANSITION_POS="${DEFAULT_TRANSITION_POS}"
+TRANSITION_BEZIER="${DEFAULT_TRANSITION_BEZIER}"
+TRANSITION_WAVE="${DEFAULT_TRANSITION_WAVE}"
+DRY_RUN=0
+REVERSE=0
+RUN_LOOP=0
+
+usage() {
+    printf 'Usage: %s [--duration SECONDS] [--transition TYPE] [--transition-duration SECONDS] [--transition-angle ANGLE] [--transition-step STEP] [--transition-fps FPS] [--transition-pos POS] [--transition-bezier CURVE] [--transition-wave SIZE] [--reverse|--forward] [--dry-run]\n' "${0##*/}"
+}
+
+require_binary() {
+    local binary_path="$1"
+
+    [[ -x "${binary_path}" ]] || {
+        printf 'Missing required binary: %s\n' "${binary_path}" >&2
+        exit 1
+    }
+}
+
+parse_boolean() {
+    local raw_value="$1"
+
+    case "${raw_value,,}" in
+        true|1|yes|on)
+            printf '1\n'
+            ;;
+        false|0|no|off)
+            printf '0\n'
+            ;;
+        *)
+            return 1
+            ;;
+    esac
+}
+
+is_number() {
+    local raw_value="$1"
+    [[ "${raw_value}" =~ ^([0-9]+([.][0-9]+)?|[.][0-9]+)$ ]]
+}
+
+is_integer() {
+    local raw_value="$1"
+    [[ "${raw_value}" =~ ^[0-9]+$ ]]
+}
+
+is_greater_than() {
+    local left_value="$1"
+    local right_value="$2"
+
+    "${AWK_BIN}" -v left="${left_value}" -v right="${right_value}" 'BEGIN { exit !((left + 0) > (right + 0)) }'
+}
+
+is_greater_than_or_equal() {
+    local left_value="$1"
+    local right_value="$2"
+
+    "${AWK_BIN}" -v left="${left_value}" -v right="${right_value}" 'BEGIN { exit !((left + 0) >= (right + 0)) }'
+}
+
+trim_value() {
+    local raw_value="$1"
+
+    raw_value="${raw_value#"${raw_value%%[![:space:]]*}"}"
+    raw_value="${raw_value%"${raw_value##*[![:space:]]}"}"
+    printf '%s\n' "${raw_value}"
+}
+
+load_config() {
+    [[ -f "${CONFIG_FILE}" ]] || return 0
+
+    local line=""
+    local key=""
+    local value=""
+    local reverse_value=""
+
+    while IFS= read -r line || [[ -n "${line}" ]]; do
+        [[ -n "${line}" ]] || continue
+        [[ "${line}" =~ ^[[:space:]]*# ]] && continue
+        [[ "${line}" == *"="* ]] || continue
+
+        key="${line%%=*}"
+        value="${line#*=}"
+        key="${key//[[:space:]]/}"
+        value="$(trim_value "${value}")"
+
+        case "${key}" in
+            duration)
+                DURATION_SECONDS="${value}"
+                ;;
+            reverse)
+                reverse_value="$(parse_boolean "${value}")" || {
+                    printf 'Invalid reverse value in %s: %s\n' "${CONFIG_FILE}" "${value}" >&2
+                    exit 1
+                }
+                REVERSE="${reverse_value}"
+                ;;
+            transition)
+                TRANSITION_TYPE="${value}"
+                ;;
+            transition-duration)
+                TRANSITION_DURATION="${value}"
+                ;;
+            transition-angle)
+                TRANSITION_ANGLE="${value}"
+                ;;
+            transition-step)
+                TRANSITION_STEP="${value}"
+                ;;
+            transition-fps)
+                TRANSITION_FPS="${value}"
+                ;;
+            transition-pos)
+                TRANSITION_POS="${value}"
+                ;;
+            transition-bezier)
+                TRANSITION_BEZIER="${value}"
+                ;;
+            transition-wave)
+                TRANSITION_WAVE="${value}"
+                ;;
+        esac
+    done < "${CONFIG_FILE}"
+}
+
+parse_args() {
+    while (($# > 0)); do
+        case "$1" in
+            --duration)
+                (($# >= 2)) || {
+                    usage >&2
+                    exit 1
+                }
+                DURATION_SECONDS="$2"
+                shift
+                ;;
+            --transition)
+                (($# >= 2)) || {
+                    usage >&2
+                    exit 1
+                }
+                TRANSITION_TYPE="$2"
+                shift
+                ;;
+            --transition-duration)
+                (($# >= 2)) || {
+                    usage >&2
+                    exit 1
+                }
+                TRANSITION_DURATION="$2"
+                shift
+                ;;
+            --transition-angle)
+                (($# >= 2)) || {
+                    usage >&2
+                    exit 1
+                }
+                TRANSITION_ANGLE="$2"
+                shift
+                ;;
+            --transition-step)
+                (($# >= 2)) || {
+                    usage >&2
+                    exit 1
+                }
+                TRANSITION_STEP="$2"
+                shift
+                ;;
+            --transition-fps)
+                (($# >= 2)) || {
+                    usage >&2
+                    exit 1
+                }
+                TRANSITION_FPS="$2"
+                shift
+                ;;
+            --transition-pos)
+                (($# >= 2)) || {
+                    usage >&2
+                    exit 1
+                }
+                TRANSITION_POS="$2"
+                shift
+                ;;
+            --transition-bezier)
+                (($# >= 2)) || {
+                    usage >&2
+                    exit 1
+                }
+                TRANSITION_BEZIER="$2"
+                shift
+                ;;
+            --transition-wave)
+                (($# >= 2)) || {
+                    usage >&2
+                    exit 1
+                }
+                TRANSITION_WAVE="$2"
+                shift
+                ;;
+            --reverse)
+                REVERSE=1
+                ;;
+            --forward|--no-reverse)
+                REVERSE=0
+                ;;
+            --run-loop)
+                RUN_LOOP=1
+                ;;
+            -n|--dry-run)
+                DRY_RUN=1
+                ;;
+            -h|--help)
+                usage
+                exit 0
+                ;;
+            *)
+                usage >&2
+                exit 1
+                ;;
+        esac
+        shift
+    done
+}
+
+validate_settings() {
+    [[ -n "${TRANSITION_TYPE}" ]] || {
+        printf 'Transition must not be empty.\n' >&2
+        exit 1
+    }
+
+    is_number "${DURATION_SECONDS}" || {
+        printf 'Duration must be a positive number of seconds.\n' >&2
+        exit 1
+    }
+
+    is_number "${TRANSITION_DURATION}" || {
+        printf 'Transition duration must be a non-negative number of seconds.\n' >&2
+        exit 1
+    }
+
+    is_greater_than "${DURATION_SECONDS}" "0" || {
+        printf 'Duration must be greater than 0.\n' >&2
+        exit 1
+    }
+
+    is_greater_than_or_equal "${TRANSITION_DURATION}" "0" || {
+        printf 'Transition duration must be at least 0.\n' >&2
+        exit 1
+    }
+
+    if [[ -n "${TRANSITION_ANGLE}" ]]; then
+        is_number "${TRANSITION_ANGLE}" || {
+            printf 'Transition angle must be a number.\n' >&2
+            exit 1
+        }
+    fi
+
+    is_integer "${TRANSITION_STEP}" || {
+        printf 'Transition step must be an integer between 0 and 255.\n' >&2
+        exit 1
+    }
+
+    (( TRANSITION_STEP >= 0 && TRANSITION_STEP <= 255 )) || {
+        printf 'Transition step must be between 0 and 255.\n' >&2
+        exit 1
+    }
+
+    is_integer "${TRANSITION_FPS}" || {
+        printf 'Transition fps must be an integer between 1 and 255.\n' >&2
+        exit 1
+    }
+
+    (( TRANSITION_FPS >= 1 && TRANSITION_FPS <= 255 )) || {
+        printf 'Transition fps must be between 1 and 255.\n' >&2
+        exit 1
+    }
+
+    [[ -n "${TRANSITION_POS}" ]] || {
+        printf 'Transition pos must not be empty.\n' >&2
+        exit 1
+    }
+
+    [[ -n "${TRANSITION_BEZIER}" ]] || {
+        printf 'Transition bezier must not be empty.\n' >&2
+        exit 1
+    }
+
+    [[ -n "${TRANSITION_WAVE}" ]] || {
+        printf 'Transition wave must not be empty.\n' >&2
+        exit 1
+    }
+
+    is_greater_than_or_equal "${DURATION_SECONDS}" "$(printf '%s\n' "${TRANSITION_DURATION}" | "${AWK_BIN}" '{ printf "%.6f", ($1 + 2) }')" || {
+        printf 'Duration must be at least 2 seconds longer than transition duration.\n' >&2
+        exit 1
+    }
+}
+
+ensure_state_dir() {
+    ((DRY_RUN)) && return 0
+    "${MKDIR_BIN}" -p "${STATE_DIR}"
+}
+
+read_pid() {
+    [[ -f "${PID_FILE}" ]] || return 1
+
+    local pid
+    pid="$(<"${PID_FILE}")"
+    [[ "${pid}" =~ ^[0-9]+$ ]] || return 1
+
+    printf '%s\n' "${pid}"
+}
+
+is_pid_running() {
+    local pid="$1"
+    "${KILL_BIN}" -0 "${pid}" 2>/dev/null
+}
+
+remove_pid_file() {
+    ((DRY_RUN)) || "${RM_BIN}" -f "${PID_FILE}"
+}
+
+cleanup_stale_pid_file() {
+    local pid=""
+
+    pid="$(read_pid 2>/dev/null || true)"
+    [[ -n "${pid}" ]] || {
+        remove_pid_file
+        return
+    }
+
+    if ! is_pid_running "${pid}"; then
+        remove_pid_file
+    fi
+}
+
+notify_state() {
+    local state_label="$1"
+
+    if ((DRY_RUN)); then
+        printf '%s -t 3000 "Background" "Slideshow: <b>%s</b>"\n' "${NOTIFY_SEND_BIN}" "${state_label}"
+        return
+    fi
+
+    "${NOTIFY_SEND_BIN}" -t 3000 "Background" "Slideshow: <b>${state_label}</b>"
+}
+
+write_pid_file() {
+    local pid="$1"
+    ((DRY_RUN)) || printf '%s\n' "${pid}" > "${PID_FILE}"
+}
+
+get_step_script() {
+    if ((REVERSE)); then
+        printf '%s\n' "${BG_PREV_SCRIPT}"
+        return
+    fi
+
+    printf '%s\n' "${BG_NEXT_SCRIPT}"
+}
+
+print_start_command() {
+    printf '%s %s %s --run-loop --duration %s --transition %s --transition-duration %s' \
+        "${NOHUP_BIN}" \
+        "${BASH_BIN}" \
+        "${SCRIPT_PATH}" \
+        "${DURATION_SECONDS}" \
+        "${TRANSITION_TYPE}" \
+        "${TRANSITION_DURATION}"
+
+    if [[ -n "${TRANSITION_ANGLE}" ]]; then
+        printf ' --transition-angle %s' "${TRANSITION_ANGLE}"
+    fi
+
+    printf ' --transition-step %s --transition-fps %s --transition-pos %s --transition-bezier %s --transition-wave %s' \
+        "${TRANSITION_STEP}" \
+        "${TRANSITION_FPS}" \
+        "${TRANSITION_POS}" \
+        "${TRANSITION_BEZIER}" \
+        "${TRANSITION_WAVE}"
+
+    if ((REVERSE)); then
+        printf ' --reverse'
+    fi
+
+    printf '\n'
+}
+
+stop_slideshow() {
+    local pid="$1"
+
+    if ((DRY_RUN)); then
+        printf '%s %s\n' "${KILL_BIN}" "${pid}"
+        notify_state "OFF"
+        return
+    fi
+
+    "${KILL_BIN}" "${pid}" 2>/dev/null || true
+    remove_pid_file
+    notify_state "OFF"
+}
+
+start_slideshow() {
+    local child_pid=""
+    local reverse_arg=()
+    local step_script=""
+    local angle_arg=()
+    local timing_arg=()
+    local extra_arg=()
+
+    ((REVERSE)) && reverse_arg+=(--reverse)
+    [[ -n "${TRANSITION_ANGLE}" ]] && angle_arg+=(--transition-angle "${TRANSITION_ANGLE}")
+    timing_arg+=(--transition-step "${TRANSITION_STEP}" --transition-fps "${TRANSITION_FPS}")
+    extra_arg+=(--transition-pos "${TRANSITION_POS}" --transition-bezier "${TRANSITION_BEZIER}" --transition-wave "${TRANSITION_WAVE}")
+    step_script="$(get_step_script)"
+    [[ -x "${step_script}" ]] || {
+        printf 'Missing required script: %s\n' "${step_script}" >&2
+        exit 1
+    }
+
+    if ((DRY_RUN)); then
+        print_start_command
+        notify_state "ON"
+        return
+    fi
+
+    "${NOHUP_BIN}" "${BASH_BIN}" "${SCRIPT_PATH}" \
+        --run-loop \
+        --duration "${DURATION_SECONDS}" \
+        --transition "${TRANSITION_TYPE}" \
+        --transition-duration "${TRANSITION_DURATION}" \
+        "${angle_arg[@]}" \
+        "${timing_arg[@]}" \
+        "${extra_arg[@]}" \
+        "${reverse_arg[@]}" >/dev/null 2>&1 &
+    child_pid="$!"
+    write_pid_file "${child_pid}"
+    disown 2>/dev/null || true
+    notify_state "ON"
+}
+
+cleanup_if_owner() {
+    local owner_pid="$1"
+    local current_pid=""
+
+    current_pid="$(read_pid 2>/dev/null || true)"
+    [[ "${current_pid}" == "${owner_pid}" ]] || return 0
+
+    remove_pid_file
+}
+
+run_loop() {
+    local self_pid="$$"
+    local step_script=""
+    local angle_arg=()
+    local timing_arg=()
+    local extra_arg=()
+
+    require_binary "${SLEEP_BIN}"
+
+    step_script="$(get_step_script)"
+    [[ -x "${step_script}" ]] || {
+        printf 'Missing required script: %s\n' "${step_script}" >&2
+        exit 1
+    }
+
+    trap 'cleanup_if_owner "'"${self_pid}"'"' EXIT
+    [[ -n "${TRANSITION_ANGLE}" ]] && angle_arg+=(--transition-angle "${TRANSITION_ANGLE}")
+    timing_arg+=(--transition-step "${TRANSITION_STEP}" --transition-fps "${TRANSITION_FPS}")
+    extra_arg+=(--transition-pos "${TRANSITION_POS}" --transition-bezier "${TRANSITION_BEZIER}" --transition-wave "${TRANSITION_WAVE}")
+
+    while true; do
+        BG_NOTIFY=0 "${step_script}" \
+            --transition "${TRANSITION_TYPE}" \
+            --transition-duration "${TRANSITION_DURATION}" \
+            "${angle_arg[@]}" \
+            "${timing_arg[@]}" \
+            "${extra_arg[@]}"
+        "${SLEEP_BIN}" "${DURATION_SECONDS}"
+    done
+}
+
+main() {
+    local pid=""
+
+    load_config
+    parse_args "$@"
+
+    require_binary "${AWK_BIN}"
+    require_binary "${BASH_BIN}"
+    require_binary "${KILL_BIN}"
+    require_binary "${MKDIR_BIN}"
+    require_binary "${NOHUP_BIN}"
+    require_binary "${NOTIFY_SEND_BIN}"
+    require_binary "${RM_BIN}"
+
+    validate_settings
+
+    if ((RUN_LOOP)); then
+        run_loop
+        return
+    fi
+
+    ensure_state_dir
+    cleanup_stale_pid_file
+
+    pid="$(read_pid 2>/dev/null || true)"
+
+    if [[ -n "${pid}" ]] && is_pid_running "${pid}"; then
+        stop_slideshow "${pid}"
+        return
+    fi
+
+    start_slideshow
+}
+
+main "$@"
