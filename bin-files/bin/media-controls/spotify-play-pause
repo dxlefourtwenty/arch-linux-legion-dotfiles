@@ -22,6 +22,6 @@ case "$status" in
       sleep 0.1
     done
 
-    spotify_notify_track_with_timestamp "Resuming…" 3000
+    spotify_notify_track_with_timestamp "Resuming" 3000
     ;;
 esac

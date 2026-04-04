@@ -1,0 +1,150 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+spotify_notify_ward_clear_state() {
+  "$RM_BIN" -f "$SPOTIFY_NOTIFY_WARD_STATE_FILE"
+}
+
+spotify_notify_ward_write_state() {
+  local notification_id="$1"
+  local created_at_s="$2"
+  local timeout="$3"
+  local temp_state_file
+
+  temp_state_file="$("$MKTEMP_BIN" "$SPOTIFY_NOTIFY_STATE_DIR/.ward-notification-state.XXXXXX")"
+  printf '%s\n%s\n%s\n' "$notification_id" "$created_at_s" "$timeout" > "$temp_state_file"
+  "$MV_BIN" -f "$temp_state_file" "$SPOTIFY_NOTIFY_WARD_STATE_FILE"
+}
+
+spotify_notify_ward_active_id() {
+  local -a lines=()
+  local notification_id=""
+  local created_at_s=""
+  local timeout=""
+  local now_s
+  local expires_at_s
+
+  [[ -r "$SPOTIFY_NOTIFY_WARD_STATE_FILE" ]] || return 1
+
+  if ! mapfile -t lines < "$SPOTIFY_NOTIFY_WARD_STATE_FILE"; then
+    spotify_notify_ward_clear_state
+    return 1
+  fi
+
+  notification_id="${lines[0]-}"
+  created_at_s="${lines[1]-}"
+  timeout="${lines[2]-}"
+
+  if [[ ! "$notification_id" =~ ^[0-9]+$ || ! "$created_at_s" =~ ^[0-9]+$ || ! "$timeout" =~ ^[0-9]+$ ]]; then
+    spotify_notify_ward_clear_state
+    return 1
+  fi
+
+  if [[ "$timeout" -eq 0 ]]; then
+    printf '%s\n' "$notification_id"
+    return 0
+  fi
+
+  now_s="$("$DATE_BIN" +%s)"
+  expires_at_s=$(( created_at_s + ((timeout + 999) / 1000) ))
+
+  if [[ "$now_s" -ge "$expires_at_s" ]]; then
+    spotify_notify_ward_clear_state
+    return 1
+  fi
+
+  printf '%s\n' "$notification_id"
+}
+
+spotify_notify_ward_args() {
+  local summary="$1"
+  local body="$2"
+  local timeout="$3"
+  local icon="${4-}"
+  local had_active="${5:-0}"
+  local -a args
+
+  args=(
+    -a "$SPOTIFY_NOTIFY_APP_NAME"
+    -p
+    -t "$timeout"
+    -h "boolean:x-ward-replace-last:true"
+  )
+
+  if [[ "$had_active" == "1" ]]; then
+    args+=(
+      -h "boolean:x-ward-silent-open:true"
+    )
+  fi
+
+  if [[ -n "$icon" ]]; then
+    args+=(-i "$icon")
+  fi
+
+  args+=("$summary" "$body")
+  printf '%s\0' "${args[@]}"
+}
+
+spotify_notify_ward_preview() {
+  local summary="$1"
+  local body="$2"
+  local timeout="$3"
+  local icon="${4-}"
+  local active_id=""
+  local had_active="0"
+  local -a preview_args
+
+  if active_id="$(spotify_notify_ward_active_id 2>/dev/null)"; then
+    had_active="1"
+  fi
+
+  mapfile -d '' -t preview_args < <(spotify_notify_ward_args "$summary" "$body" "$timeout" "$icon" "$had_active")
+  printf 'backend=ward\n'
+  printf 'summary=%s\n' "$summary"
+  printf 'timeout=%s\n' "$timeout"
+  printf 'icon=%s\n' "$icon"
+  printf 'body=%s\n' "$body"
+  printf 'app_name=%s\n' "$SPOTIFY_NOTIFY_APP_NAME"
+  printf 'previous_id=%s\n' "$active_id"
+  printf 'notify_args=%q ' "$NOTIFY_SEND_BIN" "${preview_args[@]}"
+  printf '\n'
+}
+
+spotify_notify_ward_send() {
+  local summary="$1"
+  local body="$2"
+  local timeout="$3"
+  local icon="${4-}"
+  local active_id=""
+  local had_active="0"
+  local notify_output=""
+  local notification_id=""
+  local created_at_s
+  local notify_exit_code=0
+  local -a notify_args
+
+  "$MKDIR_BIN" -p "$SPOTIFY_NOTIFY_STATE_DIR"
+
+  if active_id="$(spotify_notify_ward_active_id 2>/dev/null)"; then
+    had_active="1"
+  fi
+
+  mapfile -d '' -t notify_args < <(spotify_notify_ward_args "$summary" "$body" "$timeout" "$icon" "$had_active")
+
+  if notify_output="$("$TIMEOUT_BIN" "$SPOTIFY_NOTIFY_SEND_TIMEOUT" "$NOTIFY_SEND_BIN" "${notify_args[@]}")"; then
+    :
+  else
+    notify_exit_code=$?
+    return "$notify_exit_code"
+  fi
+
+  notification_id="$(printf '%s\n' "$notify_output" | "$AWK_BIN" 'NF { value=$NF } END { print value }')"
+
+  if [[ ! "$notification_id" =~ ^[0-9]+$ ]]; then
+    spotify_notify_ward_clear_state
+    return 1
+  fi
+
+  created_at_s="$("$DATE_BIN" +%s)"
+  spotify_notify_ward_write_state "$notification_id" "$created_at_s" "$timeout"
+}

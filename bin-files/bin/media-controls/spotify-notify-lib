@@ -14,8 +14,11 @@ MKTEMP_BIN="${MKTEMP_BIN:-/usr/bin/mktemp}"
 MV_BIN="${MV_BIN:-/usr/bin/mv}"
 RM_BIN="${RM_BIN:-/usr/bin/rm}"
 TIMEOUT_BIN="${TIMEOUT_BIN:-/usr/bin/timeout}"
+GDBUS_BIN="${GDBUS_BIN:-/usr/bin/gdbus}"
+PGREP_BIN="${PGREP_BIN:-/usr/bin/pgrep}"
 SPOTIFY_PLAYER="${SPOTIFY_PLAYER:-spotify}"
 SPOTIFY_NOTIFY_DRY_RUN="${SPOTIFY_NOTIFY_DRY_RUN:-0}"
+SPOTIFY_NOTIFY_DAEMON="${SPOTIFY_NOTIFY_DAEMON:-auto}"
 SPOTIFY_NOTIFY_APP_NAME="${SPOTIFY_NOTIFY_APP_NAME:-spotify-media-controls}"
 SPOTIFY_NOTIFY_STACK_TAG="${SPOTIFY_NOTIFY_STACK_TAG:-spotify-media-controls}"
 SPOTIFY_NOTIFY_STATE_DIR="${SPOTIFY_NOTIFY_STATE_DIR:-/tmp/spotify-media-controls-notify}"
@@ -24,8 +27,15 @@ SPOTIFY_TRACK_CHANGE_MARK_FILE="${SPOTIFY_TRACK_CHANGE_MARK_FILE:-$SPOTIFY_NOTIF
 SPOTIFY_TRACK_CHANGE_MARK_LOCK_FILE="${SPOTIFY_TRACK_CHANGE_MARK_LOCK_FILE:-$SPOTIFY_NOTIFY_STATE_DIR/track-change-mark.lock}"
 SPOTIFY_TRACK_CHANGE_MARK_TTL="${SPOTIFY_TRACK_CHANGE_MARK_TTL:-5}"
 SPOTIFY_NOTIFY_ICON_DIR="${SPOTIFY_NOTIFY_ICON_DIR:-$SPOTIFY_NOTIFY_STATE_DIR/icons}"
+SPOTIFY_NOTIFY_WARD_STATE_FILE="${SPOTIFY_NOTIFY_WARD_STATE_FILE:-$SPOTIFY_NOTIFY_STATE_DIR/ward-notification-state}"
 SPOTIFY_NOTIFY_CURL_MAX_TIME="${SPOTIFY_NOTIFY_CURL_MAX_TIME:-5}"
 SPOTIFY_NOTIFY_SEND_TIMEOUT="${SPOTIFY_NOTIFY_SEND_TIMEOUT:-5}"
+
+spotify_notify_lib_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
+if [[ -r "$spotify_notify_lib_dir/spotify-notify-ward-lib" ]]; then
+  source "$spotify_notify_lib_dir/spotify-notify-ward-lib"
+fi
 
 spotify_escape_markup() {
   local value="${1-}"
@@ -175,7 +185,32 @@ spotify_cover_image() {
   printf '%s\n' "$icon_path"
 }
 
-spotify_notify_args() {
+spotify_notify_backend() {
+  local backend="$SPOTIFY_NOTIFY_DAEMON"
+
+  case "$backend" in
+    auto)
+      if [[ -x "$PGREP_BIN" ]] && "$PGREP_BIN" -x ward >/dev/null 2>&1; then
+        backend="ward"
+      else
+        backend="mako"
+      fi
+      ;;
+    mako|ward)
+      ;;
+    *)
+      backend="mako"
+      ;;
+  esac
+
+  if [[ "$backend" == "ward" ]] && ! declare -F spotify_notify_ward_send >/dev/null 2>&1; then
+    backend="mako"
+  fi
+
+  printf '%s\n' "$backend"
+}
+
+spotify_notify_mako_args() {
   local summary="$1"
   local body="$2"
   local timeout="$3"
@@ -196,47 +231,91 @@ spotify_notify_args() {
   printf '%s\0' "${args[@]}"
 }
 
+spotify_notify_preview() {
+  local backend="$1"
+  local summary="$2"
+  local body="$3"
+  local timeout="$4"
+  local icon="${5-}"
+  local -a preview_args
+
+  if [[ "$backend" == "ward" ]]; then
+    spotify_notify_ward_preview "$summary" "$body" "$timeout" "$icon"
+    return 0
+  fi
+
+  mapfile -d '' -t preview_args < <(spotify_notify_mako_args "$summary" "$body" "$timeout" "$icon")
+  printf 'backend=%s\n' "$backend"
+  printf 'summary=%s\n' "$summary"
+  printf 'timeout=%s\n' "$timeout"
+  printf 'icon=%s\n' "$icon"
+  printf 'body=%s\n' "$body"
+  printf 'stack_tag=%s\n' "$SPOTIFY_NOTIFY_STACK_TAG"
+  printf 'app_name=%s\n' "$SPOTIFY_NOTIFY_APP_NAME"
+  printf 'notify_args=%q ' "$NOTIFY_SEND_BIN" "${preview_args[@]}"
+  printf '\n'
+}
+
+spotify_notify_send() {
+  local backend="$1"
+  local summary="$2"
+  local body="$3"
+  local timeout="$4"
+  local icon="${5-}"
+  local notify_exit_code=0
+  local -a notify_args
+
+  if [[ "$backend" == "ward" ]]; then
+    if spotify_notify_ward_send "$summary" "$body" "$timeout" "$icon"; then
+      return 0
+    else
+      notify_exit_code=$?
+      return "$notify_exit_code"
+    fi
+  fi
+
+  mapfile -d '' -t notify_args < <(spotify_notify_mako_args "$summary" "$body" "$timeout" "$icon")
+
+  if "$TIMEOUT_BIN" "$SPOTIFY_NOTIFY_SEND_TIMEOUT" "$NOTIFY_SEND_BIN" "${notify_args[@]}"; then
+    return 0
+  else
+    notify_exit_code=$?
+    return "$notify_exit_code"
+  fi
+}
+
 spotify_notify_track() {
   local summary="$1"
   local timeout="${2:-2500}"
+  local backend
   local body
   local icon
   local lock_fd
-  local notify_exit_code=0
-  local -a preview_args
-  local -a notify_args
 
   body="$(spotify_track_markup)"
   icon=""
+  backend="$(spotify_notify_backend)"
 
   if ! icon="$(spotify_cover_image 2>/dev/null)"; then
     icon=""
   fi
 
   if [[ "$SPOTIFY_NOTIFY_DRY_RUN" == "1" ]]; then
-    mapfile -d '' -t preview_args < <(spotify_notify_args "$summary" "$body" "$timeout" "$icon")
-    printf 'summary=%s\n' "$summary"
-    printf 'timeout=%s\n' "$timeout"
-    printf 'icon=%s\n' "$icon"
-    printf 'body=%s\n' "$body"
-    printf 'stack_tag=%s\n' "$SPOTIFY_NOTIFY_STACK_TAG"
-    printf 'app_name=%s\n' "$SPOTIFY_NOTIFY_APP_NAME"
-    printf 'notify_args=%q ' "$NOTIFY_SEND_BIN" "${preview_args[@]}"
-    printf '\n'
+    spotify_notify_preview "$backend" "$summary" "$body" "$timeout" "$icon"
     return 0
   fi
 
   "$MKDIR_BIN" -p "$SPOTIFY_NOTIFY_STATE_DIR"
   exec {lock_fd}> "$SPOTIFY_NOTIFY_LOCK_FILE"
   "$FLOCK_BIN" -x "$lock_fd"
-  mapfile -d '' -t notify_args < <(spotify_notify_args "$summary" "$body" "$timeout" "$icon")
+  local notify_exit_code=0
 
-  if "$TIMEOUT_BIN" "$SPOTIFY_NOTIFY_SEND_TIMEOUT" "$NOTIFY_SEND_BIN" "${notify_args[@]}"; then
-    exec {lock_fd}>&-
-    return 0
+  if spotify_notify_send "$backend" "$summary" "$body" "$timeout" "$icon"; then
+    notify_exit_code=0
+  else
+    notify_exit_code=$?
   fi
 
-  notify_exit_code=$?
   exec {lock_fd}>&-
   return "$notify_exit_code"
 }
