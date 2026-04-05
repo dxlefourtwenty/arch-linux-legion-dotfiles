@@ -3,7 +3,145 @@ set -euo pipefail
 
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 source "$script_dir/spotify-notify-lib"
-spotify_notify_parse_args "${0##*/}" "$@"
+script_path="$script_dir/$(basename -- "${BASH_SOURCE[0]}")"
 
-SPOTIFY_NOTIFY_EXEC_COMMAND=""
-spotify_notify_track "Currently Playing" 0
+SPOTIFY_CURRENT_SONG_PERSISTENT_STATE_FILE="${SPOTIFY_CURRENT_SONG_PERSISTENT_STATE_FILE:-$SPOTIFY_NOTIFY_STATE_DIR/current-song-persistent.state}"
+SPOTIFY_CURRENT_SONG_PERSISTENT_LOCK_FILE="${SPOTIFY_CURRENT_SONG_PERSISTENT_LOCK_FILE:-$SPOTIFY_NOTIFY_STATE_DIR/current-song-persistent.lock}"
+SPOTIFY_CURRENT_SONG_PERSISTENT_FRESH_SEND_FILE="${SPOTIFY_CURRENT_SONG_PERSISTENT_FRESH_SEND_FILE:-$SPOTIFY_NOTIFY_STATE_DIR/current-song-persistent.fresh-send}"
+SPOTIFY_CURRENT_SONG_PERSISTENT_ON_TIMEOUT="${SPOTIFY_CURRENT_SONG_PERSISTENT_ON_TIMEOUT:-0}"
+SPOTIFY_CURRENT_SONG_PERSISTENT_OFF_TIMEOUT="${SPOTIFY_CURRENT_SONG_PERSISTENT_OFF_TIMEOUT:-1000}"
+SPOTIFY_CURRENT_SONG_PERSISTENT_CLEAR_STATE=0
+
+spotify_current_song_persistent_parse_args() {
+  local -a notify_args=()
+
+  while [[ "$#" -gt 0 ]]; do
+    case "$1" in
+      --clear-state)
+        SPOTIFY_CURRENT_SONG_PERSISTENT_CLEAR_STATE=1
+        shift
+        ;;
+      *)
+        notify_args+=("$1")
+        shift
+        ;;
+    esac
+  done
+
+  spotify_notify_parse_args "${0##*/}" "${notify_args[@]}"
+}
+
+spotify_current_song_persistent_validate_timeout() {
+  local value="${1-}"
+
+  [[ "$value" =~ ^[0-9]+$ ]] || {
+    printf 'invalid timeout: %s\n' "$value" >&2
+    return 1
+  }
+}
+
+spotify_current_song_persistent_enabled() {
+  [[ -r "$SPOTIFY_CURRENT_SONG_PERSISTENT_STATE_FILE" ]]
+}
+
+spotify_current_song_persistent_enable() {
+  local temp_state_file
+
+  temp_state_file="$("$MKTEMP_BIN" "$SPOTIFY_NOTIFY_STATE_DIR/.current-song-persistent.XXXXXX")"
+  printf 'enabled\n' > "$temp_state_file"
+  "$MV_BIN" -f "$temp_state_file" "$SPOTIFY_CURRENT_SONG_PERSISTENT_STATE_FILE"
+}
+
+spotify_current_song_persistent_disable() {
+  "$RM_BIN" -f "$SPOTIFY_CURRENT_SONG_PERSISTENT_STATE_FILE"
+}
+
+spotify_current_song_persistent_mark_fresh_send() {
+  local temp_state_file
+
+  temp_state_file="$("$MKTEMP_BIN" "$SPOTIFY_NOTIFY_STATE_DIR/.current-song-persistent-fresh.XXXXXX")"
+  printf 'fresh\n' > "$temp_state_file"
+  "$MV_BIN" -f "$temp_state_file" "$SPOTIFY_CURRENT_SONG_PERSISTENT_FRESH_SEND_FILE"
+}
+
+spotify_current_song_persistent_clear_fresh_send() {
+  "$RM_BIN" -f "$SPOTIFY_CURRENT_SONG_PERSISTENT_FRESH_SEND_FILE"
+}
+
+spotify_current_song_persistent_fresh_send_pending() {
+  [[ -r "$SPOTIFY_CURRENT_SONG_PERSISTENT_FRESH_SEND_FILE" ]]
+}
+
+spotify_current_song_persistent_clear_state() {
+  local lock_fd
+
+  "$MKDIR_BIN" -p "$SPOTIFY_NOTIFY_STATE_DIR"
+  exec {lock_fd}> "$SPOTIFY_CURRENT_SONG_PERSISTENT_LOCK_FILE"
+  "$FLOCK_BIN" -x "$lock_fd"
+  spotify_current_song_persistent_disable
+  spotify_current_song_persistent_mark_fresh_send
+  if declare -F spotify_notify_ward_clear_state >/dev/null 2>&1; then
+    spotify_notify_ward_clear_state
+  fi
+  exec {lock_fd}>&-
+}
+
+spotify_current_song_persistent_timeout() {
+  if spotify_current_song_persistent_enabled; then
+    printf '%s\n' "$SPOTIFY_CURRENT_SONG_PERSISTENT_OFF_TIMEOUT"
+    return 0
+  fi
+
+  printf '%s\n' "$SPOTIFY_CURRENT_SONG_PERSISTENT_ON_TIMEOUT"
+}
+
+spotify_current_song_persistent_toggle() {
+  local timeout
+  local lock_fd
+  local replace_last="1"
+  local notify_exit_code=0
+
+  spotify_current_song_persistent_validate_timeout "$SPOTIFY_CURRENT_SONG_PERSISTENT_ON_TIMEOUT"
+  spotify_current_song_persistent_validate_timeout "$SPOTIFY_CURRENT_SONG_PERSISTENT_OFF_TIMEOUT"
+
+  "$MKDIR_BIN" -p "$SPOTIFY_NOTIFY_STATE_DIR"
+  exec {lock_fd}> "$SPOTIFY_CURRENT_SONG_PERSISTENT_LOCK_FILE"
+  "$FLOCK_BIN" -x "$lock_fd"
+
+  timeout="$(spotify_current_song_persistent_timeout)"
+
+  if spotify_current_song_persistent_fresh_send_pending; then
+    replace_last="0"
+  fi
+
+  SPOTIFY_NOTIFY_WARD_REPLACE_LAST="$replace_last"
+
+  if spotify_notify_track "Currently Playing" "$timeout"; then
+    if [[ "$SPOTIFY_NOTIFY_DRY_RUN" != "1" ]]; then
+      if [[ "$replace_last" == "0" ]]; then
+        spotify_current_song_persistent_clear_fresh_send
+      fi
+
+      if [[ "$timeout" == "$SPOTIFY_CURRENT_SONG_PERSISTENT_ON_TIMEOUT" ]]; then
+        spotify_current_song_persistent_enable
+      else
+        spotify_current_song_persistent_disable
+      fi
+    fi
+  else
+    notify_exit_code=$?
+  fi
+
+  exec {lock_fd}>&-
+  return "$notify_exit_code"
+}
+
+spotify_current_song_persistent_parse_args "$@"
+
+if [[ "$SPOTIFY_CURRENT_SONG_PERSISTENT_CLEAR_STATE" == "1" ]]; then
+  spotify_current_song_persistent_clear_state
+  exit 0
+fi
+
+SPOTIFY_NOTIFY_EXEC_COMMAND="$script_path --clear-state"
+spotify_current_song_persistent_toggle

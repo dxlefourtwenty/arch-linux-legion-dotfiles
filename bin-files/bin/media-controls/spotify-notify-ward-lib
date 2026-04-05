@@ -5,6 +5,16 @@ spotify_notify_ward_clear_state() {
   "$RM_BIN" -f "$SPOTIFY_NOTIFY_WARD_STATE_FILE"
 }
 
+spotify_notify_ward_replace_last_enabled() {
+  case "${SPOTIFY_NOTIFY_WARD_REPLACE_LAST:-1}" in
+    1|true|yes|on)
+      return 0
+      ;;
+  esac
+
+  return 1
+}
+
 spotify_notify_ward_write_state() {
   local notification_id="$1"
   local created_at_s="$2"
@@ -68,8 +78,11 @@ spotify_notify_ward_args() {
     -a "$SPOTIFY_NOTIFY_APP_NAME"
     -p
     -t "$timeout"
-    -h "boolean:x-ward-replace-last:true"
   )
+
+  if spotify_notify_ward_replace_last_enabled; then
+    args+=(-h "boolean:x-ward-replace-last:true")
+  fi
 
   spotify_notify_append_hint_args args
 
@@ -77,7 +90,7 @@ spotify_notify_ward_args() {
     args+=(-h "string:exec:$SPOTIFY_NOTIFY_EXEC_COMMAND")
   fi
 
-  if [[ "$had_active" == "1" ]]; then
+  if [[ "$had_active" == "1" ]] && spotify_notify_ward_replace_last_enabled; then
     args+=(
       -h "boolean:x-ward-silent-open:true"
     )
