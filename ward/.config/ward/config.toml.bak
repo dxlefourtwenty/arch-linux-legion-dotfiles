@@ -3,10 +3,10 @@ anchor = "top-right"
 screen = "HDMI-A-1"
 width = 350
 outer_margin = 12
-top_margin = 32
-right_margin = 32
-bottom_margin = 32
-left_margin = 32
+top_margin = 28
+right_margin = 28
+bottom_margin = 28
+left_margin = 28
 minimum_height = 40
 
 [notifications]

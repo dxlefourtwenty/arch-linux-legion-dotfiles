@@ -1,7 +1,7 @@
 @import '/home/dxle/.config/themes/current/ward.css';
 
 * {
-    font-family = "JetBrainsMono Nerd Font";
+    font-family: "Liberation Sans";
 }
 
 NotificationPopup {
