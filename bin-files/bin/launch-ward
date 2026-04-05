@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+nohup ~/builds/ward/build/ward >/dev/null 2>&1 &

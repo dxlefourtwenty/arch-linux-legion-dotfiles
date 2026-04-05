@@ -2,10 +2,13 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-INCLUDE_MAKO=0
+DEFAULT_INCLUDE_MAKO=0
+DEFAULT_INCLUDE_WARD=0
+INCLUDE_MAKO="$DEFAULT_INCLUDE_MAKO"
+INCLUDE_WARD="$DEFAULT_INCLUDE_WARD"
 
 usage() {
-    echo "Usage: font [--include-mako|-m] <font-name>"
+    echo "Usage: font [--include-mako|-m] [--include-ward|-w] <font-name>"
     exit 1
 }
 
@@ -13,6 +16,10 @@ while [[ $# -gt 0 ]]; do
     case "$1" in
         --include-mako|-m)
             INCLUDE_MAKO=1
+            shift
+            ;;
+        --include-ward|-w)
+            INCLUDE_WARD=1
             shift
             ;;
         --help|-h)
@@ -47,8 +54,9 @@ KITTY_CONF="${XDG_CONFIG_HOME:-$HOME/.config}/kitty/kitty.conf"
 ALACRITTY_CONF="${XDG_CONFIG_HOME:-$HOME/.config}/alacritty/alacritty.toml"
 ROFI_THEME="${XDG_CONFIG_HOME:-$HOME/.config}/rofi/theme.rasi"
 MAKO_CONF="${XDG_CONFIG_HOME:-$HOME/.config}/mako/config"
+WARD_STYLE="${XDG_CONFIG_HOME:-$HOME/.config}/ward/style.css"
 
-set_waybar_font() {
+set_css_font() {
     local file="$1"
     local family="$2"
 
@@ -80,16 +88,20 @@ for file in "$WAYBAR_DIR"/styles/*.css; do
 
     case "$(basename "$file")" in
         minimal.css)
-            set_waybar_font "$file" "$(waybar_font_stack 1 0)"
+            set_css_font "$file" "$(waybar_font_stack 1 0)"
             ;;
         spaced-arrow.css|arrowline.css)
-            set_waybar_font "$file" "$(waybar_font_stack 0 1)"
+            set_css_font "$file" "$(waybar_font_stack 0 1)"
             ;;
         *)
-            set_waybar_font "$file" "$(waybar_font_stack 0 0)"
+            set_css_font "$file" "$(waybar_font_stack 0 0)"
             ;;
     esac
 done
+
+if [[ "$INCLUDE_WARD" -eq 1 && -f "$WARD_STYLE" ]]; then
+    set_css_font "$WARD_STYLE" "\"$FONT_NAME\""
+fi
 
 for file in "$DASHBOARD_DIR"/styles/*.qml; do
     [[ -f "$file" ]] || continue
@@ -114,6 +126,10 @@ fi
 
 if [[ "$INCLUDE_MAKO" -eq 1 ]]; then
     "$SCRIPT_DIR/reload-mako" || true
+fi
+
+if [[ "$INCLUDE_WARD" -eq 1 ]]; then
+    "$SCRIPT_DIR/reload-ward" || true
 fi
 
 notify-send -t 5000 "Font" "Updated to $FONT_NAME." >/dev/null 2>&1 || true

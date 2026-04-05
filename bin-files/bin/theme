@@ -36,6 +36,7 @@ ln -sfn "$NEW_THEME" "$CURRENT_LINK"
 "$SCRIPT_DIR/reload-btop" || true
 "$SCRIPT_DIR/reload-cava" || true
 "$SCRIPT_DIR/reload-mako" || true
+"$SCRIPT_DIR/reload-ward" || true
 
 "$SCRIPT_DIR/reload-discord" >/dev/null 2>&1 &
 "$SCRIPT_DIR/spicetify-set" --live "$1" >/dev/null 2>&1 &

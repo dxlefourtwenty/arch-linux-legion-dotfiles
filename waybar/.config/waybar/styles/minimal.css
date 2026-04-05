@@ -2,7 +2,7 @@
 
 * {
     /* `otf-font-awesome` is required to be installed for icons */
-    font-family: "CaskaydiaMono Nerd Font", "Font Awesome 6 Free", sans-serif;
+    font-family: "JetBrainsMono Nerd Font", "Font Awesome 6 Free", sans-serif;
 }
 
 window#waybar {
