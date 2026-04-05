@@ -442,8 +442,8 @@ spotify_track_change_take_mark() {
   local -a lines=()
   local expires_at_s=""
   local marked_previous_id=""
-  local summary=""
-  local text_gap=""
+  local marked_summary=""
+  local marked_text_gap=""
   local -n summary_ref="$summary_var_name"
   local -n text_gap_ref="$text_gap_var_name"
 
@@ -464,8 +464,8 @@ spotify_track_change_take_mark() {
 
   expires_at_s="${lines[0]-}"
   marked_previous_id="${lines[1]-}"
-  summary="${lines[2]-}"
-  text_gap="${lines[3]-}"
+  marked_summary="${lines[2]-}"
+  marked_text_gap="${lines[3]-}"
 
   [[ "$expires_at_s" =~ ^[0-9]+$ ]] || {
     "$RM_BIN" -f "$SPOTIFY_TRACK_CHANGE_MARK_FILE"
@@ -481,7 +481,7 @@ spotify_track_change_take_mark() {
     return 1
   fi
 
-  if [[ -z "$summary" ]]; then
+  if [[ -z "$marked_summary" ]]; then
     exec {lock_fd}>&-
     return 1
   fi
@@ -494,6 +494,6 @@ spotify_track_change_take_mark() {
 
   "$RM_BIN" -f "$SPOTIFY_TRACK_CHANGE_MARK_FILE"
   exec {lock_fd}>&-
-  summary_ref="$summary"
-  text_gap_ref="$text_gap"
+  summary_ref="$marked_summary"
+  text_gap_ref="$marked_text_gap"
 }
