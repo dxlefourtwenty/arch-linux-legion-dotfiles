@@ -7,13 +7,13 @@ top_margin = 32
 right_margin = 32
 bottom_margin = 32
 left_margin = 32
-minimum_height = 40
+minimum_height = 20
 
 [notifications]
 default_timeout_ms = 5000
 max_icon_size = 64
 max_notifications = 4
-text_gap = 4
+text_gap = 2
 
 [animation]
 enabled = true

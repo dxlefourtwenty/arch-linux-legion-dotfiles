@@ -30,12 +30,77 @@ SPOTIFY_NOTIFY_ICON_DIR="${SPOTIFY_NOTIFY_ICON_DIR:-$SPOTIFY_NOTIFY_STATE_DIR/ic
 SPOTIFY_NOTIFY_WARD_STATE_FILE="${SPOTIFY_NOTIFY_WARD_STATE_FILE:-$SPOTIFY_NOTIFY_STATE_DIR/ward-notification-state}"
 SPOTIFY_NOTIFY_CURL_MAX_TIME="${SPOTIFY_NOTIFY_CURL_MAX_TIME:-5}"
 SPOTIFY_NOTIFY_SEND_TIMEOUT="${SPOTIFY_NOTIFY_SEND_TIMEOUT:-5}"
+SPOTIFY_NOTIFY_EXEC_COMMAND="${SPOTIFY_NOTIFY_EXEC_COMMAND:-~/bin/hypr-focus-workspace special:mediaspace}"
+SPOTIFY_NOTIFY_DEFAULT_TEXT_GAP="${SPOTIFY_NOTIFY_DEFAULT_TEXT_GAP:-5}"
+SPOTIFY_NOTIFY_TEXT_GAP="${SPOTIFY_NOTIFY_TEXT_GAP:-$SPOTIFY_NOTIFY_DEFAULT_TEXT_GAP}"
 
 spotify_notify_lib_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 
 if [[ -r "$spotify_notify_lib_dir/spotify-notify-ward-lib" ]]; then
   source "$spotify_notify_lib_dir/spotify-notify-ward-lib"
 fi
+
+spotify_notify_usage() {
+  local program_name="${1:-spotify-notify}"
+
+  printf 'Usage: %s [--text-gap PIXELS]\n' "$program_name"
+}
+
+spotify_notify_set_text_gap() {
+  local value="${1-}"
+
+  if [[ ! "$value" =~ ^[0-9]+$ ]]; then
+    printf 'invalid text gap: %s\n' "$value" >&2
+    return 1
+  fi
+
+  SPOTIFY_NOTIFY_TEXT_GAP="$value"
+}
+
+spotify_notify_parse_args() {
+  local program_name="${1:-spotify-notify}"
+  shift || true
+
+  while [[ "$#" -gt 0 ]]; do
+    case "$1" in
+      --text-gap)
+        [[ "$#" -ge 2 ]] || {
+          printf '%s\n' "missing value for --text-gap" >&2
+          return 1
+        }
+        spotify_notify_set_text_gap "$2"
+        shift 2
+        ;;
+      --text-gap=*)
+        spotify_notify_set_text_gap "${1#*=}"
+        shift
+        ;;
+      -h|--help)
+        spotify_notify_usage "$program_name"
+        exit 0
+        ;;
+      --)
+        shift
+        [[ "$#" -eq 0 ]] || {
+          printf 'unexpected arguments: %s\n' "$*" >&2
+          return 1
+        }
+        ;;
+      *)
+        printf 'unexpected argument: %s\n' "$1" >&2
+        return 1
+        ;;
+    esac
+  done
+}
+
+spotify_notify_append_hint_args() {
+  local -n args_ref="$1"
+
+  if [[ -n "${SPOTIFY_NOTIFY_TEXT_GAP:-}" ]]; then
+    args_ref+=(-h "int:x-ward-text-gap:$SPOTIFY_NOTIFY_TEXT_GAP")
+  fi
+}
 
 spotify_escape_markup() {
   local value="${1-}"
@@ -106,7 +171,7 @@ spotify_track_markup() {
   title="$("$PLAYERCTL_BIN" -p "$SPOTIFY_PLAYER" metadata --format '{{title}}' 2>/dev/null || printf '')"
   artist="$(spotify_track_artists)"
 
-  printf '<b><i>%s</i></b>\n%s' \
+  printf '<b>%s</b>\n<span foreground="var(--border-color)">%s</span>' \
     "$(spotify_escape_markup "$title")" \
     "$(spotify_escape_markup "$artist")"
 }
@@ -223,6 +288,8 @@ spotify_notify_mako_args() {
     -t "$timeout"
   )
 
+  spotify_notify_append_hint_args args
+
   if [[ -n "$icon" ]]; then
     args+=(-i "$icon")
   fi
@@ -320,9 +387,35 @@ spotify_notify_track() {
   return "$notify_exit_code"
 }
 
+spotify_notify_track_with_text_gap() {
+  local summary="$1"
+  local timeout="${2:-2500}"
+  local text_gap="${3-}"
+  local restore_text_gap=""
+  local notify_exit_code=0
+
+  if [[ -n "$text_gap" ]]; then
+    restore_text_gap="${SPOTIFY_NOTIFY_TEXT_GAP:-}"
+    SPOTIFY_NOTIFY_TEXT_GAP="$text_gap"
+  fi
+
+  if spotify_notify_track "$summary" "$timeout"; then
+    notify_exit_code=0
+  else
+    notify_exit_code=$?
+  fi
+
+  if [[ -n "$text_gap" ]]; then
+    SPOTIFY_NOTIFY_TEXT_GAP="$restore_text_gap"
+  fi
+
+  return "$notify_exit_code"
+}
+
 spotify_track_change_mark() {
   local summary="$1"
   local previous_id="${2-}"
+  local text_gap="${SPOTIFY_NOTIFY_TEXT_GAP:-}"
   local lock_fd
   local now_s
   local expires_at_s
@@ -335,19 +428,24 @@ spotify_track_change_mark() {
   expires_at_s=$(( now_s + SPOTIFY_TRACK_CHANGE_MARK_TTL ))
   temp_mark_file="$("$MKTEMP_BIN" "$SPOTIFY_NOTIFY_STATE_DIR/.track-change-mark.XXXXXX")"
 
-  printf '%s\n%s\n%s\n' "$expires_at_s" "$previous_id" "$summary" > "$temp_mark_file"
+  printf '%s\n%s\n%s\n%s\n' "$expires_at_s" "$previous_id" "$summary" "$text_gap" > "$temp_mark_file"
   "$MV_BIN" -f "$temp_mark_file" "$SPOTIFY_TRACK_CHANGE_MARK_FILE"
   exec {lock_fd}>&-
 }
 
 spotify_track_change_take_mark() {
   local previous_id="$1"
+  local summary_var_name="$2"
+  local text_gap_var_name="$3"
   local lock_fd
   local now_s
   local -a lines=()
   local expires_at_s=""
   local marked_previous_id=""
   local summary=""
+  local text_gap=""
+  local -n summary_ref="$summary_var_name"
+  local -n text_gap_ref="$text_gap_var_name"
 
   "$MKDIR_BIN" -p "$SPOTIFY_NOTIFY_STATE_DIR"
   exec {lock_fd}> "$SPOTIFY_TRACK_CHANGE_MARK_LOCK_FILE"
@@ -367,6 +465,7 @@ spotify_track_change_take_mark() {
   expires_at_s="${lines[0]-}"
   marked_previous_id="${lines[1]-}"
   summary="${lines[2]-}"
+  text_gap="${lines[3]-}"
 
   [[ "$expires_at_s" =~ ^[0-9]+$ ]] || {
     "$RM_BIN" -f "$SPOTIFY_TRACK_CHANGE_MARK_FILE"
@@ -395,5 +494,6 @@ spotify_track_change_take_mark() {
 
   "$RM_BIN" -f "$SPOTIFY_TRACK_CHANGE_MARK_FILE"
   exec {lock_fd}>&-
-  printf '%s\n' "$summary"
+  summary_ref="$summary"
+  text_gap_ref="$text_gap"
 }

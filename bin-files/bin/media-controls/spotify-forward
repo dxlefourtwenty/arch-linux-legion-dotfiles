@@ -3,6 +3,7 @@ set -euo pipefail
 
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 source "$script_dir/spotify-notify-lib"
+spotify_notify_parse_args "${0##*/}" "$@"
 
 "$PLAYERCTL_BIN" -p "$SPOTIFY_PLAYER" position 5+
 spotify_notify_track_with_timestamp "Forwarding..." 3000

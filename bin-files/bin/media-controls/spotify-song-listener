@@ -3,6 +3,7 @@ set -euo pipefail
 
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 source "$script_dir/spotify-notify-lib"
+spotify_notify_parse_args "${0##*/}" "$@"
 
 last_id=""
 last_pos=0
@@ -11,12 +12,13 @@ last_len=0
 spotify_track_change_notify() {
   local previous_id="$1"
   local summary=""
+  local text_gap=""
 
   [[ -n "$previous_id" ]] || return 0
 
-  if summary="$(spotify_track_change_take_mark "$previous_id" 2>/dev/null)"; then
+  if spotify_track_change_take_mark "$previous_id" summary text_gap 2>/dev/null; then
     sleep 0.5
-    spotify_notify_track "$summary" 6500 || true
+    spotify_notify_track_with_text_gap "$summary" 6500 "$text_gap" || true
     return 0
   fi
 

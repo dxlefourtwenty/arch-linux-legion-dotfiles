@@ -71,6 +71,12 @@ spotify_notify_ward_args() {
     -h "boolean:x-ward-replace-last:true"
   )
 
+  spotify_notify_append_hint_args args
+
+  if [[ -n "${SPOTIFY_NOTIFY_EXEC_COMMAND:-}" ]]; then
+    args+=(-h "string:exec:$SPOTIFY_NOTIFY_EXEC_COMMAND")
+  fi
+
   if [[ "$had_active" == "1" ]]; then
     args+=(
       -h "boolean:x-ward-silent-open:true"
