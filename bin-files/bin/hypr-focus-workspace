@@ -1,0 +1,18 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+# Ensure argument is provided
+if [[ $# -ne 1 ]]; then
+  echo "Usage: hypr-focus-workspace <workspace>"
+  echo "Examples:"
+  echo "  hypr-focus-workspace 3"
+  echo "  hypr-focus-workspace special"
+  echo "  hypr-focus-workspace special:term"
+  exit 1
+fi
+
+workspace="$1"
+
+# Focus the workspace
+hyprctl dispatch workspace "$workspace"

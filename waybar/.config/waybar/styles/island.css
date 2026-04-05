@@ -376,3 +376,7 @@ button {
     padding-left: 12px;
     padding-right: 6px;
 }
+
+#custom-expo:hover {
+    color: @foreground;
+}

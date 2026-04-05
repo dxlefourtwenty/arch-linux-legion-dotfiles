@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
 
 if pgrep -x ward; then
-    ward --reload 
+    /home/dxle/.local/bin/ward --reload 
 fi
