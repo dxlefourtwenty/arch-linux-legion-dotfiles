@@ -10,6 +10,8 @@ readonly NOHUP_BIN="${NOHUP_BIN:-/usr/bin/nohup}"
 readonly NOTIFY_SEND_BIN="${NOTIFY_SEND_BIN:-/usr/bin/notify-send}"
 readonly RM_BIN="${RM_BIN:-/usr/bin/rm}"
 readonly SLEEP_BIN="${SLEEP_BIN:-/usr/bin/sleep}"
+readonly BG_SLIDESHOW_NOTIFY_APP_NAME="${BG_SLIDESHOW_NOTIFY_APP_NAME:-bg-toggle-slideshow}"
+readonly BG_SLIDESHOW_NOTIFY_STACK_TAG="${BG_SLIDESHOW_NOTIFY_STACK_TAG:-bg-toggle-slideshow}"
 
 readonly SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 readonly SCRIPT_PATH="${SCRIPT_DIR}/$(basename -- "${BASH_SOURCE[0]}")"
@@ -377,11 +379,20 @@ notify_state() {
     local state_label="$1"
 
     if ((DRY_RUN)); then
-        printf '%s -t 3000 "Background" "Slideshow: <b>%s</b>"\n' "${NOTIFY_SEND_BIN}" "${state_label}"
+        printf '%s -a %s -h %s -t 3000 "Background" "Slideshow: <b>%s</b>"\n' \
+            "${NOTIFY_SEND_BIN}" \
+            "${BG_SLIDESHOW_NOTIFY_APP_NAME}" \
+            "string:x-dunst-stack-tag:${BG_SLIDESHOW_NOTIFY_STACK_TAG}" \
+            "${state_label}"
         return
     fi
 
-    "${NOTIFY_SEND_BIN}" -t 3000 "Background" "Slideshow: <b>${state_label}</b>"
+    "${NOTIFY_SEND_BIN}" \
+        -a "${BG_SLIDESHOW_NOTIFY_APP_NAME}" \
+        -h "string:x-dunst-stack-tag:${BG_SLIDESHOW_NOTIFY_STACK_TAG}" \
+        -t 3000 \
+        "Background" \
+        "Slideshow: <b>${state_label}</b>"
 }
 
 write_pid_file() {

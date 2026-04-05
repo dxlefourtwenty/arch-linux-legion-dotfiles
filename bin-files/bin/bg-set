@@ -301,7 +301,7 @@ MENU_INPUT="$tmp_dir/menu-input"
 MENU_FONT="$(escape_rofi_string "$(current_menu_font)")"
 
 mkdir -p "$CACHE_DIR"
-notify-send -t 2000 "Background" "Opened $THEME_PRETTY gallery."
+notify-send -t 3000 "Background" "Opened $THEME_PRETTY gallery."
 
 for wallpaper_path in "${WALLPAPERS[@]}"; do
     display_name="$(format_wallpaper_name "$wallpaper_path")"
