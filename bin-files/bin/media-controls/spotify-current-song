@@ -3,6 +3,15 @@ set -euo pipefail
 
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 source "$script_dir/spotify-notify-lib"
+SPOTIFY_CURRENT_SONG_PERSISTENT_STATE_FILE="${SPOTIFY_CURRENT_SONG_PERSISTENT_STATE_FILE:-$SPOTIFY_NOTIFY_STATE_DIR/current-song-persistent.state}"
+SPOTIFY_CURRENT_SONG_PERSISTENT_STACK_TAG="${SPOTIFY_CURRENT_SONG_PERSISTENT_STACK_TAG:-spotify-media-controls-persistent}"
+SPOTIFY_CURRENT_SONG_PERSISTENT_WARD_STATE_FILE="${SPOTIFY_CURRENT_SONG_PERSISTENT_WARD_STATE_FILE:-$SPOTIFY_NOTIFY_STATE_DIR/current-song-persistent-ward-notification-state}"
+SPOTIFY_NOTIFY_STACK_TAG="$SPOTIFY_CURRENT_SONG_PERSISTENT_STACK_TAG"
+SPOTIFY_NOTIFY_WARD_STATE_FILE="$SPOTIFY_CURRENT_SONG_PERSISTENT_WARD_STATE_FILE"
 spotify_notify_parse_args "${0##*/}" "$@"
+
+if [[ -r "$SPOTIFY_CURRENT_SONG_PERSISTENT_STATE_FILE" ]]; then
+  exit 0
+fi
 
 spotify_notify_track "Currently Playing" 5000

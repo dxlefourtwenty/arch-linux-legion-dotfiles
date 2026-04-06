@@ -20,7 +20,7 @@ QFrame#notificationCard {
 QLabel#summaryLabel {
     color: var(--text-color);
     font-size: 11pt;
-    font-weight: 700;
+    font-weight: 600;
 }
 
 QLabel#bodyLabel {

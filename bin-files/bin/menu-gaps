@@ -9,10 +9,13 @@ GAPS_MIN=0
 GAPS_MAX=30
 WAYBAR_MARGIN_MIN=2
 
-# Add more same-format Waybar JSONC files here if they should track gaps.
-WAYBAR_MARGIN_FILES=(
-    "${XDG_CONFIG_HOME:-$HOME/.config}/waybar/configs/floating.jsonc"
-    "${XDG_CONFIG_HOME:-$HOME/.config}/waybar/configs/island.jsonc"
+# format: path|addition|base_value
+WAYBAR_CONFIGS=(
+    "${XDG_CONFIG_HOME:-$HOME/.config}/waybar/configs/floating.jsonc|true|14"
+    "${XDG_CONFIG_HOME:-$HOME/.config}/waybar/configs/island.jsonc|false|0"
+    "${XDG_CONFIG_HOME:-$HOME/.config}/waybar/configs/minimal.jsonc|false|0"
+    "${XDG_CONFIG_HOME:-$HOME/.config}/waybar/configs/spaced-arrow.jsonc|false|0"
+    "${XDG_CONFIG_HOME:-$HOME/.config}/waybar/configs/arrowline.jsonc|false|0"
 )
 
 if "$SCRIPT_DIR/rofi-toggle-pidfile" begin "$MENU_ID"; then
@@ -105,7 +108,35 @@ update_values() {
     mv "$tmp_file" "$HYPR_CONF"
 }
 
-update_waybar_margins() {
+is_valid_waybar_bool() {
+    local value="$1"
+
+    [[ "$value" == "true" || "$value" == "false" ]]
+}
+
+is_valid_nonnegative_integer() {
+    local value="$1"
+
+    [[ "$value" =~ ^[0-9]+$ ]]
+}
+
+config_has_key() {
+    local config_file="$1"
+    local key_name="$2"
+
+    awk -v key_name="$key_name" '
+        index($0, "\"" key_name "\"") {
+            found = 1
+            exit
+        }
+
+        END {
+            exit found ? 0 : 1
+        }
+    ' "$config_file"
+}
+
+update_waybar_vertical_margins() {
     local config_file="$1"
     local new_top="$2"
     local new_bottom="$3"
@@ -113,7 +144,7 @@ update_waybar_margins() {
 
     tmp_file="$(mktemp)"
 
-    awk -v new_top="$new_top" -v new_bottom="$new_bottom" '
+    if ! awk -v new_top="$new_top" -v new_bottom="$new_bottom" '
         /"margin-top"[[:space:]]*:/ && !updated_top {
             sub(/"margin-top"[[:space:]]*:[[:space:]]*[-]?[0-9]+([.][0-9]+)?/, "\"margin-top\": " new_top)
             updated_top = 1
@@ -131,7 +162,44 @@ update_waybar_margins() {
                 exit 1
             }
         }
-    ' "$config_file" > "$tmp_file"
+    ' "$config_file" > "$tmp_file"; then
+        rm -f "$tmp_file"
+        return 1
+    fi
+
+    mv "$tmp_file" "$config_file"
+}
+
+update_waybar_horizontal_margins() {
+    local config_file="$1"
+    local new_left="$2"
+    local new_right="$3"
+    local tmp_file
+
+    tmp_file="$(mktemp)"
+
+    if ! awk -v new_left="$new_left" -v new_right="$new_right" '
+        /"margin-left"[[:space:]]*:/ && !updated_left {
+            sub(/"margin-left"[[:space:]]*:[[:space:]]*[-]?[0-9]+([.][0-9]+)?/, "\"margin-left\": " new_left)
+            updated_left = 1
+        }
+
+        /"margin-right"[[:space:]]*:/ && !updated_right {
+            sub(/"margin-right"[[:space:]]*:[[:space:]]*[-]?[0-9]+([.][0-9]+)?/, "\"margin-right\": " new_right)
+            updated_right = 1
+        }
+
+        { print }
+
+        END {
+            if (!updated_left || !updated_right) {
+                exit 1
+            }
+        }
+    ' "$config_file" > "$tmp_file"; then
+        rm -f "$tmp_file"
+        return 1
+    fi
 
     mv "$tmp_file" "$config_file"
 }
@@ -192,14 +260,41 @@ while true; do
 
     update_values "$new_out" "$new_in"
 
-    for waybar_config in "${WAYBAR_MARGIN_FILES[@]}"; do
+    for waybar_entry in "${WAYBAR_CONFIGS[@]}"; do
+        IFS='|' read -r waybar_config addition_enabled base_value <<< "$waybar_entry"
+
         if [[ ! -f "$waybar_config" ]]; then
             notify-send -t 4000 "Gaps" "Waybar config not found: $waybar_config"
             continue
         fi
 
-        if ! update_waybar_margins "$waybar_config" "$new_margin_top" "$new_margin_bottom"; then
-            notify-send -t 4000 "Gaps" "Failed to update Waybar config: $waybar_config"
+        if ! is_valid_waybar_bool "$addition_enabled"; then
+            notify-send -t 4000 "Gaps" "Invalid addition flag for: $waybar_config"
+            continue
+        fi
+
+        if ! is_valid_nonnegative_integer "$base_value"; then
+            notify-send -t 4000 "Gaps" "Invalid base value for: $waybar_config"
+            continue
+        fi
+
+        if config_has_key "$waybar_config" "margin-top" && config_has_key "$waybar_config" "margin-bottom"; then
+            if ! update_waybar_vertical_margins "$waybar_config" "$new_margin_top" "$new_margin_bottom"; then
+                notify-send -t 4000 "Gaps" "Failed to update Waybar config: $waybar_config"
+                continue
+            fi
+        fi
+
+        if [[ "$addition_enabled" == "true" ]]; then
+            new_margin_side=$((base_value + new_out))
+
+            if config_has_key "$waybar_config" "margin-left" && config_has_key "$waybar_config" "margin-right"; then
+                if ! update_waybar_horizontal_margins "$waybar_config" "$new_margin_side" "$new_margin_side"; then
+                    notify-send -t 4000 "Gaps" "Failed to update Waybar side margins: $waybar_config"
+                fi
+            else
+                notify-send -t 4000 "Gaps" "Addition enabled, but side margins are missing: $waybar_config"
+            fi
         fi
     done
 

@@ -71,7 +71,8 @@ spotify_notify_ward_args() {
   local body="$2"
   local timeout="$3"
   local icon="${4-}"
-  local had_active="${5:-0}"
+  local replace_id="${5-}"
+  local had_active="${6:-0}"
   local -a args
 
   args=(
@@ -80,8 +81,8 @@ spotify_notify_ward_args() {
     -t "$timeout"
   )
 
-  if spotify_notify_ward_replace_last_enabled; then
-    args+=(-h "boolean:x-ward-replace-last:true")
+  if [[ -n "$replace_id" ]]; then
+    args+=(-r "$replace_id")
   fi
 
   spotify_notify_append_hint_args args
@@ -110,6 +111,7 @@ spotify_notify_ward_preview() {
   local timeout="$3"
   local icon="${4-}"
   local active_id=""
+  local replace_id=""
   local had_active="0"
   local -a preview_args
 
@@ -117,7 +119,11 @@ spotify_notify_ward_preview() {
     had_active="1"
   fi
 
-  mapfile -d '' -t preview_args < <(spotify_notify_ward_args "$summary" "$body" "$timeout" "$icon" "$had_active")
+  if [[ "$had_active" == "1" ]] && spotify_notify_ward_replace_last_enabled; then
+    replace_id="$active_id"
+  fi
+
+  mapfile -d '' -t preview_args < <(spotify_notify_ward_args "$summary" "$body" "$timeout" "$icon" "$replace_id" "$had_active")
   printf 'backend=ward\n'
   printf 'summary=%s\n' "$summary"
   printf 'timeout=%s\n' "$timeout"
@@ -125,6 +131,7 @@ spotify_notify_ward_preview() {
   printf 'body=%s\n' "$body"
   printf 'app_name=%s\n' "$SPOTIFY_NOTIFY_APP_NAME"
   printf 'previous_id=%s\n' "$active_id"
+  printf 'replace_id=%s\n' "$replace_id"
   printf 'notify_args=%q ' "$NOTIFY_SEND_BIN" "${preview_args[@]}"
   printf '\n'
 }
@@ -135,6 +142,7 @@ spotify_notify_ward_send() {
   local timeout="$3"
   local icon="${4-}"
   local active_id=""
+  local replace_id=""
   local had_active="0"
   local notify_output=""
   local notification_id=""
@@ -148,7 +156,11 @@ spotify_notify_ward_send() {
     had_active="1"
   fi
 
-  mapfile -d '' -t notify_args < <(spotify_notify_ward_args "$summary" "$body" "$timeout" "$icon" "$had_active")
+  if [[ "$had_active" == "1" ]] && spotify_notify_ward_replace_last_enabled; then
+    replace_id="$active_id"
+  fi
+
+  mapfile -d '' -t notify_args < <(spotify_notify_ward_args "$summary" "$body" "$timeout" "$icon" "$replace_id" "$had_active")
 
   if notify_output="$("$TIMEOUT_BIN" "$SPOTIFY_NOTIFY_SEND_TIMEOUT" "$NOTIFY_SEND_BIN" "${notify_args[@]}")"; then
     :

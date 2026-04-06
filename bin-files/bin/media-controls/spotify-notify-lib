@@ -176,6 +176,12 @@ spotify_track_markup() {
     "$(spotify_escape_markup "$artist")"
 }
 
+spotify_summary_markup() {
+  local summary="${1-}"
+
+  printf '<span font-weight="300">%s</span>' "$(spotify_escape_markup "$summary")"
+}
+
 spotify_format_mmss() {
   local total_seconds="${1:-0}"
   local minutes
@@ -304,14 +310,17 @@ spotify_notify_preview() {
   local body="$3"
   local timeout="$4"
   local icon="${5-}"
+  local summary_markup=""
   local -a preview_args
 
+  summary_markup="$(spotify_summary_markup "$summary")"
+
   if [[ "$backend" == "ward" ]]; then
-    spotify_notify_ward_preview "$summary" "$body" "$timeout" "$icon"
+    spotify_notify_ward_preview "$summary_markup" "$body" "$timeout" "$icon"
     return 0
   fi
 
-  mapfile -d '' -t preview_args < <(spotify_notify_mako_args "$summary" "$body" "$timeout" "$icon")
+  mapfile -d '' -t preview_args < <(spotify_notify_mako_args "$summary_markup" "$body" "$timeout" "$icon")
   printf 'backend=%s\n' "$backend"
   printf 'summary=%s\n' "$summary"
   printf 'timeout=%s\n' "$timeout"
@@ -329,11 +338,14 @@ spotify_notify_send() {
   local body="$3"
   local timeout="$4"
   local icon="${5-}"
+  local summary_markup=""
   local notify_exit_code=0
   local -a notify_args
 
+  summary_markup="$(spotify_summary_markup "$summary")"
+
   if [[ "$backend" == "ward" ]]; then
-    if spotify_notify_ward_send "$summary" "$body" "$timeout" "$icon"; then
+    if spotify_notify_ward_send "$summary_markup" "$body" "$timeout" "$icon"; then
       return 0
     else
       notify_exit_code=$?
@@ -341,7 +353,7 @@ spotify_notify_send() {
     fi
   fi
 
-  mapfile -d '' -t notify_args < <(spotify_notify_mako_args "$summary" "$body" "$timeout" "$icon")
+  mapfile -d '' -t notify_args < <(spotify_notify_mako_args "$summary_markup" "$body" "$timeout" "$icon")
 
   if "$TIMEOUT_BIN" "$SPOTIFY_NOTIFY_SEND_TIMEOUT" "$NOTIFY_SEND_BIN" "${notify_args[@]}"; then
     return 0

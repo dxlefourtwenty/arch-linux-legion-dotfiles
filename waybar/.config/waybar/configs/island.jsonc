@@ -45,6 +45,8 @@
             "scratchpad": "<span font-size='14pt'>✎</span>",
             "floating": "+",
             "desktop": "",
+            "active": "",
+            "empty": "",
         },
         "persistent-workspaces": {
             "HDMI-A-1": [ 1,2,3,4,5 ]

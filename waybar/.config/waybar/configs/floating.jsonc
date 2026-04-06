@@ -2,7 +2,6 @@
 {
     // "layer": "top", // Waybar at top layer
     // "position": "bottom", // Waybar position (top|bottom|left|right)
-    "height": 30, // Waybar height (to be removed for auto height)
     "margin-top": 10,
     "margin-bottom": 0,
     "margin-right": 24,
@@ -12,24 +11,36 @@
     "spacing": 4, // Gaps between modules (4px)
     // Choose the order of the modules
     "modules-left": [
-        "custom/menu",
-        "hyprland/workspaces",
-        "custom/expo"
+        "group/left",
     ],
     "modules-center": [
         "clock"
     ],
     "modules-right": [
-        "custom/wallpapers",
-        "pulseaudio",
-        "network",
-        "custom/bluetooth",
-        "cpu",
-        "memory",
-        "temperature",
-        "battery",
-        "custom/power"
+        "group/right",
     ],
+    "group/left": {
+        "orientation": "horizontal",
+        "modules": [
+            "custom/expo",
+            "hyprland/workspaces"
+        ],
+    },
+    "group/right": {
+        "orientation": "horizontal",
+        "modules": [
+           "custom/menu",
+            "custom/wallpapers",
+            "pulseaudio",
+            "network",
+            "custom/bluetooth",
+            "cpu",
+            "memory",
+            "temperature",
+            "battery",
+            "custom/power"
+        ]
+    },
     "hyprland/workspaces": {
         "disable-scroll": true,
         "all-outputs": false,
@@ -37,22 +48,22 @@
         "warp-on-scroll": false,
         "format": "<span font_desc=\"JetBrainsMono Nerd Font\">{icon}</span>",
         "format-icons": {
-            "1": "1",
-            "2": "2",
-            "3": "3",
-            "4": "4",
-            "5": "5",
-            "6": "6",
-            "7": "7",
-            "8": "8",
-            "9": "9",
+            "1": "",
+            "2": "",
+            "3": "",
+            "4": "",
+            "5": "",
+            "6": "",
+            "7": "",
+            "8": "",
+            "9": "",
             "10": "0",
-            "socialspace": "<span font-size='9pt'></span>",
-            "discordspace": "<span font-size='9pt'> 󱋊 </span>",
-            "mediaspace": "<span font-size='8pt'> </span>",
-            "scratchpad": "<span font-size='8pt'> </span>",
+            "socialspace": "<span font-size='12pt'></span>",
+            "discordspace": "<span font-size='12pt'>󱋊</span>",
+            "mediaspace": "<span font-size='12pt'></span>",
+            "scratchpad": "<span font-size='12pt'></span>",
             "floating": "+",
-            "active": "󱓻"
+            "active": "",
         },
         "persistent-workspaces": {
             "HDMI-A-1": [ 1,2,3,4,5 ],
@@ -231,12 +242,12 @@
         "tooltip": false,
     },
     "custom/wallpapers": {
-        "format": "<span font_desc=\"JetBrainsMono Nerd Font\"></span> ",  
+        "format": "<span font_desc=\"JetBrainsMono Nerd Font\"></span>",  
         "on-click": "~/bin/bg-set",
         "tooltip": false,
     },
     "custom/bluetooth": {
-        "format": "<span font_desc=\"JetBrainsMono Nerd Font\"></span> ",  
+        "format": "<span font_desc=\"JetBrainsMono Nerd Font\"></span>",  
         "on-click": "~/bin/launch-terminal-floating 1000 800 bluetuith",
         "tooltip": false,
     }
