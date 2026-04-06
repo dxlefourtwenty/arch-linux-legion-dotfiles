@@ -54,7 +54,7 @@ window#waybar {
 	box-shadow: inherit;
 	text-shadow: inherit;
 	color: @red;
-	background-color: @background;
+	background-color: transparent;
 }
 
 #workspaces button.empty {
