@@ -12,6 +12,7 @@ WAYBAR_MARGIN_MIN=2
 # format: path|addition|base_value
 WAYBAR_CONFIGS=(
     "${XDG_CONFIG_HOME:-$HOME/.config}/waybar/configs/floating.jsonc|true|14"
+    "${XDG_CONFIG_HOME:-$HOME/.config}/waybar/configs/pill.jsonc|true|38"
     "${XDG_CONFIG_HOME:-$HOME/.config}/waybar/configs/island.jsonc|false|0"
     "${XDG_CONFIG_HOME:-$HOME/.config}/waybar/configs/minimal.jsonc|false|0"
     "${XDG_CONFIG_HOME:-$HOME/.config}/waybar/configs/spaced-arrow.jsonc|false|0"
