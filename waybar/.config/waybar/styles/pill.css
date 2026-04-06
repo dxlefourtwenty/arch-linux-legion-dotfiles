@@ -3,7 +3,7 @@
 * {
 	border: none;
 	border-radius: 0;
-	font-family:  "CaskaydiaMono Nerd Font";
+	font-family: "CaskaydiaMono Nerd Font";
 	font-size: 18px;
 }
 
@@ -41,12 +41,12 @@ window#waybar {
 	padding: 6px 18px;
 	margin: 0px 3px;
 	border-radius: 4px;
-	background-color: @background;
+	background-color: transparent;
 	color: @foreground;
 }
 
 #workspaces button.active {
-	background-color: @background;
+	background-color: transparent;
 	color: @primary;
 }
 
@@ -86,13 +86,13 @@ window#waybar {
 #custom-left-1 {
 	font-size: 30px;
 	color: @primary;
-	background: @background;
+	background: transparent;
 }
 
 #custom-left-2 {
 	font-size: 30px;
 	color: @primary;
-	background: @background;
+	background: transparent;
 }
 
 #user {
