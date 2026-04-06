@@ -27,13 +27,14 @@ spotify_track_change_notify() {
 }
 
 while IFS='|' read -r status id length pos; do
-  [[ "$status" != "Playing" ]] && continue
-
   length_s=$(( ${length:-0} / 1000000 ))
   pos_s=$(( ${pos:-0} / 1000000 ))
 
-  if [[ "$id" != "$last_id" ]]; then
-    spotify_track_change_notify "$last_id"
+  if [[ -n "$id" && "$id" != "$last_id" ]]; then
+    if [[ "$status" == "Playing" ]]; then
+      spotify_track_change_notify "$last_id"
+    fi
+
     last_id="$id"
     last_len="$length_s"
   fi
