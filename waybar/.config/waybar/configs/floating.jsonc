@@ -213,7 +213,7 @@
             "phone": " ",
             "portable": " ",
             "car": " ",
-            "default": ["", " ", " "]
+            "default": ["", " ", "  "]
         },
         "tooltip-format": "{volume}%",
         "on-click": "~/bin/menu-audio",

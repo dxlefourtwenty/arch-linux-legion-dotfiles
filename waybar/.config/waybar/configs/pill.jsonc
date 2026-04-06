@@ -1,0 +1,186 @@
+{
+	"layer":"top",
+	"position":"top",
+  "output": "HDMI-A-1",
+   "reload_style_on_change": true,
+   "spacing": 0,
+
+   "margin-top": 8,
+   "margin-right": 48,
+   "margin-bottom": 0,
+   "margin-left": 48,
+    
+	"modules-left"	: ["custom/menu", "custom/left-1", "hyprland/workspaces", "custom/left-2", "user"],
+	"modules-center": ["hyprland/window"],
+	"modules-right"	: [ "group/group-tools", "custom/left-1", "battery","network","wireplumber","custom/left-2", "clock"],
+
+    "custom/left-1": {
+        "format" : "<span font_desc=\"JetBrainsMono Nerd Font\"></span>",
+        "tooltip": false
+    },
+
+    "custom/left-2": {
+        "format" : "<span font_desc=\"JetBrainsMono Nerd Font\"></span>",
+        "tooltip": false
+    },
+
+	"custom/menu": {
+    "format": "<span font_desc=\"JetBrainsMono Nerd Font\">󰣇</span> ",
+    "on-click": "~/bin/menu",
+    "tooltip": false,
+  },
+	"user": {
+       "format":"{user}'S DESK",
+       "interval": 60,
+	},
+   // "hyprland/workspaces": {
+   //      "disable-scroll": true,
+   //      "all-outputs": false,
+   //      "warp-on-scroll": false,
+   //      "show-special": true,
+   //      "format": "<span font_desc=\"JetBrainsMono Nerd Font\">{icon}</span>",
+   //      "format-icons": {
+   //          "1": "",
+   //          "2": "",
+   //          "3": "",
+   //          "4": "",
+   //          "5": "",
+   //          "6": "",
+   //          "7": "",
+   //          "8": "",
+   //          "9": "",
+   //          "10": "",
+   //          "socialspace": "<span font-size='12pt'></span>",
+   //          "discordspace": "<span font-size='12pt'>󱋊</span>",
+   //          "mediaspace": "<span font-size='12pt'></span>",
+   //          "scratchpad": "",
+   //          "floating": "+",
+   //          "active": ""
+   //      },
+   //      "persistent-workspaces": {
+   //      },
+   //  },
+    "hyprland/workspaces": {
+      "format": "<span font_desc=\"JetBrainsMono Nerd Font\">{windows}</span>",
+      "format-empty": "<span font_desc=\"JetBrainsMono Nerd Font\"></span>",
+      "format-window-separator": "  ",
+      "window-rewrite-default": "",
+      "window-rewrite": {
+        "title<.*youtube.*>": "", // Windows whose titles contain "youtube"
+        "title<.*chatgpt.*>": "󰚩",
+        "class<.*chrome-chatgpt.*>": "󰚩",
+        "class<.*chrome-github.*>": "",
+        "class<.*lutgen-studio.*>": "󰜋",
+        "class<.*prismlauncher.*>": "",
+        "class<.*minecraft.*>": "󰍳",
+        "class<.*obsproject.Studio.*>": "",
+        "title<.*Claude.*>": "󰚩",
+        "class<chromium>": "", // Windows whose classes are "chromium"
+        "class<brave-browser>": "🦁", // Windows whose classes are "chromium"
+        "class<chromium> title<.*github.*>": "", // Windows whose class is "chromium" and title contains "github". Note that "class" always comes first.
+        "class<.*chrome.*> title<.*Hyprland Wiki*>": "", 
+        "class<.*chrome.*> title<.*LazyVim.*>": "󰒲", 
+        "class<.*chrome.*> title<.*Bash.*>": "󱆃", 
+        "class<.*chrome.*> title<.*Git Cheat Sheet.*>": "", 
+        "class<kitty>": "", // Windows that contain "kitty" in either class or title. For optimization reasons, it will only match against a title if at least one other window explicitly matches against a title.
+        "class<alacritty>": "",
+        "class<kitty> title<.*nvim.*>": "", // Windows that contain "kitty" in either class or title. For optimization reasons, it will only match against a title if at least one other window explicitly matches against a title.
+        "class<localsend>": "", // Windows whose classes are "chromium"
+        "class<nemo>": "", // Windows whose classes are "chromium"
+        "class<spotify>": "*",
+        "class<steam>": "",
+        "class<obsidian>": "*", // Windows whose classes are "obsidian"
+        "class<vesktop>": "*",
+        "class<.*chrome-instagram.*>": "*󰋾",
+        "class<.*chrome-tiktok.*>": "*󰎇",
+        "btop": "",
+        "title<.* - (.*) - VSCodium>": "codium $1"  // captures part of the window title and formats it into output
+      },
+      "show-special": true
+    },
+    "hyprland/window": {
+        "format": "{}",
+        "max-length": 40,
+        "tooltip": false,
+        "rewrite": {
+            "(.*)Hellpaper(.*)": "Select Background",
+        },
+    },
+   "group/group-tools": {
+		"orientation": "inherit",
+		"drawer": {
+			"transition-duration": 500,
+			"children-class": "not-info",
+			"transition-left-to-right": true
+		},
+		"modules": [
+			"custom/infolabel",
+			"custom/htop",
+			"custom/shot",
+		]
+	}, 
+	"custom/infolabel": {
+       "format": "TOOLS",
+       "tooltip": false
+	},
+   "custom/htop": {
+		"format":"<span font_desc=\"JetBrainsMono Nerd Font\"></span>",
+		"tooltip-format": "top",
+		"on-click":"alacritty -e btm"
+    },
+   "custom/shot": {
+		"format":"<span font_desc=\"JetBrainsMono Nerd Font\"></span>",
+		"tooltip-format": "screenshot",
+		"on-click":"niri msg action screenshot-screen"
+    },
+   "wireplumber": {
+       "format":"<span font_desc=\"JetBrainsMono Nerd Font\">{icon}</span> {volume}%",
+		"format-muted":"<span font_desc=\"JetBrainsMono Nerd Font\">󰝟</span>",
+		"format-icons": ["󰖀","󰕾"],        
+       "on-click":"pavucontrol",        
+       "max-volume": 150,
+       "scroll-step": 2,
+       "tooltip-format":"Volume: {volume}%",
+    },
+   "battery": {
+       "bat":"BAT0",
+       "interval": 60,
+       "format":"<span font_desc=\"JetBrainsMono Nerd Font\">{icon}</span> {capacity}%",
+       "format-icons": ["","","","",""],
+       "tooltip-format":"Battery: {capacity}%, {time}",
+    }, 
+   "network": {
+       "format":"",
+       "on-click":"alacritty -e nmtui",
+       "format-ethernet":"<span font_desc=\"JetBrainsMono Nerd Font\"></span>",
+       "format-wifi":"<span font_desc=\"JetBrainsMono Nerd Font\">{icon}</span> {signalStrength}%",
+       "format-disconnected":"<span font_desc=\"JetBrainsMono Nerd Font\">󰤭</span>",
+       "format-icons": ["󰤟","󰤢","󰤥","󰤨"],
+       "tooltip-format-wifi":"{essid}: ({signalStrength}%)",
+       "tooltip-format-ethernet":"{ifname}",
+       "tooltip-format-disconnected":"Disconnected",
+    },
+   "clock": {
+		"format":"<span font_desc=\"JetBrainsMono Nerd Font\">󱑍</span> {:%I:%M %p}",
+		"tooltip-format":"{:%I:%M %p ~  %a. %d.%m }",
+       "timezones": [
+           "America/Los_Angeles",
+        ],
+       "actions":  {
+           "on-click":"~/bin/toggle-dashboard",
+        },
+       "on-click":"~/bin/toggle-dashboard",
+    },
+    "mpris": {
+       "format": "<span font_desc=\"JetBrainsMono Nerd Font\">{player_icon}</span> {title}",
+       "format-paused": "<span font_desc=\"JetBrainsMono Nerd Font\">{status_icon}</span> {title}",
+       "player-icons": {
+           "default": "",
+           "mpv": ""
+       },
+       "status-icons": {
+           "paused": ""
+	},
+	// "ignored-players": ["firefox"]
+}
+}
