@@ -12,7 +12,7 @@
     
 	"modules-left"	: ["custom/menu", "custom/left-1", "hyprland/workspaces", "custom/left-2", "user"],
 	"modules-center": ["hyprland/window"],
-	"modules-right"	: [ "group/group-tools", "custom/left-1", "battery","network","wireplumber","custom/left-2", "clock"],
+	"modules-right"	: [ "group/group-tools", "custom/left-1", "network","wireplumber","custom/left-2", "clock"],
 
     "custom/left-1": {
         "format" : "<span font_desc=\"JetBrainsMono Nerd Font\"></span>",
@@ -27,10 +27,11 @@
 	"custom/menu": {
     "format": "<span font_desc=\"JetBrainsMono Nerd Font\">󰣇</span> ",
     "on-click": "~/bin/menu",
-    "tooltip": false,
+    "tooltip-format": "Menu",
   },
 	"user": {
        "format":"{user}'S DESK",
+       "cursor": false,
        "interval": 60,
 	},
    // "hyprland/workspaces": {
@@ -63,7 +64,7 @@
     "hyprland/workspaces": {
       "format": "<span font_desc=\"JetBrainsMono Nerd Font\">{windows}</span>",
       "format-empty": "<span font_desc=\"JetBrainsMono Nerd Font\"></span>",
-      "format-window-separator": "  ",
+      "format-window-separator": "  / ",
       "window-rewrite-default": "",
       "window-rewrite": {
         "title<.*youtube.*>": "", // Windows whose titles contain "youtube"
@@ -115,31 +116,44 @@
 		},
 		"modules": [
 			"custom/infolabel",
-			"custom/htop",
+			"custom/btop",
 			"custom/shot",
+			"custom/wallpapers",
+			"custom/theme",
 		]
 	}, 
 	"custom/infolabel": {
        "format": "TOOLS",
        "tooltip": false
 	},
-   "custom/htop": {
-		"format":"<span font_desc=\"JetBrainsMono Nerd Font\"></span>",
-		"tooltip-format": "top",
-		"on-click":"alacritty -e btm"
+   "custom/btop": {
+		"format":"<span font_desc=\"JetBrainsMono Nerd Font\"> </span>",
+		"tooltip-format": "Activity",
+		"on-click":"~/bin/launch-terminal btop"
     },
    "custom/shot": {
 		"format":"<span font_desc=\"JetBrainsMono Nerd Font\"></span>",
-		"tooltip-format": "screenshot",
-		"on-click":"niri msg action screenshot-screen"
+		"tooltip-format": "Screenshot",
+		"on-click-right":"~/bin/menu-screenshot",
+		"on-click":"~/bin/launch-screenshot-clipboard"
+    },
+    "custom/wallpapers": {
+      "format": "<span font_desc=\"JetBrainsMono Nerd Font\"></span>",  
+      "on-click": "~/bin/bg-set",
+		  "tooltip-format": "Select Background",
+    },
+    "custom/theme": {
+      "format": "<span font_desc=\"JetBrainsMono Nerd Font\"></span>",  
+      "on-click": "~/bin/menu-style",
+		  "tooltip-format": "Style Configuration",
     },
    "wireplumber": {
        "format":"<span font_desc=\"JetBrainsMono Nerd Font\">{icon}</span> {volume}%",
 		"format-muted":"<span font_desc=\"JetBrainsMono Nerd Font\">󰝟</span>",
 		"format-icons": ["󰖀","󰕾"],        
-       "on-click":"pavucontrol",        
-       "max-volume": 150,
-       "scroll-step": 2,
+       "on-click": "~/bin/menu-audio",
+       "on-click-right": "~/bin/launch-window-floating 1000 800 pavucontrol",       
+       "max-volume": 120,
        "tooltip-format":"Volume: {volume}%",
     },
    "battery": {
@@ -151,7 +165,7 @@
     }, 
    "network": {
        "format":"",
-       "on-click":"alacritty -e nmtui",
+       "on-click": "~/bin/launch-terminal-floating 1000 800 nmtui",
        "format-ethernet":"<span font_desc=\"JetBrainsMono Nerd Font\"></span>",
        "format-wifi":"<span font_desc=\"JetBrainsMono Nerd Font\">{icon}</span> {signalStrength}%",
        "format-disconnected":"<span font_desc=\"JetBrainsMono Nerd Font\">󰤭</span>",
@@ -162,7 +176,7 @@
     },
    "clock": {
 		"format":"<span font_desc=\"JetBrainsMono Nerd Font\">󱑍</span> {:%I:%M %p}",
-		"tooltip-format":"{:%I:%M %p ~  %a. %d.%m }",
+		"tooltip-format":"  {:%a %m/%d}",
        "timezones": [
            "America/Los_Angeles",
         ],

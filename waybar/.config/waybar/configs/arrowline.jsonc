@@ -134,7 +134,6 @@
       "on-click": "~/bin/menu-audio",
       "on-click-right": "~/bin/launch-window-floating 1000 800 pavucontrol",
       "max-volume": 150,
-      "scroll-step": 2,
       "tooltip-format": "{icon} {volume}%",
   },
     
