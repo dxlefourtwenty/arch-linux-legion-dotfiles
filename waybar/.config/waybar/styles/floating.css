@@ -92,7 +92,7 @@ tooltip label {
 }
 
 #right {
-    background-color: alpha(@background, 0.62);
+    background-color: alpha(@background, 0.7);
     border-radius: 2rem;
 }
 
@@ -102,7 +102,7 @@ tooltip label {
 
 #left {
     border-radius: 2rem;
-    background-color: alpha(@background, 0.62);
+    background-color: alpha(@background, 0.7);
     padding: 3px 10px 3px 0; 
 }
 
@@ -140,7 +140,7 @@ tooltip label {
 #clock {
     padding: 0 20px 0 20px;
     border-radius: 2rem;
-    background-color: alpha(@background, 0.62);
+    background-color: alpha(@background, 0.7);
 }
 
 #battery {
