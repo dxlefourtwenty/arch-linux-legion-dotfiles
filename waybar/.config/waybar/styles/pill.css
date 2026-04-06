@@ -53,28 +53,22 @@ window#waybar {
 #workspaces button:hover {
 	box-shadow: inherit;
 	text-shadow: inherit;
-	color: @primary;
+	color: @red;
 	background-color: @background;
 }
 
+#workspaces button.empty {
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+  min-height: 0;
+  border: none;
+  background: transparent;
+}
 
-/* #workspaces { */
-/*   background: transparent; */
-/*   margin: 0 45px; */
-/* } */
-
-/* #workspaces button { */
-/*   padding: 0 15px; */
-/*   transition-property: background-color; */
-/*   transition-duration: 0.5s; */
-/*   background: transparent; */
-/*   color: @yellow; */
-/* } */
-
-/* #workspaces button.active { */
-/*   background: transparent; */
-/*   color: @primary; */
-/* } */
+#workspaces button.empty .workspace-label {
+  font-size: 0;
+}
 
 #custom-menu {
 	padding: 0 30px 0 45px;
