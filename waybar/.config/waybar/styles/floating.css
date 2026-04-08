@@ -67,6 +67,7 @@ tooltip label {
     border-radius: 2rem;
     font-size: 20px;
     background-color: transparent;
+    transition: all 1s ease-in-out;
     color: @foreground;
 }
 
@@ -78,11 +79,13 @@ tooltip label {
 
 #workspaces button.active {
     background-color: transparent;
+    transition: all 1s ease-in-out;
     color: @foreground;
 }
 
 #workspaces button.empty {
     font-weight: bolder;
+    transition: all 1s ease-in-out;
     color: alpha(@background, 0.7);
 }
 

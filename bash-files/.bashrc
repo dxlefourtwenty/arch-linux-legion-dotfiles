@@ -55,3 +55,10 @@ source <(fzf --bash)
 
 eval "$(starship init bash)"
 
+
+# Added by LM Studio CLI (lms)
+export PATH="$PATH:/home/dxle/.lmstudio/bin"
+# End of LM Studio CLI section
+
+export OPENAI_BASE_URL="http://localhost:1234/v1"
+export OPENAI_API_KEY="lm-studio"

@@ -45,7 +45,6 @@
             "scratchpad": "<span font-size='14pt'>✎</span>",
             "floating": "+",
             "desktop": "",
-            "active": "",
             "empty": "",
         },
         "persistent-workspaces": {

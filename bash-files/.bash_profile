@@ -12,3 +12,8 @@ fi
 export PATH="$PATH:/home/dxle/.local/bin"
 
 export PATH=$PATH:/home/dxle/.spicetify
+
+# Added by LM Studio CLI (lms)
+export PATH="$PATH:/home/dxle/.lmstudio/bin"
+# End of LM Studio CLI section
+

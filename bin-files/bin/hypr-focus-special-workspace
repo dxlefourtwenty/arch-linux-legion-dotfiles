@@ -1,0 +1,21 @@
+
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+MONITOR_TO_FOCUS="HDMI-A-1"
+
+# Ensure argument is provided
+if [[ $# -ne 1 ]]; then
+  echo "Usage: hypr-focus-special-workspace <special-workspace>"
+  echo "Examples:"
+  echo "  hypr-focus-special-workspace special"
+  echo "  hypr-focus-special-workspace special:term"
+  exit 1
+fi
+
+workspace="$1"
+
+# Focus the workspace
+hyprctl dispatch focusmonitor "$MONITOR_TO_FOCUS"
+hyprctl dispatch togglespecialworkspace "$workspace"

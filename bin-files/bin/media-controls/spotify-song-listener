@@ -5,18 +5,20 @@ script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 source "$script_dir/spotify-notify-lib"
 spotify_notify_parse_args "${0##*/}" "$@"
 
-last_id=""
-last_pos=0
-last_len=0
+SPOTIFY_TRACK_LISTENER_LAST_TRACK_FILE="${SPOTIFY_TRACK_LISTENER_LAST_TRACK_FILE:-$SPOTIFY_NOTIFY_STATE_DIR/song-listener-last-track}"
+
+last_playing_id=""
+last_seen_id=""
+pending_change=0
+pending_previous_id=""
+has_state=0
 
 spotify_track_change_notify() {
   local previous_id="$1"
   local summary=""
   local text_gap=""
 
-  [[ -n "$previous_id" ]] || return 0
-
-  if spotify_track_change_take_mark "$previous_id" summary text_gap 2>/dev/null; then
+  if [[ -n "$previous_id" ]] && spotify_track_change_take_mark "$previous_id" summary text_gap 2>/dev/null; then
     sleep 0.5
     spotify_notify_track_with_text_gap "$summary" 6500 "$text_gap" || true
     return 0
@@ -26,18 +28,57 @@ spotify_track_change_notify() {
   spotify_notify_track "Now Playing" 6500 || true
 }
 
-while IFS='|' read -r status id length pos; do
-  length_s=$(( ${length:-0} / 1000000 ))
-  pos_s=$(( ${pos:-0} / 1000000 ))
+spotify_track_listener_load_last_playing_id() {
+  local value=""
 
-  if [[ -n "$id" && "$id" != "$last_id" ]]; then
-    if [[ "$status" == "Playing" ]]; then
-      spotify_track_change_notify "$last_id"
-    fi
-
-    last_id="$id"
-    last_len="$length_s"
+  if [[ -r "$SPOTIFY_TRACK_LISTENER_LAST_TRACK_FILE" ]]; then
+    IFS= read -r value < "$SPOTIFY_TRACK_LISTENER_LAST_TRACK_FILE" || true
   fi
 
-  last_pos="$pos_s"
+  if [[ -n "$value" ]]; then
+    last_playing_id="$value"
+    last_seen_id="$value"
+  fi
+}
+
+spotify_track_listener_store_last_playing_id() {
+  local current_id="$1"
+  local temp_state_file=""
+
+  [[ -n "$current_id" ]] || return 0
+
+  "$MKDIR_BIN" -p "$SPOTIFY_NOTIFY_STATE_DIR"
+  temp_state_file="$("$MKTEMP_BIN" "$SPOTIFY_NOTIFY_STATE_DIR/.song-listener-last-track.XXXXXX")"
+  printf '%s\n' "$current_id" > "$temp_state_file"
+  "$MV_BIN" -f "$temp_state_file" "$SPOTIFY_TRACK_LISTENER_LAST_TRACK_FILE"
+}
+
+spotify_track_listener_load_last_playing_id
+
+while IFS='|' read -r status id _length _pos; do
+  if [[ -n "$id" && "$id" != "$last_seen_id" ]]; then
+    if [[ "$status" != "Playing" ]]; then
+      pending_change=1
+      pending_previous_id="$last_playing_id"
+    fi
+
+    last_seen_id="$id"
+  fi
+
+  if [[ "$has_state" == "1" && "$status" == "Playing" && -n "$id" ]]; then
+    if [[ "$pending_change" == "1" ]]; then
+      spotify_track_change_notify "$pending_previous_id"
+      pending_change=0
+      pending_previous_id=""
+    elif [[ "$id" != "$last_playing_id" ]]; then
+      spotify_track_change_notify "$last_playing_id"
+    fi
+  fi
+
+  if [[ "$status" == "Playing" && -n "$id" && "$id" != "$last_playing_id" ]]; then
+    last_playing_id="$id"
+    spotify_track_listener_store_last_playing_id "$id"
+  fi
+
+  has_state=1
 done < <("$PLAYERCTL_BIN" -p "$SPOTIFY_PLAYER" metadata --format '{{status}}|{{mpris:trackid}}|{{mpris:length}}|{{position}}' --follow)

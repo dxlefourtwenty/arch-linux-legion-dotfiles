@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+SYSTEMCTL_BIN="${SYSTEMCTL_BIN:-/usr/bin/systemctl}"
+SPOTIFY_LISTENER_SERVICE="${SPOTIFY_LISTENER_SERVICE:-spotify-listener.service}"
+
+usage() {
+  printf 'Usage: %s [--dry-run]\n' "${0##*/}"
+}
+
+dry_run=0
+
+while [[ "$#" -gt 0 ]]; do
+  case "$1" in
+    -n|--dry-run)
+      dry_run=1
+      shift
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      printf 'unexpected argument: %s\n' "$1" >&2
+      usage >&2
+      exit 1
+      ;;
+  esac
+done
+
+command=("$SYSTEMCTL_BIN" --user restart "$SPOTIFY_LISTENER_SERVICE")
+
+if [[ "$dry_run" == "1" ]]; then
+  printf '%q ' "${command[@]}"
+  printf '\n'
+  exit 0
+fi
+
+"${command[@]}"

@@ -18,7 +18,7 @@ GDBUS_BIN="${GDBUS_BIN:-/usr/bin/gdbus}"
 PGREP_BIN="${PGREP_BIN:-/usr/bin/pgrep}"
 SPOTIFY_PLAYER="${SPOTIFY_PLAYER:-spotify}"
 SPOTIFY_NOTIFY_DRY_RUN="${SPOTIFY_NOTIFY_DRY_RUN:-0}"
-SPOTIFY_NOTIFY_DAEMON="${SPOTIFY_NOTIFY_DAEMON:-auto}"
+SPOTIFY_NOTIFY_DAEMON="${SPOTIFY_NOTIFY_DAEMON:-ward}"
 SPOTIFY_NOTIFY_APP_NAME="${SPOTIFY_NOTIFY_APP_NAME:-spotify-media-controls}"
 SPOTIFY_NOTIFY_STACK_TAG="${SPOTIFY_NOTIFY_STACK_TAG:-spotify-media-controls}"
 SPOTIFY_NOTIFY_STATE_DIR="${SPOTIFY_NOTIFY_STATE_DIR:-/tmp/spotify-media-controls-notify}"
@@ -271,7 +271,7 @@ spotify_notify_backend() {
     mako|ward)
       ;;
     *)
-      backend="mako"
+      backend="ward"
       ;;
   esac
 

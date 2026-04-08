@@ -77,3 +77,18 @@ ZSH_HIGHLIGHT_STYLES[arg0]='fg=default'
 ZSH_HIGHLIGHT_STYLES[command]='fg=default'
 ZSH_HIGHLIGHT_STYLES[precommand]='fg=default'
 
+
+# Added by LM Studio CLI (lms)
+export PATH="$PATH:/home/dxle/.lmstudio/bin"
+# End of LM Studio CLI section
+
+# Start SSH agent if not already running
+if [ -z "$SSH_AUTH_SOCK" ]; then
+  eval "$(ssh-agent -s)" > /dev/null 2>&1
+fi
+
+# Add key if not already loaded
+ssh-add -l > /dev/null 2>&1
+if [ $? -ne 0 ]; then
+  ssh-add ~/.ssh/id_ed25519 > /dev/null 2>&1
+fi
