@@ -31,7 +31,7 @@ export CURRSEM=/home/dxle/dev/coding-in-class/spring2026
 export DESKTOP_APPS=/usr/share/applications
 export DESKTOP_ICONS=/home/dxle/.local/share/icons
 
-export BROWSER=chromium
+export BROWSER=brave
 
 export LOX_DEV=/home/dxle/dev/coding-in-class/spring2026/4080CS/lox-dev/lox/com/craftinginterpreters/lox
 
