@@ -9,7 +9,7 @@ QtObject {
     property bool borderTop: false
     property bool borderBottom: false
     property int radius: 0
-    property int barHeight: 28
+    property int barHeight: 30
     property int finalPosition: 0
 
     property string font: "CaskaydiaMono Nerd Font"
