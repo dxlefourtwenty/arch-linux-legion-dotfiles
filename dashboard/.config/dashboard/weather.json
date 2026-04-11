@@ -1,0 +1,30 @@
+{
+    "locations": [
+        {
+            "displayName": "Covina, CA",
+            "latitude": 34.09,
+            "longitude": -117.89
+        },
+        {
+            "displayName": "Manila, PH",
+            "latitude": 14.5995,
+            "longitude": 120.9842
+        },
+        {
+            "displayName": "New York City, NY",
+            "latitude": 40.7128,
+            "longitude": -74.006
+        },
+        {
+            "displayName": "Chicago, IL",
+            "latitude": 41.8781,
+            "longitude": -87.6298
+        },
+        {
+            "displayName": "Walnut, CA",
+            "latitude": 34.0203,
+            "longitude": -117.8653
+        }
+    ],
+    "selectedIndex": 4
+}

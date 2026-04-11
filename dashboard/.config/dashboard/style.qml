@@ -1,1 +1,1 @@
-/home/dxle/.config/dashboard/styles/minimal.qml
+/home/dxle/.config/dashboard/styles/pill.qml
