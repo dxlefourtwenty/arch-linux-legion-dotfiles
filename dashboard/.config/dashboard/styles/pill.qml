@@ -14,4 +14,9 @@ QtObject {
 
     property string font: "CaskaydiaMono Nerd Font"
     property int fontSize: 16
+
+    property bool tabSlideEnabled: true
+    property int tabSlideDuration: 220
+    property int tabSlideEasing: Easing.OutCubic
+    property real tabSlideDistanceMultiplier: 1.0
 }
