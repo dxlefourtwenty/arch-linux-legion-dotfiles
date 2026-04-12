@@ -8,7 +8,10 @@ QtObject {
     property bool borderRight: false
     property bool borderTop: false
     property bool borderBottom: false
-    property int radius: 0
+    property int radiusTopLeft: 0
+    property int radiusTopRight: 0
+    property int radiusBottomRight: 0
+    property int radiusBottomLeft: 0
     property int barHeight: 30
     property int finalPosition: 0
 

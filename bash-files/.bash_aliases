@@ -94,3 +94,6 @@ alias bonsai='cbonsai'
 alias clock='tty-clock -c'
 alias train='sl'
 alias random-pokemon='pokemon-colorscripts -r -b'
+
+# browser
+alias firefox='~/bin/launch-firefox'

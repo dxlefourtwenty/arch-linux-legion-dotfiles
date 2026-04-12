@@ -36,23 +36,14 @@ window#waybar.solo {
 */
 
 tooltip {
-  background: @background-gray;
-  border: 1px solid @foreground;
+  background: @black;
+  border: 1px solid @primary;
   border-radius: 12px;
 }
 
 tooltip label {
-  color: @foreground;
+  color: @magenta;
   padding: 6px;
-}
-
-window#waybar.termite {
-    background-color: #3F3F3F;
-}
-
-window#waybar.chromium {
-    background-color: #000000;
-    border: none;
 }
 
 button {
