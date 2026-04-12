@@ -19,7 +19,8 @@ options="󰸌  Theme
 󰍜  Waybar
 󰃇  Border
 󰹳  Gaps
-  Layouts"
+  Layouts
+󰖲  WS Axis"
 
 chosen="$(printf '%b\n' "$options" | "$SCRIPT_DIR/rofi-nerd-markup" | rofi -dmenu -i \
     -markup-rows \
@@ -71,5 +72,8 @@ case "$label" in
     ;;
   "Layouts")
     "$SCRIPT_DIR/menu-layout"
+    ;;
+  "WS Axis")
+    "$SCRIPT_DIR/menu-workspace-axis"
     ;;
 esac
