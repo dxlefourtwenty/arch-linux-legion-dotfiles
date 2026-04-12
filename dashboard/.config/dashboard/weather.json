@@ -24,6 +24,11 @@
             "displayName": "Walnut, CA",
             "latitude": 34.0203,
             "longitude": -117.8653
+        },
+        {
+            "displayName": "Cebu City, PH",
+            "latitude": 10.3157,
+            "longitude": 123.8854
         }
     ],
     "selectedIndex": 0
