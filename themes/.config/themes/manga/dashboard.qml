@@ -7,6 +7,7 @@ QtObject {
     property color muted:     "#8a8888"
     property color accent:    "#d8c7e0"
     property color secondary: "#96a6b5"
+    property color green:     "#a19797"
     property color border:    "#aca7a7"
 
     property real opacity: 1.0

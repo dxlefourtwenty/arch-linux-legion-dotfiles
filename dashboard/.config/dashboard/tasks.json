@@ -12,12 +12,6 @@
     "created_at": "2026-03-01T09:09:19Z"
   },
   {
-    "task": "CS4800 First Version Deployment",
-    "recurrence_type": "daily",
-    "recurrence_value": "daily",
-    "created_at": "2026-03-23T23:32:16Z"
-  },
-  {
     "task": "CS4630 Work on Seminar Presentation",
     "recurrence_type": "daily",
     "recurrence_value": "daily",

@@ -24,8 +24,41 @@ sink_name_for_profile() {
     esac
 }
 
+sink_label() {
+    local sink_name="$1"
+
+    if [[ "$sink_name" == *usb* ]]; then
+        printf 'Headset\n'
+    elif [[ "$sink_name" == *analog* ]]; then
+        printf 'Speakers\n'
+    elif [[ "$sink_name" == *hdmi* ]]; then
+        printf 'Acer\n'
+    else
+        printf 'Audio\n'
+    fi
+}
+
+profile_label() {
+    local profile="$1"
+
+    case "$profile" in
+        output:hdmi-stereo-extra1)
+            printf 'Acer\n'
+            ;;
+        *)
+            printf 'Audio\n'
+            ;;
+    esac
+}
+
+notify_audio_switched() {
+    local audio_label="$1"
+    notify-send -t 5000 "Audio" "Switched to: $audio_label"
+}
+
 switch_hdmi_monitor() {
     local profile="$1"
+    local profile_display_name
     local target_sink
     local sink_id=""
 
@@ -53,6 +86,9 @@ switch_hdmi_monitor() {
     pactl list sink-inputs short | while read -r input rest; do
         pactl move-sink-input "$input" "$sink_id"
     done
+
+    profile_display_name="$(profile_label "$profile")"
+    notify_audio_switched "$profile_display_name"
 }
 
 for monitor in "Acer|output:hdmi-stereo-extra1"; do
@@ -125,6 +161,8 @@ case "$action" in
         pactl list sink-inputs short | while read -r input rest; do
             pactl move-sink-input "$input" "$sink_id"
         done
+
+        notify_audio_switched "$(sink_label "$sink_id")"
         ;;
     hdmi:*)
         profile="${action#hdmi:}"

@@ -1,0 +1,77 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+LAUNCH_HYPRIDLE_SCRIPT="${SCRIPT_DIR}/launch-hypridle"
+PGREP_BIN="${PGREP_BIN:-/usr/bin/pgrep}"
+PKILL_BIN="${PKILL_BIN:-/usr/bin/pkill}"
+KITTY_BIN="${KITTY_BIN:-/usr/bin/kitty}"
+SH_BIN="${SH_BIN:-/usr/bin/sh}"
+HYPRIDLE_BIN="${HYPRIDLE_BIN:-/usr/bin/hypridle}"
+
+is_sleep_active() {
+    "$PGREP_BIN" -f "blackscreen-hdmi" >/dev/null 2>&1 || "$PGREP_BIN" -f "blackscreen-dp" >/dev/null 2>&1
+}
+
+is_idle_lock_on() {
+    "$PGREP_BIN" -x hypridle >/dev/null 2>&1
+}
+
+toggle_idle_lock_off_if_needed() {
+    if is_idle_lock_on; then
+        "$PKILL_BIN" -x hypridle
+    fi
+}
+
+toggle_idle_lock_on_if_needed() {
+    if is_idle_lock_on; then
+        return
+    fi
+
+    if [ -x "$LAUNCH_HYPRIDLE_SCRIPT" ]; then
+        "$LAUNCH_HYPRIDLE_SCRIPT"
+        return
+    fi
+
+    "$HYPRIDLE_BIN" >/dev/null 2>&1 &
+    disown 2>/dev/null || true
+}
+
+cycle_idle_lock() {
+    toggle_idle_lock_off_if_needed
+    toggle_idle_lock_on_if_needed
+}
+
+spawn_sleep_windows() {
+    "$KITTY_BIN" \
+        --class blackscreen \
+        --title blackscreen-hdmi \
+        --override background=#000000 \
+        --override foreground=#000000 \
+        --override cursor=#000000 \
+        --override cursor_text_color=#000000 \
+        "$SH_BIN" -c 'tput civis; clear; sleep infinity' &
+
+    "$KITTY_BIN" \
+        --class blackscreen \
+        --title blackscreen-dp \
+        --override background=#000000 \
+        --override foreground=#000000 \
+        --override cursor=#000000 \
+        --override cursor_text_color=#000000 \
+        "$SH_BIN" -c 'tput civis; clear; sleep infinity' &
+}
+
+main() {
+    cycle_idle_lock
+
+    if is_sleep_active; then
+        "$PKILL_BIN" -f "blackscreen-"
+        exit 0
+    fi
+
+    spawn_sleep_windows
+}
+
+main "$@"
