@@ -6,8 +6,8 @@ QtObject {
     property color fg:        "#f4f6fa"
     property color muted:     "#5F6B7B"
     property color accent:    "#f2a7c4"
-    property color secondary: "#3A4F7A"
-    property color green:     "#8FAED9"
+    property color secondary: "#8FAED9"
+    property color green:     "#C7B7E2"
     property color border:    "#f2a7c4"
     property real opacity: 1.0
 }

@@ -1,1 +1,1 @@
-/home/dxle/.config/dashboard/styles/island.qml
+/home/dxle/.config/dashboard/styles/pill.qml

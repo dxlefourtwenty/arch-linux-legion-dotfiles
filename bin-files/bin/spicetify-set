@@ -25,8 +25,8 @@ case "$MODE" in
         FLAVOR="Galaxy"
         ;;
     akane)
-        THEME="StarryNight"
-        FLAVOR="Sunrise"
+        THEME="text"
+        FLAVOR="Akane"
         ;;
     catppuccin)
         THEME="text"

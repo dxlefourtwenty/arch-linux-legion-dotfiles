@@ -1,18 +1,9 @@
 @define-color foreground #f4f6fa;
 @define-color background #1e2a44;
-@define-color primary #f4f6fa;
+@define-color primary #8faed9;
 @define-color muted #5F6B7B;
 @define-color border #f2a7c4;
 
-
-
-@define-color bright-blue #3A4F7A;
-@define-color bright-cyan #8FAED9;
-@define-color bright-green #8FAED9;
-@define-color bright-magenta #C7B7E2;
-@define-color bright-red #F2A7C4;
-@define-color bright-white #F4F6FA;
-@define-color bright-yellow #F2A7C4;
 @define-color background-alpha rgba(43, 47, 58, 0.87);
 @define-color background-alt @background;
 @define-color foreground-inactive #e8ebf2;
