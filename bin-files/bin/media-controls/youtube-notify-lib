@@ -1,0 +1,133 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+YOUTUBE_NOTIFY_NOTIFY_SEND_BIN="${YOUTUBE_NOTIFY_NOTIFY_SEND_BIN:-/usr/bin/notify-send}"
+YOUTUBE_NOTIFY_FLOCK_BIN="${YOUTUBE_NOTIFY_FLOCK_BIN:-/usr/bin/flock}"
+YOUTUBE_NOTIFY_MKDIR_BIN="${YOUTUBE_NOTIFY_MKDIR_BIN:-/usr/bin/mkdir}"
+YOUTUBE_NOTIFY_DATE_BIN="${YOUTUBE_NOTIFY_DATE_BIN:-/usr/bin/date}"
+YOUTUBE_NOTIFY_AWK_BIN="${YOUTUBE_NOTIFY_AWK_BIN:-/usr/bin/awk}"
+YOUTUBE_NOTIFY_MKTEMP_BIN="${YOUTUBE_NOTIFY_MKTEMP_BIN:-/usr/bin/mktemp}"
+YOUTUBE_NOTIFY_MV_BIN="${YOUTUBE_NOTIFY_MV_BIN:-/usr/bin/mv}"
+YOUTUBE_NOTIFY_RM_BIN="${YOUTUBE_NOTIFY_RM_BIN:-/usr/bin/rm}"
+YOUTUBE_NOTIFY_TIMEOUT_BIN="${YOUTUBE_NOTIFY_TIMEOUT_BIN:-/usr/bin/timeout}"
+YOUTUBE_NOTIFY_PGREP_BIN="${YOUTUBE_NOTIFY_PGREP_BIN:-/usr/bin/pgrep}"
+YOUTUBE_NOTIFY_DRY_RUN="${YOUTUBE_NOTIFY_DRY_RUN:-0}"
+YOUTUBE_NOTIFY_DAEMON="${YOUTUBE_NOTIFY_DAEMON:-ward}"
+YOUTUBE_NOTIFY_APP_NAME="${YOUTUBE_NOTIFY_APP_NAME:-youtube-media-controls}"
+YOUTUBE_NOTIFY_STACK_TAG="${YOUTUBE_NOTIFY_STACK_TAG:-youtube-media-controls}"
+YOUTUBE_NOTIFY_STATE_DIR="${YOUTUBE_NOTIFY_STATE_DIR:-/tmp/youtube-media-controls-notify}"
+YOUTUBE_NOTIFY_LOCK_FILE="${YOUTUBE_NOTIFY_LOCK_FILE:-$YOUTUBE_NOTIFY_STATE_DIR/notification.lock}"
+YOUTUBE_NOTIFY_WARD_STATE_FILE="${YOUTUBE_NOTIFY_WARD_STATE_FILE:-$YOUTUBE_NOTIFY_STATE_DIR/ward-notification-state}"
+YOUTUBE_NOTIFY_SEND_TIMEOUT="${YOUTUBE_NOTIFY_SEND_TIMEOUT:-5}"
+YOUTUBE_NOTIFY_TOGGLE_TIMEOUT="${YOUTUBE_NOTIFY_TOGGLE_TIMEOUT:-2500}"
+YOUTUBE_NOTIFY_DEFAULT_TEXT_GAP="${YOUTUBE_NOTIFY_DEFAULT_TEXT_GAP:-5}"
+YOUTUBE_NOTIFY_TEXT_GAP="${YOUTUBE_NOTIFY_TEXT_GAP:-$YOUTUBE_NOTIFY_DEFAULT_TEXT_GAP}"
+
+youtube_notify_lib_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
+if [[ -r "$youtube_notify_lib_dir/youtube-notify-ward-lib" ]]; then
+  source "$youtube_notify_lib_dir/youtube-notify-ward-lib"
+fi
+
+youtube_notify_backend() {
+  local backend="$YOUTUBE_NOTIFY_DAEMON"
+
+  case "$backend" in
+    auto)
+      if [[ -x "$YOUTUBE_NOTIFY_PGREP_BIN" ]] && "$YOUTUBE_NOTIFY_PGREP_BIN" -x ward >/dev/null 2>&1; then
+        backend="ward"
+      else
+        backend="mako"
+      fi
+      ;;
+    mako|ward)
+      ;;
+    *)
+      backend="ward"
+      ;;
+  esac
+
+  if [[ "$backend" == "ward" ]] && ! declare -F youtube_notify_ward_send >/dev/null 2>&1; then
+    backend="mako"
+  fi
+
+  printf '%s\n' "$backend"
+}
+
+youtube_notify_append_hint_args() {
+  local -n args_ref="$1"
+
+  if [[ -n "${YOUTUBE_NOTIFY_TEXT_GAP:-}" ]]; then
+    args_ref+=(-h "int:x-ward-text-gap:$YOUTUBE_NOTIFY_TEXT_GAP")
+  fi
+}
+
+youtube_summary_markup() {
+  local summary="${1-}"
+  printf '<span font-weight="300">%s</span>' "$summary"
+}
+
+youtube_notify_mako_args() {
+  local summary="$1"
+  local body="$2"
+  local timeout="$3"
+  local icon="${4-}"
+  local -a args=()
+
+  args=(
+    -a "$YOUTUBE_NOTIFY_APP_NAME"
+    -h "string:x-dunst-stack-tag:$YOUTUBE_NOTIFY_STACK_TAG"
+    -t "$timeout"
+  )
+
+  if [[ -n "$icon" ]]; then
+    args+=(-i "$icon")
+  fi
+
+  youtube_notify_append_hint_args args
+
+  args+=("$summary" "$body")
+  printf '%s\0' "${args[@]}"
+}
+
+youtube_notify_send() {
+  local summary="$1"
+  local body="$2"
+  local timeout="${3:-$YOUTUBE_NOTIFY_TOGGLE_TIMEOUT}"
+  local icon="${4-}"
+  local backend=""
+  local summary_markup=""
+  local lock_fd=""
+  local notify_exit_code=0
+  local -a notify_args=()
+
+  backend="$(youtube_notify_backend)"
+  summary_markup="$(youtube_summary_markup "$summary")"
+
+  if [[ "$YOUTUBE_NOTIFY_DRY_RUN" == "1" ]]; then
+    printf 'backend=%s summary=%s body=%s timeout=%s icon=%s\n' "$backend" "$summary" "$body" "$timeout" "$icon"
+    return 0
+  fi
+
+  "$YOUTUBE_NOTIFY_MKDIR_BIN" -p "$YOUTUBE_NOTIFY_STATE_DIR"
+  exec {lock_fd}> "$YOUTUBE_NOTIFY_LOCK_FILE"
+  "$YOUTUBE_NOTIFY_FLOCK_BIN" -x "$lock_fd"
+
+  if [[ "$backend" == "ward" ]]; then
+    if youtube_notify_ward_send "$summary_markup" "$body" "$timeout" "$icon"; then
+      notify_exit_code=0
+    else
+      notify_exit_code=$?
+    fi
+  else
+    mapfile -d '' -t notify_args < <(youtube_notify_mako_args "$summary_markup" "$body" "$timeout" "$icon")
+    if "$YOUTUBE_NOTIFY_TIMEOUT_BIN" "$YOUTUBE_NOTIFY_SEND_TIMEOUT" "$YOUTUBE_NOTIFY_NOTIFY_SEND_BIN" "${notify_args[@]}"; then
+      notify_exit_code=0
+    else
+      notify_exit_code=$?
+    fi
+  fi
+
+  exec {lock_fd}>&-
+  return "$notify_exit_code"
+}

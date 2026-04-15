@@ -7,6 +7,7 @@
     "margin-right": 24,
     "margin-left": 24,
     "output": "HDMI-A-1",
+    "layer": "top",
     // "width": 1280, // Waybar width
     "spacing": 4, // Gaps between modules (4px)
     // Choose the order of the modules

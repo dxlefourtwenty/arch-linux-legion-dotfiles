@@ -6,6 +6,7 @@
     "margin-top": 10,
     "margin-bottom": 0,
     "output":"HDMI-A-1", 
+    "layer": "top",
     // "spacing": 4, // Gaps between modules (4px)
     // Choose the order of the modules
     "modules-left": [

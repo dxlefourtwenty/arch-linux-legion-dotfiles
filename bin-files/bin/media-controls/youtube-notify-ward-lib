@@ -1,0 +1,150 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+youtube_notify_ward_clear_state() {
+  "$YOUTUBE_NOTIFY_RM_BIN" -f "$YOUTUBE_NOTIFY_WARD_STATE_FILE"
+}
+
+youtube_notify_ward_replace_last_enabled() {
+  case "${YOUTUBE_NOTIFY_WARD_REPLACE_LAST:-1}" in
+    1|true|yes|on)
+      return 0
+      ;;
+  esac
+
+  return 1
+}
+
+youtube_notify_ward_write_state() {
+  local notification_id="$1"
+  local created_at_s="$2"
+  local timeout="$3"
+  local temp_state_file=""
+
+  temp_state_file="$("$YOUTUBE_NOTIFY_MKTEMP_BIN" "$YOUTUBE_NOTIFY_STATE_DIR/.ward-notification-state.XXXXXX")"
+  printf '%s\n%s\n%s\n' "$notification_id" "$created_at_s" "$timeout" > "$temp_state_file"
+  "$YOUTUBE_NOTIFY_MV_BIN" -f "$temp_state_file" "$YOUTUBE_NOTIFY_WARD_STATE_FILE"
+}
+
+youtube_notify_ward_active_id() {
+  local -a lines=()
+  local notification_id=""
+  local created_at_s=""
+  local timeout=""
+  local now_s=""
+  local expires_at_s=""
+
+  [[ -r "$YOUTUBE_NOTIFY_WARD_STATE_FILE" ]] || return 1
+
+  if ! mapfile -t lines < "$YOUTUBE_NOTIFY_WARD_STATE_FILE"; then
+    youtube_notify_ward_clear_state
+    return 1
+  fi
+
+  notification_id="${lines[0]-}"
+  created_at_s="${lines[1]-}"
+  timeout="${lines[2]-}"
+
+  if [[ ! "$notification_id" =~ ^[0-9]+$ || ! "$created_at_s" =~ ^[0-9]+$ || ! "$timeout" =~ ^[0-9]+$ ]]; then
+    youtube_notify_ward_clear_state
+    return 1
+  fi
+
+  if [[ "$timeout" -eq 0 ]]; then
+    printf '%s\n' "$notification_id"
+    return 0
+  fi
+
+  now_s="$("$YOUTUBE_NOTIFY_DATE_BIN" +%s)"
+  expires_at_s=$(( created_at_s + ((timeout + 999) / 1000) ))
+
+  if [[ "$now_s" -ge "$expires_at_s" ]]; then
+    youtube_notify_ward_clear_state
+    return 1
+  fi
+
+  printf '%s\n' "$notification_id"
+}
+
+youtube_notify_ward_args() {
+  local summary="$1"
+  local body="$2"
+  local timeout="$3"
+  local icon="${4-}"
+  local replace_id="${5-}"
+  local had_active="${6:-0}"
+  local -a args=()
+
+  args=(
+    -a "$YOUTUBE_NOTIFY_APP_NAME"
+    -p
+    -t "$timeout"
+  )
+
+  if [[ -n "$replace_id" ]]; then
+    args+=(-r "$replace_id")
+  fi
+
+  if [[ -n "${YOUTUBE_NOTIFY_EXEC_COMMAND:-}" ]]; then
+    args+=(-h "string:exec:$YOUTUBE_NOTIFY_EXEC_COMMAND")
+  fi
+
+  if declare -F youtube_notify_append_hint_args >/dev/null 2>&1; then
+    youtube_notify_append_hint_args args
+  fi
+
+  if [[ "$had_active" == "1" ]] && youtube_notify_ward_replace_last_enabled; then
+    args+=(-h "boolean:x-ward-silent-open:true")
+  fi
+
+  if [[ -n "$icon" ]]; then
+    args+=(-i "$icon")
+  fi
+
+  args+=("$summary" "$body")
+  printf '%s\0' "${args[@]}"
+}
+
+youtube_notify_ward_send() {
+  local summary="$1"
+  local body="$2"
+  local timeout="$3"
+  local icon="${4-}"
+  local active_id=""
+  local replace_id=""
+  local had_active="0"
+  local notify_output=""
+  local notification_id=""
+  local created_at_s=""
+  local notify_exit_code=0
+  local -a notify_args=()
+
+  "$YOUTUBE_NOTIFY_MKDIR_BIN" -p "$YOUTUBE_NOTIFY_STATE_DIR"
+
+  if active_id="$(youtube_notify_ward_active_id 2>/dev/null)"; then
+    had_active="1"
+  fi
+
+  if [[ "$had_active" == "1" ]] && youtube_notify_ward_replace_last_enabled; then
+    replace_id="$active_id"
+  fi
+
+  mapfile -d '' -t notify_args < <(youtube_notify_ward_args "$summary" "$body" "$timeout" "$icon" "$replace_id" "$had_active")
+
+  if notify_output="$("$YOUTUBE_NOTIFY_TIMEOUT_BIN" "$YOUTUBE_NOTIFY_SEND_TIMEOUT" "$YOUTUBE_NOTIFY_NOTIFY_SEND_BIN" "${notify_args[@]}")"; then
+    :
+  else
+    notify_exit_code=$?
+    return "$notify_exit_code"
+  fi
+
+  notification_id="$(printf '%s\n' "$notify_output" | "$YOUTUBE_NOTIFY_AWK_BIN" 'NF { value=$NF } END { print value }')"
+
+  if [[ ! "$notification_id" =~ ^[0-9]+$ ]]; then
+    youtube_notify_ward_clear_state
+    return 1
+  fi
+
+  created_at_s="$("$YOUTUBE_NOTIFY_DATE_BIN" +%s)"
+  youtube_notify_ward_write_state "$notification_id" "$created_at_s" "$timeout"
+}

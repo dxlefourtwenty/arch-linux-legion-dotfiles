@@ -1,0 +1,440 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+readonly HYPRCTL_BIN="${HYPRCTL_BIN:-/usr/bin/hyprctl}"
+readonly JQ_BIN="${JQ_BIN:-/usr/bin/jq}"
+readonly PLAYERCTL_BIN="${PLAYERCTL_BIN:-/usr/bin/playerctl}"
+readonly MKDIR_BIN="${MKDIR_BIN:-/usr/bin/mkdir}"
+readonly MKTEMP_BIN="${MKTEMP_BIN:-/usr/bin/mktemp}"
+readonly MV_BIN="${MV_BIN:-/usr/bin/mv}"
+readonly CURL_BIN="${CURL_BIN:-/usr/bin/curl}"
+readonly MAGICK_BIN="${MAGICK_BIN:-/usr/bin/magick}"
+readonly CKSUM_BIN="${CKSUM_BIN:-/usr/bin/cksum}"
+readonly AWK_BIN="${AWK_BIN:-/usr/bin/awk}"
+readonly RM_BIN="${RM_BIN:-/usr/bin/rm}"
+
+STATE_DIR="${YOUTUBE_PLAY_PAUSE_STATE_DIR:-${XDG_RUNTIME_DIR:-/tmp}/media-controls}"
+STATE_FILE="${YOUTUBE_PLAY_PAUSE_STATE_FILE:-$STATE_DIR/youtube-play-pause.state}"
+ICON_DIR="${YOUTUBE_PLAY_PAUSE_ICON_DIR:-$STATE_DIR/icons}"
+THUMB_CURL_MAX_TIME="${YOUTUBE_PLAY_PAUSE_THUMB_CURL_MAX_TIME:-5}"
+DRY_RUN="${YOUTUBE_PLAY_PAUSE_DRY_RUN:-0}"
+script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+
+if [[ -r "$script_dir/youtube-notify-lib" ]]; then
+  source "$script_dir/youtube-notify-lib"
+fi
+
+usage() {
+  printf 'Usage: %s [--dry-run]\n' "${0##*/}"
+}
+
+parse_args() {
+  while (($# > 0)); do
+    case "$1" in
+      -n|--dry-run)
+        DRY_RUN=1
+        ;;
+      -h|--help)
+        usage
+        exit 0
+        ;;
+      *)
+        usage >&2
+        exit 1
+        ;;
+    esac
+    shift
+  done
+}
+
+require_binary() {
+  local path="$1"
+  [[ -x "$path" ]] || {
+    printf 'Missing required binary: %s\n' "$path" >&2
+    exit 1
+  }
+}
+
+clients_json() {
+  "$HYPRCTL_BIN" clients -j
+}
+
+active_window_json() {
+  "$HYPRCTL_BIN" activewindow -j
+}
+
+find_candidate_from_active() {
+  active_window_json | "$JQ_BIN" -r '
+    . as $w
+    | ($w.class // "") as $class
+    | ($w.initialClass // "") as $initial_class
+    | ($w.title // "") as $title
+    | ($w.initialTitle // "") as $initial_title
+    | ($class | ascii_downcase) as $class_l
+    | ($initial_class | ascii_downcase) as $initial_class_l
+    | ($title | ascii_downcase) as $title_l
+    | ($initial_title | ascii_downcase) as $initial_title_l
+      | if
+        ((($class_l == "chromium") or ($class_l == "brave") or ($class_l == "brave-browser"))
+          or
+         (($initial_class_l == "chromium") or ($initial_class_l == "brave") or ($initial_class_l == "brave-browser")))
+        and
+        (($title_l | contains("youtube")) or ($initial_title_l | contains("youtube")))
+      then
+        [
+          (
+            if (($class_l == "chromium") or ($class_l == "brave") or ($class_l == "brave-browser"))
+            then $class_l
+            else $initial_class_l
+            end
+          ),
+          ($w.title // ""),
+          ($w.address // "")
+        ] | @tsv
+      else
+        empty
+      end
+  '
+}
+
+find_first_candidate() {
+  clients_json | "$JQ_BIN" -r '
+    map(
+      . as $w
+      | ($w.class // "") as $class
+      | ($w.initialClass // "") as $initial_class
+      | ($w.title // "") as $title
+      | ($w.initialTitle // "") as $initial_title
+      | ($class | ascii_downcase) as $class_l
+      | ($initial_class | ascii_downcase) as $initial_class_l
+      | ($title | ascii_downcase) as $title_l
+      | ($initial_title | ascii_downcase) as $initial_title_l
+      | select(
+          ((($class_l == "chromium") or ($class_l == "brave") or ($class_l == "brave-browser"))
+            or
+           (($initial_class_l == "chromium") or ($initial_class_l == "brave") or ($initial_class_l == "brave-browser")))
+          and
+          (($title_l | contains("youtube")) or ($initial_title_l | contains("youtube")))
+        )
+    )
+    | .[0]
+    | if . == null then
+        empty
+      else
+        [
+          (
+            if ((((.class // "") | ascii_downcase) == "chromium")
+                or (((.class // "") | ascii_downcase) == "brave")
+                or (((.class // "") | ascii_downcase) == "brave-browser"))
+            then ((.class // "") | ascii_downcase)
+            else ((.initialClass // "") | ascii_downcase)
+            end
+          ),
+          (.title // ""),
+          (.address // "")
+        ] | @tsv
+      end
+  '
+}
+
+write_state() {
+  local player="$1"
+  local browser_class="$2"
+  local window_title="$3"
+  local media_url="$4"
+  local media_title="$5"
+  local temp_file=""
+
+  (( DRY_RUN == 1 )) && {
+    printf 'dry-run: save state player=%s class=%s window_title=%s media_url=%s media_title=%s\n' \
+      "$player" "$browser_class" "$window_title" "$media_url" "$media_title"
+    return 0
+  }
+
+  "$MKDIR_BIN" -p "$STATE_DIR"
+  temp_file="$("$MKTEMP_BIN" "$STATE_DIR/.youtube-play-pause.XXXXXX")"
+  printf '%s\n%s\n%s\n%s\n%s\n' "$player" "$browser_class" "$window_title" "$media_url" "$media_title" > "$temp_file"
+  "$MV_BIN" -f "$temp_file" "$STATE_FILE"
+}
+
+browser_token_from_class() {
+  local browser_class="$1"
+
+  case "$browser_class" in
+    brave|brave-browser)
+      printf 'brave\n'
+      ;;
+    chromium)
+      printf 'chromium\n'
+      ;;
+    *)
+      printf '\n'
+      ;;
+  esac
+}
+
+player_metadata() {
+  local player="$1"
+  "$PLAYERCTL_BIN" -p "$player" metadata --format '{{xesam:url}}|{{title}}' 2>/dev/null || true
+}
+
+player_artist() {
+  local player="$1"
+  local artist=""
+
+  artist="$("$PLAYERCTL_BIN" -p "$player" metadata --format '{{artist}}' 2>/dev/null || true)"
+  artist="${artist#"${artist%%[![:space:]]*}"}"
+  artist="${artist%"${artist##*[![:space:]]}"}"
+  printf '%s\n' "$artist"
+}
+
+player_thumbnail() {
+  local player="$1"
+  "$PLAYERCTL_BIN" -p "$player" metadata mpris:artUrl 2>/dev/null || true
+}
+
+normalize_thumbnail_icon() {
+  local thumbnail_url="$1"
+  local icon_key=""
+  local icon_path=""
+  local temp_icon_path=""
+
+  [[ -n "$thumbnail_url" ]] || return 1
+  [[ -x "$CURL_BIN" && -x "$MAGICK_BIN" && -x "$CKSUM_BIN" && -x "$AWK_BIN" && -x "$RM_BIN" ]] || return 1
+
+  "$MKDIR_BIN" -p "$ICON_DIR"
+  icon_key="$(printf '%s' "$thumbnail_url" | "$CKSUM_BIN" | "$AWK_BIN" '{print $1}')"
+  icon_path="$ICON_DIR/$icon_key.png"
+
+  if [[ -s "$icon_path" ]]; then
+    printf '%s\n' "$icon_path"
+    return 0
+  fi
+
+  temp_icon_path="$("$MKTEMP_BIN" "$ICON_DIR/.youtube-thumb.XXXXXX.png")"
+
+  if ! "$CURL_BIN" -fsSL --max-time "$THUMB_CURL_MAX_TIME" "$thumbnail_url" \
+    | "$MAGICK_BIN" - -resize 64x64\! "$temp_icon_path"; then
+    "$RM_BIN" -f "$temp_icon_path"
+    return 1
+  fi
+
+  "$MV_BIN" -f "$temp_icon_path" "$icon_path"
+  printf '%s\n' "$icon_path"
+}
+
+player_status() {
+  local player="$1"
+  "$PLAYERCTL_BIN" -p "$player" status 2>/dev/null || true
+}
+
+toggle_pause_player() {
+  local player="$1"
+
+  if (( DRY_RUN == 1 )); then
+    printf 'dry-run: %s -p %s pause\n' "$PLAYERCTL_BIN" "$player"
+    return 0
+  fi
+
+  "$PLAYERCTL_BIN" -p "$player" pause
+}
+
+toggle_play_player() {
+  local player="$1"
+
+  if (( DRY_RUN == 1 )); then
+    printf 'dry-run: %s -p %s play\n' "$PLAYERCTL_BIN" "$player"
+    return 0
+  fi
+
+  "$PLAYERCTL_BIN" -p "$player" play
+}
+
+is_title_match() {
+  local window_title="$1"
+  local media_title="$2"
+
+  "$JQ_BIN" -en \
+    --arg w "$window_title" \
+    --arg m "$media_title" '
+      ($w | ascii_downcase) as $wl
+      | ($m | ascii_downcase) as $ml
+      | ($wl != "" and $ml != "" and (($wl | contains($ml)) or ($ml | contains($wl))))
+    ' | "$JQ_BIN" -e '. == true' >/dev/null
+}
+
+pick_player_for_browser() {
+  local browser_class="$1"
+  local window_title="$2"
+  local browser_token=""
+  local player=""
+  local status=""
+  local metadata=""
+  local media_url=""
+  local media_title=""
+  local first_any=""
+  local first_playing=""
+  local first_title_match=""
+
+  browser_token="$(browser_token_from_class "$browser_class")"
+  [[ -n "$browser_token" ]] || return 1
+
+  while IFS= read -r player; do
+    [[ -n "$player" ]] || continue
+    [[ "${player,,}" == *"$browser_token"* ]] || continue
+
+    metadata="$(player_metadata "$player")"
+    media_url="${metadata%%|*}"
+    media_title="${metadata#*|}"
+
+    status="$(player_status "$player")"
+    [[ -n "$first_any" ]] || first_any="$player"$'\t'"$status"$'\t'"$media_url"$'\t'"$media_title"
+
+    if [[ "$status" == "Playing" && -z "$first_playing" ]]; then
+      first_playing="$player"$'\t'"$status"$'\t'"$media_url"$'\t'"$media_title"
+    fi
+
+    if [[ -z "$first_title_match" ]] && is_title_match "$window_title" "$media_title"; then
+      first_title_match="$player"$'\t'"$status"$'\t'"$media_url"$'\t'"$media_title"
+    fi
+  done < <("$PLAYERCTL_BIN" -l 2>/dev/null || true)
+
+  if [[ -n "$first_title_match" ]]; then
+    printf '%s\n' "$first_title_match"
+    return 0
+  fi
+
+  if [[ -n "$first_playing" ]]; then
+    printf '%s\n' "$first_playing"
+    return 0
+  fi
+
+  [[ -n "$first_any" ]] || return 1
+  printf '%s\n' "$first_any"
+}
+
+toggle_player_by_status() {
+  local player_name="$1"
+  local status="$2"
+
+  case "$status" in
+    Playing)
+      toggle_pause_player "$player_name"
+      ;;
+    Paused|Stopped|*)
+      toggle_play_player "$player_name"
+      ;;
+  esac
+}
+
+notification_summary_for_status() {
+  local status="$1"
+
+  case "$status" in
+    Playing)
+      printf 'Paused\n'
+      ;;
+    Paused|Stopped|*)
+      printf 'Resuming\n'
+      ;;
+  esac
+}
+
+escape_markup() {
+  local value="${1-}"
+
+  value=${value//&/\&amp;}
+  value=${value//</\&lt;}
+  value=${value//>/\&gt;}
+  value=${value//\"/\&quot;}
+  value=${value//\'/\&apos;}
+
+  printf '%s' "$value"
+}
+
+notify_toggle() {
+  local summary="$1"
+  local video_title="$2"
+  local video_artist="$3"
+  local video_thumbnail="$4"
+  local body=""
+  local escaped_title=""
+  local escaped_artist=""
+
+  escaped_title="$(escape_markup "$video_title")"
+  escaped_artist="$(escape_markup "$video_artist")"
+  body="<b>$escaped_title</b>"
+  if [[ -n "$video_artist" ]]; then
+    body+=$'\n'"<span foreground=\"var(--border-color)\">$escaped_artist</span>"
+  fi
+  [[ -n "$body" ]] || body="YouTube"
+
+  if declare -F youtube_notify_send >/dev/null 2>&1; then
+    YOUTUBE_NOTIFY_DRY_RUN="$DRY_RUN" youtube_notify_send "$summary" "$body" 2500 "$video_thumbnail" || true
+  fi
+}
+
+toggle_candidate() {
+  local candidate=""
+  local browser_class=""
+  local window_title=""
+  local _address=""
+  local player_record=""
+  local player_name=""
+  local status=""
+  local media_url=""
+  local media_title=""
+  local media_artist=""
+  local media_thumbnail=""
+  local media_icon=""
+  local summary=""
+
+  candidate="$(find_candidate_from_active 2>/dev/null || true)"
+
+  if [[ -z "$candidate" ]]; then
+    candidate="$(find_first_candidate 2>/dev/null || true)"
+  fi
+
+  [[ -n "$candidate" ]] || {
+    printf 'No Chromium/Brave YouTube window found\n' >&2
+    exit 1
+  }
+
+  IFS=$'\t' read -r browser_class window_title _address <<< "$candidate"
+
+  player_record="$(pick_player_for_browser "$browser_class" "$window_title" 2>/dev/null || true)"
+  [[ -n "$player_record" ]] || {
+    printf 'No matching MPRIS player found for %s\n' "$browser_class" >&2
+    exit 1
+  }
+
+  IFS=$'\t' read -r player_name status media_url media_title <<< "$player_record"
+  summary="$(notification_summary_for_status "$status")"
+  toggle_player_by_status "$player_name" "$status"
+
+  media_url="$(player_metadata "$player_name")"
+  media_title="${media_url#*|}"
+  media_url="${media_url%%|*}"
+  media_artist="$(player_artist "$player_name")"
+  media_thumbnail="$(player_thumbnail "$player_name")"
+  media_icon="$(normalize_thumbnail_icon "$media_thumbnail" 2>/dev/null || true)"
+  [[ -n "$media_title" ]] || media_title="$window_title"
+
+  notify_toggle "$summary" "$media_title" "$media_artist" "$media_icon"
+  write_state "$player_name" "$browser_class" "$window_title" "$media_url" "$media_title"
+}
+
+main() {
+  parse_args "$@"
+
+  require_binary "$HYPRCTL_BIN"
+  require_binary "$JQ_BIN"
+  require_binary "$PLAYERCTL_BIN"
+  require_binary "$MKDIR_BIN"
+  require_binary "$MKTEMP_BIN"
+  require_binary "$MV_BIN"
+
+  toggle_candidate
+}
+
+main "$@"
