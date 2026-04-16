@@ -1,0 +1,160 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+HYPR_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/hypr"
+HYPR_ANIMATIONS_CONF="${HYPR_DIR}/animations.conf"
+HYPR_ANIMATIONS_ALT="${HYPR_DIR}/animations"
+
+AWK_BIN="${AWK_BIN:-/usr/bin/awk}"
+MKTEMP_BIN="${MKTEMP_BIN:-/usr/bin/mktemp}"
+MV_BIN="${MV_BIN:-/usr/bin/mv}"
+NOTIFY_SEND_BIN="${NOTIFY_SEND_BIN:-/usr/bin/notify-send}"
+HYPRCTL_BIN="${HYPRCTL_BIN:-/usr/bin/hyprctl}"
+
+DRY_RUN=0
+
+usage() {
+    cat <<'EOF'
+Usage: hypr-toggle-animations [--dry-run]
+
+Toggle Hyprland animations between enabled = yes and enabled = no.
+EOF
+}
+
+notify_status() {
+    local text="$1"
+    "$NOTIFY_SEND_BIN" \
+        -a "hypr-toggle-animations" \
+        -h "string:x-dunst-stack-tag:hypr-toggle-animations" \
+        -t 2500 \
+        "Hyprland" \
+        "$text" >/dev/null 2>&1 || true
+}
+
+resolve_animations_file() {
+    if [[ -f "$HYPR_ANIMATIONS_CONF" ]]; then
+        printf '%s\n' "$HYPR_ANIMATIONS_CONF"
+        return 0
+    fi
+
+    if [[ -f "$HYPR_ANIMATIONS_ALT" ]]; then
+        printf '%s\n' "$HYPR_ANIMATIONS_ALT"
+        return 0
+    fi
+
+    return 1
+}
+
+get_enabled_value() {
+    local config_file="$1"
+
+    "$AWK_BIN" '
+        /^[[:space:]]*animations[[:space:]]*\{/ {
+            in_section = 1
+            next
+        }
+
+        in_section && /^[[:space:]]*\}/ {
+            in_section = 0
+        }
+
+        in_section && match($0, /^[[:space:]]*enabled[[:space:]]*=[[:space:]]*([^[:space:],#]+)/, captures) {
+            found = 1
+            print captures[1]
+            exit
+        }
+
+        END {
+            if (!found) {
+                exit 1
+            }
+        }
+    ' "$config_file"
+}
+
+set_enabled_value() {
+    local config_file="$1"
+    local new_value="$2"
+    local tmp_file=""
+
+    tmp_file="$("$MKTEMP_BIN")"
+
+    "$AWK_BIN" -v new_value="$new_value" '
+        /^[[:space:]]*animations[[:space:]]*\{/ {
+            in_section = 1
+        }
+
+        in_section && !updated && /^[[:space:]]*enabled[[:space:]]*=/ {
+            sub(/=[[:space:]]*[^[:space:],#]+/, "= " new_value)
+            updated = 1
+        }
+
+        in_section && /^[[:space:]]*\}/ {
+            in_section = 0
+        }
+
+        { print }
+
+        END {
+            if (!updated) {
+                exit 1
+            }
+        }
+    ' "$config_file" > "$tmp_file"
+
+    "$MV_BIN" "$tmp_file" "$config_file"
+}
+
+for arg in "$@"; do
+    case "$arg" in
+        --dry-run|-n)
+            DRY_RUN=1
+            ;;
+        --help|-h)
+            usage
+            exit 0
+            ;;
+        *)
+            usage >&2
+            exit 2
+            ;;
+    esac
+done
+
+config_file="$(resolve_animations_file)" || {
+    notify_status "Missing animations config"
+    exit 1
+}
+
+current_value="$(get_enabled_value "$config_file")" || {
+    notify_status "Could not read animations state"
+    exit 1
+}
+
+case "${current_value,,}" in
+    yes|1|true|on)
+        new_value="no"
+        status_text="OFF"
+        ;;
+    no|0|false|off)
+        new_value="yes"
+        status_text="ON"
+        ;;
+    *)
+        notify_status "Unsupported enabled value: $current_value"
+        exit 1
+        ;;
+esac
+
+if (( DRY_RUN )); then
+    printf 'Would set %s to enabled = %s\n' "$config_file" "$new_value"
+    exit 0
+fi
+
+set_enabled_value "$config_file" "$new_value"
+
+if [[ -x "$HYPRCTL_BIN" ]]; then
+    "$HYPRCTL_BIN" reload >/dev/null 2>&1 || true
+fi
+
+notify_status "Animations: <b>${status_text}</b>"

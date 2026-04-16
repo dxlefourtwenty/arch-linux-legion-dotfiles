@@ -4,6 +4,52 @@ set -euo pipefail
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 MENU_ID="menu-style"
 PID_FILE="/tmp/menu-rofi.pid"
+HYPR_ANIMATIONS_CONF="${XDG_CONFIG_HOME:-$HOME/.config}/hypr/animations.conf"
+HYPR_ANIMATIONS_ALT="${XDG_CONFIG_HOME:-$HOME/.config}/hypr/animations"
+
+get_animations_status() {
+    local config_file=""
+    local enabled_value=""
+
+    if [[ -f "$HYPR_ANIMATIONS_CONF" ]]; then
+        config_file="$HYPR_ANIMATIONS_CONF"
+    elif [[ -f "$HYPR_ANIMATIONS_ALT" ]]; then
+        config_file="$HYPR_ANIMATIONS_ALT"
+    else
+        printf 'Unknown\n'
+        return 0
+    fi
+
+    enabled_value="$(
+        awk '
+            /^[[:space:]]*animations[[:space:]]*\{/ {
+                in_section = 1
+                next
+            }
+
+            in_section && /^[[:space:]]*\}/ {
+                in_section = 0
+            }
+
+            in_section && match($0, /^[[:space:]]*enabled[[:space:]]*=[[:space:]]*([^[:space:],#]+)/, captures) {
+                print captures[1]
+                exit
+            }
+        ' "$config_file" 2>/dev/null || true
+    )"
+
+    case "${enabled_value,,}" in
+        yes|1|true|on)
+            printf 'ON\n'
+            ;;
+        no|0|false|off)
+            printf 'OFF\n'
+            ;;
+        *)
+            printf 'Unknown\n'
+            ;;
+    esac
+}
 
 if "$SCRIPT_DIR/rofi-toggle-pidfile" begin "$MENU_ID"; then
     exit 0
@@ -11,12 +57,15 @@ fi
 
 trap '"$SCRIPT_DIR/rofi-toggle-pidfile" clear "$MENU_ID"' EXIT
 
+animations_status="$(get_animations_status)"
+
 options="󰸌  Theme
 󰛖  Font
   Background
 󱢈  Live Gallery
   Terminal Prompt
 󰍜  Waybar
+󰗘  Animations: ${animations_status}
 󰃇  Border
 󰹳  Gaps
   Layouts
@@ -63,6 +112,9 @@ case "$label" in
     ;;
   "Waybar")
     "$SCRIPT_DIR/menu-waybar"
+    ;;
+  "Animations:"*)
+    "$SCRIPT_DIR/hypr-toggle-animations"
     ;;
   "Border")
     "$SCRIPT_DIR/menu-border"
