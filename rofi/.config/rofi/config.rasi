@@ -78,6 +78,7 @@ configuration {
 /*	display-run: ;*/
 /*	display-ssh: ;*/
 	display-drun: "";
+  monitor: "HDMI-A-1";
 /*	display-combi: ;*/
 /*	display-keys: ;*/
 /*	display-filebrowser: ;*/

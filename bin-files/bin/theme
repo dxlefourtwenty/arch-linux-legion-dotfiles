@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
-set -e
+set -euo pipefail
+
+export PATH="/usr/local/sbin:/usr/local/bin:/usr/bin:/bin"
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 THEME_DIR="$HOME/.config/themes"
 CURRENT_LINK="$THEME_DIR/current"
+NOTIFY_SEND_BIN="/usr/bin/notify-send"
 
 [ -z "$1" ] && {
     echo "Usage: theme <theme-name>"
@@ -63,6 +66,8 @@ if [[ "${THEME_SUPPRESS_NOTIFY:-0}" != "1" ]]; then
             sleep 0.1
         done
 
-        notify-send -t 5000 "Theme" "Updated to $FORMATTED_NAME." >/dev/null 2>&1 || true
+        if [[ -x "$NOTIFY_SEND_BIN" ]]; then
+            "$NOTIFY_SEND_BIN" -t 5000 "Theme" "Updated to $FORMATTED_NAME." >/dev/null 2>&1 || true
+        fi
     ) >/dev/null 2>&1 &
 fi

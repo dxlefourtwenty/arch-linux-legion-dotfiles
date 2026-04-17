@@ -1,11 +1,14 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+export PATH="/usr/local/sbin:/usr/local/bin:/usr/bin:/bin"
+
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 THEME_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/themes"
 THEME_DIR_RESOLVED="$(readlink -f "$THEME_DIR" 2>/dev/null || printf '%s' "$THEME_DIR")"
 MENU_ID="menu-theme"
 PID_FILE="/tmp/menu-rofi.pid"
+NOTIFY_SEND_BIN="/usr/bin/notify-send"
 
 if "$SCRIPT_DIR/rofi-toggle-pidfile" begin "$MENU_ID"; then
     exit 0
@@ -22,7 +25,9 @@ format_theme_display() {
 }
 
 [ ! -d "$THEME_DIR_RESOLVED" ] && {
-    notify-send -t 4000 "Theme" "Themes directory not found: $THEME_DIR"
+    if [[ -x "$NOTIFY_SEND_BIN" ]]; then
+        "$NOTIFY_SEND_BIN" -t 4000 "Theme" "Themes directory not found: $THEME_DIR"
+    fi
     exit 1
 }
 
@@ -80,4 +85,8 @@ SELECTED="${THEMES[CHOSEN_INDEX]}"
 "$SCRIPT_DIR/rofi-toggle-pidfile" clear "$MENU_ID"
 trap - EXIT
 
-"$SCRIPT_DIR/theme" "$SELECTED" >/dev/null 2>&1 &
+if [[ -x /usr/bin/setsid ]]; then
+    /usr/bin/setsid -f "$SCRIPT_DIR/theme" "$SELECTED" >/dev/null 2>&1 || true
+else
+    /usr/bin/nohup "$SCRIPT_DIR/theme" "$SELECTED" >/dev/null 2>&1 &
+fi
