@@ -45,7 +45,7 @@ fi
 
 mapfile -d '' wallpapers < <(
     /usr/bin/find -L "$wallpaper_dir" -maxdepth 1 -type f \
-        \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' -o -iname '*.bmp' -o -iname '*.gif' \) \
+        \( -iname '*.jpg' -o -iname '*.jpeg' -o -iname '*.png' -o -iname '*.webp' -o -iname '*.bmp' \) \
         -print0
 )
 
@@ -54,6 +54,10 @@ if [ "${#wallpapers[@]}" -eq 0 ]; then
 fi
 
 selected="${wallpapers[$((RANDOM % ${#wallpapers[@]}))]}"
+selected_real=$(/usr/bin/readlink -f -- "$selected" 2>/dev/null || true)
+if [ -n "$selected_real" ]; then
+    selected="$selected_real"
+fi
 
 if [ "$dry_run" -eq 1 ]; then
     echo "$selected"
