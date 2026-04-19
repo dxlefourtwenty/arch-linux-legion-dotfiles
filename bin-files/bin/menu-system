@@ -58,6 +58,6 @@ case "$chosen" in
     ;;
   *Lock)
     sleep 0.1
-    ~/bin/launch-lock-screen
+    hyprlock
     ;;
 esac

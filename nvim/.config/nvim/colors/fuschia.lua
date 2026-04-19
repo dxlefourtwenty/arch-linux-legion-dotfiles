@@ -13,12 +13,12 @@ local colors = {
     fg     = "#F4F6FA", -- snow text
 
     violet = "#C7B7E2", -- lavender accent
-    purple = "#3A4F7A", -- slate blue
-    mag    = "#C7B7E2", -- secondary accent
+    purple = "#5F6B7B", -- slate blue
+    mag    = "#B48AD6", -- true magenta (muted lavender-magenta)
     rose   = "#8FAED9", -- frost blue (used for success/info)
     blush  = "#F2A7C4", -- primary accent
-    coral  = "#F2A7C4", -- primary accent (strong highlight)
-    red    = "#F2A7C4", -- error (keeping theme cohesive)
+    coral  = "#F28C6B", -- warm coral (soft orange-pink, not too saturated)
+    red    = "#E06C75", -- proper muted red (error, still soft)
     darkp  = "#2F3E60", -- surface1
 }
 

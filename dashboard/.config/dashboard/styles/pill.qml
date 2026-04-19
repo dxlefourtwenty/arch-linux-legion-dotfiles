@@ -2,7 +2,6 @@ pragma Singleton
 import QtQuick
 
 QtObject {
-    /* ---- styling ---- */
     property int borderWidth: 2
     property bool borderLeft: false
     property bool borderRight: false
@@ -22,4 +21,5 @@ QtObject {
     property int tabSlideDuration: 220
     property int tabSlideEasing: Easing.OutCubic
     property real tabSlideDistanceMultiplier: 1.0
+    property int mediaArtworkSpinDurationMs: 14000
 }
