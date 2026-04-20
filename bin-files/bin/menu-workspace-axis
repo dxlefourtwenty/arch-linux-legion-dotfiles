@@ -3,7 +3,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 ROFI_BIN="/usr/bin/rofi"
-NOTIFY_BIN="/usr/bin/notify-send"
+NOTIFY_BIN="/home/dxle/bin/notify-send"
 AWK_BIN="/usr/bin/awk"
 MKTEMP_BIN="/usr/bin/mktemp"
 MV_BIN="/usr/bin/mv"

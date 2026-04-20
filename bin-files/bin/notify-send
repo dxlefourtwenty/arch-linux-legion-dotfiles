@@ -1,0 +1,225 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+REAL_NOTIFY_SEND="/usr/bin/notify-send"
+DATE_BIN="/usr/bin/date"
+ID_BIN="/usr/bin/id"
+MKDIR_BIN="/usr/bin/mkdir"
+SED_BIN="/usr/bin/sed"
+AWK_BIN="/usr/bin/awk"
+
+DEFAULT_HISTORY_FILE="${HOME}/.local/state/wardnc/notification-history.jsonl"
+CONFIG_FILE="${XDG_CONFIG_HOME:-${HOME}/.config}/wardnc/config.toml"
+
+usage() {
+    printf 'Usage: notify-send [OPTIONS] <SUMMARY> [BODY]\n'
+    printf 'Wrapper options: --wardnc-dry-run, --wardnc-help\n'
+}
+
+expand_path() {
+    local path="$1"
+    local runtime_dir="${XDG_RUNTIME_DIR:-/run/user/$($ID_BIN -u)}"
+
+    path="${path/#\~/$HOME}"
+    path="${path//\$\{XDG_RUNTIME_DIR\}/$runtime_dir}"
+    path="${path//\$XDG_RUNTIME_DIR/$runtime_dir}"
+    path="${path//\$\{HOME\}/$HOME}"
+    path="${path//\$HOME/$HOME}"
+
+    printf '%s\n' "$path"
+}
+
+history_file_path() {
+    local configured=""
+    local path="${WARDNC_HISTORY_FILE:-$DEFAULT_HISTORY_FILE}"
+
+    if [[ -z "${WARDNC_HISTORY_FILE:-}" && -r "$CONFIG_FILE" ]]; then
+        configured="$($AWK_BIN 'match($0,/^[[:space:]]*history_file[[:space:]]*=[[:space:]]*"([^"]+)"/,m){print m[1]; exit}' "$CONFIG_FILE" 2>/dev/null || true)"
+        if [[ -n "$configured" ]]; then
+            path="$configured"
+        fi
+    fi
+
+    expand_path "$path"
+}
+
+strip_markup() {
+    printf '%s' "$1" | "$SED_BIN" -E 's/<[^>]*>//g'
+}
+
+decode_entities() {
+    printf '%s' "$1" | "$SED_BIN" \
+        -e 's/&amp;/\&/g' \
+        -e 's/&lt;/</g' \
+        -e 's/&gt;/>/g' \
+        -e 's/&quot;/"/g' \
+        -e "s/&apos;/'/g" \
+        -e 's/&nbsp;/ /g'
+}
+
+sanitize_text() {
+    local value="$1"
+    value="$(strip_markup "$value")"
+    value="$(decode_entities "$value")"
+    printf '%s' "$value"
+}
+
+json_escape() {
+    local value="$1"
+    value="${value//\\/\\\\}"
+    value="${value//\"/\\\"}"
+    value="${value//$'\n'/\\n}"
+    value="${value//$'\r'/\\r}"
+    value="${value//$'\t'/\\t}"
+    printf '%s' "$value"
+}
+
+parse_fields() {
+    local -n args_ref="$1"
+    local i=0
+    local positional=0
+
+    APP_NAME="notify-send"
+    ICON_NAME=""
+    SUMMARY=""
+    BODY=""
+
+    while (( i < ${#args_ref[@]} )); do
+        local token="${args_ref[i]}"
+
+        if (( positional == 1 )); then
+            if [[ -z "$SUMMARY" ]]; then
+                SUMMARY="$token"
+            elif [[ -z "$BODY" ]]; then
+                BODY="$token"
+            else
+                BODY+=" ${token}"
+            fi
+            ((i+=1))
+            continue
+        fi
+
+        case "$token" in
+            --)
+                positional=1
+                ((i+=1))
+                ;;
+            -a|--app-name)
+                if (( i + 1 < ${#args_ref[@]} )); then
+                    APP_NAME="${args_ref[i+1]}"
+                fi
+                ((i+=2))
+                ;;
+            -i|--icon)
+                if (( i + 1 < ${#args_ref[@]} )); then
+                    ICON_NAME="${args_ref[i+1]}"
+                fi
+                ((i+=2))
+                ;;
+            --app-name=*)
+                APP_NAME="${token#*=}"
+                ((i+=1))
+                ;;
+            --icon=*)
+                ICON_NAME="${token#*=}"
+                ((i+=1))
+                ;;
+            -u|--urgency|-t|--expire-time|-c|--category|-h|--hint|-r|--replace-id|-A|--action)
+                ((i+=2))
+                ;;
+            --urgency=*|--expire-time=*|--category=*|--hint=*|--replace-id=*|--action=*)
+                ((i+=1))
+                ;;
+            -e|--wait|--print-id|--transient|--help|--version)
+                ((i+=1))
+                ;;
+            -*)
+                ((i+=1))
+                ;;
+            *)
+                if [[ -z "$SUMMARY" ]]; then
+                    SUMMARY="$token"
+                elif [[ -z "$BODY" ]]; then
+                    BODY="$token"
+                else
+                    BODY+=" ${token}"
+                fi
+                ((i+=1))
+                ;;
+        esac
+    done
+}
+
+append_history() {
+    local app_name="$1"
+    local summary="$2"
+    local body="$3"
+    local icon_name="$4"
+
+    local history_file
+    history_file="$(history_file_path)"
+    [[ -n "$history_file" ]] || return 0
+
+    local history_dir="${history_file%/*}"
+    if [[ -n "$history_dir" && "$history_dir" != "$history_file" ]]; then
+        "$MKDIR_BIN" -p "$history_dir"
+    fi
+
+    local timestamp
+    timestamp="$($DATE_BIN -u +%Y-%m-%dT%H:%M:%S.%3NZ)"
+    local generated_id
+    generated_id="$($DATE_BIN +%s%N)"
+
+    local summary_json body_json app_json icon_json
+    summary_json="$(json_escape "$summary")"
+    body_json="$(json_escape "$body")"
+    app_json="$(json_escape "$app_name")"
+    icon_json="$(json_escape "$icon_name")"
+
+    printf '{"time":"%s","app":"%s","summary":"%s","body":"%s","icon":"%s","id":%s}\n' \
+        "$timestamp" "$app_json" "$summary_json" "$body_json" "$icon_json" "$generated_id" >> "$history_file"
+}
+
+main() {
+    local dry_run=0
+    local -a forwarded_args=()
+
+    for arg in "$@"; do
+        case "$arg" in
+            --wardnc-help)
+                usage
+                exit 0
+                ;;
+            --wardnc-dry-run)
+                dry_run=1
+                ;;
+            *)
+                forwarded_args+=("$arg")
+                ;;
+        esac
+    done
+
+    local notify_status=0
+    if (( dry_run == 0 )); then
+        "$REAL_NOTIFY_SEND" "${forwarded_args[@]}" || notify_status=$?
+    fi
+
+    parse_fields forwarded_args
+
+    APP_NAME="$(sanitize_text "$APP_NAME")"
+    SUMMARY="$(sanitize_text "$SUMMARY")"
+    BODY="$(sanitize_text "$BODY")"
+
+    if [[ -n "$SUMMARY" || -n "$BODY" ]]; then
+        append_history "$APP_NAME" "$SUMMARY" "$BODY" "$ICON_NAME"
+    fi
+
+    if (( dry_run == 1 )); then
+        printf 'summary=%s\n' "$SUMMARY"
+        printf 'body=%s\n' "$BODY"
+    fi
+
+    return "$notify_status"
+}
+
+main "$@"

@@ -1,0 +1,258 @@
+@import "/home/dxle/.config/themes/current/wardnc.css";
+
+:root {
+    --font-family: "Liberation Sans";
+
+    --panel-radius: 20px;
+    --panel-border-width: 1px;
+    --panel-padding-x: 12px;
+    --panel-padding-y: 12px;
+    --panel-section-gap: 10px;
+
+    --header-height: 36px;
+    --header-radius: 10px;
+    --header-padding-x: 12px;
+    --header-gap: 8px;
+    --header-size: 14px;
+
+    --badge-height: 22px;
+    --badge-radius: 8px;
+    --badge-min-width: 30px;
+    --badge-padding-x: 14px;
+    --badge-size: 11px;
+
+    --notification-gap: 10px;
+
+    --card-radius: 14px;
+    --card-border-width: 1px;
+    --card-padding-x: 14px;
+    --card-padding-y: 14px;
+    --card-gap: 12px;
+
+    --icon-size: 64px;
+    --icon-radius: 10px;
+    --icon-padding: 0px;
+
+    --text-gap: 6px;
+    --summary-size: 14px;
+    --body-size: 13px;
+    --body-max-lines: 0;
+    --app-name-size: 12px;
+    --timestamp-size: 11px;
+
+    --dismiss-button-size: 20px;
+    --dismiss-size: 11px;
+
+    --action-gap: 6px;
+    --action-height: 28px;
+    --action-radius: 8px;
+    --action-size: 12px;
+    --action-min-width: 80px;
+    --action-horizontal-padding: 22px;
+
+    --footer-height: 34px;
+    --footer-radius: 10px;
+    --footer-padding-x: 12px;
+    --footer-size: 12px;
+
+    --clear-height: 22px;
+    --clear-radius: 8px;
+    --clear-size: 12px;
+    --clear-min-width: 56px;
+    --clear-padding-x: 4px;
+    --clear-shadow-blur: 10px;
+    --clear-shadow-offset-x: 0px;
+    --clear-shadow-offset-y: 2px;
+    --clear-shadow-margin-y: 4px;
+
+    --scrollbar-width: 8px;
+    --scrollbar-track-radius: 4px;
+    --scrollbar-thumb-radius: 4px;
+    --scrollbar-margin-y: 4px;
+    --scrollbar-thumb-min-height: 28px;
+}
+
+QWidget#notificationCenterWindow {
+    background: transparent;
+}
+
+QWidget#notificationCenterWindow,
+QWidget#notificationCenterWindow * {
+    font-family: var(--font-family);
+}
+
+QFrame#panelRoot {
+    background-color: var(--panel-bg);
+    border: var(--panel-border-width) solid var(--panel-border);
+    border-radius: var(--panel-radius);
+}
+
+QScrollArea#notificationListScrollArea {
+    background: var(--list-bg);
+    border: none;
+}
+
+QWidget#notificationListViewport {
+    background: var(--list-bg);
+}
+
+QWidget#notificationListContainer {
+    background: var(--list-bg);
+}
+
+QScrollBar#notificationListScrollBar:vertical {
+    background: var(--scrollbar-track-bg);
+    border: none;
+    border-radius: var(--scrollbar-track-radius);
+    width: var(--scrollbar-width);
+    margin: var(--scrollbar-margin-y) 0px var(--scrollbar-margin-y) 0px;
+}
+
+QScrollBar#notificationListScrollBar::handle:vertical {
+    background: var(--scrollbar-thumb-bg);
+    border: none;
+    border-radius: var(--scrollbar-thumb-radius);
+    min-height: var(--scrollbar-thumb-min-height);
+}
+
+QScrollBar#notificationListScrollBar::handle:vertical:hover {
+    background: var(--scrollbar-thumb-hover-bg);
+}
+
+QScrollBar#notificationListScrollBar::add-line:vertical,
+QScrollBar#notificationListScrollBar::sub-line:vertical {
+    border: none;
+    background: transparent;
+    height: 0px;
+}
+
+QScrollBar#notificationListScrollBar::add-page:vertical,
+QScrollBar#notificationListScrollBar::sub-page:vertical {
+    background: transparent;
+}
+
+QFrame#headerBar {
+    background: var(--header-bg);
+    border-radius: var(--header-radius);
+}
+
+QLabel#headerTitle {
+    color: var(--header-color);
+    font-size: var(--header-size);
+    font-weight: 700;
+}
+
+QLabel#countBadge {
+    color: var(--badge-color);
+    background: var(--badge-bg);
+    border-radius: var(--badge-radius);
+    font-size: var(--badge-size);
+    font-weight: 700;
+}
+
+QPushButton#clearButton {
+    color: var(--clear-color);
+    background: var(--clear-bg);
+    border: none;
+    border-radius: var(--clear-radius);
+    font-size: var(--clear-size);
+    font-weight: 700;
+    padding: 0px var(--clear-padding-x);
+}
+
+QPushButton#clearButton:hover {
+    background: var(--clear-hover-bg);
+}
+
+QPushButton#clearButton:pressed {
+    background: var(--clear-hover-bg);
+}
+
+QFrame#notificationCard {
+    background: var(--card-bg);
+    border: var(--card-border-width) solid var(--card-border);
+    border-radius: var(--card-radius);
+}
+
+QLabel#summaryLabel {
+    color: var(--summary-color);
+    font-size: var(--summary-size);
+    font-weight: 700;
+}
+
+QLabel#bodyLabel {
+    color: var(--body-color);
+    font-size: var(--body-size);
+}
+
+QLabel#appNameLabel {
+    color: var(--app-name-color);
+    font-size: var(--app-name-size);
+}
+
+QLabel#timestampLabel {
+    color: var(--timestamp-color);
+    font-size: var(--timestamp-size);
+    font-weight: 600;
+}
+
+QLabel#timestampDayLabel {
+    color: var(--timestamp-color);
+    font-size: var(--timestamp-size);
+    font-weight: 600;
+}
+
+QFrame#iconFrame {
+    background: var(--icon-bg);
+    border-radius: var(--icon-radius);
+}
+
+QPushButton#dismissButton {
+    color: var(--dismiss-color);
+    background: transparent;
+    border: none;
+    border-radius: calc(var(--dismiss-button-size) / 2);
+    font-size: var(--dismiss-size);
+    font-weight: 700;
+    padding: 0px;
+}
+
+QPushButton#dismissButton:hover {
+    background: var(--dismiss-hover-bg);
+}
+
+QPushButton#dismissButton:pressed {
+    background: var(--dismiss-hover-bg);
+}
+
+QPushButton#actionButton {
+    color: var(--action-color);
+    background: var(--action-bg);
+    border: none;
+    border-radius: var(--action-radius);
+    font-size: var(--action-size);
+}
+
+QPushButton#actionButton:hover {
+    background: var(--action-hover-bg);
+}
+
+QPushButton#actionButton:pressed {
+    background: var(--action-hover-bg);
+}
+
+QFrame#footerBar {
+    background: var(--footer-bg);
+    border-radius: var(--footer-radius);
+}
+
+QLabel#footerLabel {
+    color: var(--footer-color);
+    font-size: var(--footer-size);
+}
+
+QFrame#sideHandle {
+    background: var(--handle-bg);
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+}

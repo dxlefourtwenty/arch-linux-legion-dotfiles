@@ -11,7 +11,7 @@ WAYBAR_STYLE_LINK="${XDG_CONFIG_HOME:-$HOME/.config}/waybar/style.css"
 THEMES_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/themes"
 STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/toggle-zen-mode"
 STATE_FILE="${STATE_DIR}/state"
-NOTIFY_SEND_BIN="${NOTIFY_SEND_BIN:-/usr/bin/notify-send}"
+NOTIFY_SEND_BIN="${NOTIFY_SEND_BIN:-/home/dxle/bin/notify-send}"
 ZEN_NOTIFY_APP_NAME="${ZEN_NOTIFY_APP_NAME:-toggle-zen-mode}"
 ZEN_NOTIFY_STACK_TAG="${ZEN_NOTIFY_STACK_TAG:-toggle-zen-mode}"
 

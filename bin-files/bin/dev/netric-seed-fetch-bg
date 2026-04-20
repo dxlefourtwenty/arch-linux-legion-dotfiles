@@ -31,8 +31,8 @@ announce() {
   local title="$1"
   local body="$2"
 
-  if [ -x /usr/bin/notify-send ]; then
-    /usr/bin/notify-send "$title" "$body"
+  if [ -x /home/dxle/bin/notify-send ]; then
+    /home/dxle/bin/notify-send "$title" "$body"
   fi
 
   /usr/bin/printf '%s\n' "$body"

@@ -4,15 +4,22 @@ set -euo pipefail
 
 STYLE_NAME="${1:-}"
 
-# Pretty notification
-FORMATTED_NAME=$(echo "$1" | tr '-' ' ' | sed -E 's/\b(.)/\U\1/g')
-
 WAYBAR_DIR="${HOME}/.config/waybar"
 DASHBOARD_DIR="${HOME}/.config/dashboard"
+XDG_STATE_HOME_DEFAULT="${HOME}/.local/state"
+STATE_DIR="${XDG_STATE_HOME:-$XDG_STATE_HOME_DEFAULT}/toggle-waybar"
+STATE_FILE="${STATE_DIR}/state"
+MKDIR_BIN="/usr/bin/mkdir"
+MKTEMP_BIN="/usr/bin/mktemp"
+MV_BIN="/usr/bin/mv"
+BASENAME_BIN="/usr/bin/basename"
+READLINK_BIN="/usr/bin/readlink"
 
 WAYBAR_STYLE="${WAYBAR_DIR}/styles/${STYLE_NAME}.css"
 WAYBAR_CONFIG="${WAYBAR_DIR}/configs/${STYLE_NAME}.jsonc"
 DASHBOARD_STYLE="${DASHBOARD_DIR}/styles/${STYLE_NAME}.qml"
+DASHBOARD_STYLE_LINK="${DASHBOARD_DIR}/style.qml"
+NO_WAYBAR_STYLE="${DASHBOARD_DIR}/styles/no-waybar.qml"
 
 if [[ -z "${STYLE_NAME}" ]]; then
   echo "Usage: waybar-style <style>"
@@ -34,8 +41,56 @@ if [[ ! -f "${DASHBOARD_STYLE}" ]]; then
   exit 1
 fi
 
+read_state_value() {
+  local key="$1"
+  [[ -r "$STATE_FILE" ]] || return 1
+
+  awk -F= -v key="$key" '$1 == key { sub(/^[^=]*=/, "", $0); print; exit }' "$STATE_FILE"
+}
+
+write_state() {
+  local visible="$1"
+  local previous_dashboard_style="$2"
+  local tmp_file=""
+
+  "$MKDIR_BIN" -p "$STATE_DIR"
+  tmp_file="$("$MKTEMP_BIN" "${STATE_DIR}/.state.XXXXXX")"
+
+  {
+    printf 'visible=%s\n' "$visible"
+    printf 'previous_dashboard_style=%s\n' "$previous_dashboard_style"
+  } > "$tmp_file"
+
+  "$MV_BIN" "$tmp_file" "$STATE_FILE"
+}
+
+is_waybar_hidden() {
+  local visible=""
+  local current_target=""
+  local current_base=""
+
+  visible="$(read_state_value "visible" 2>/dev/null || true)"
+  if [[ "$visible" == "0" ]]; then
+    return 0
+  fi
+  if [[ "$visible" == "1" ]]; then
+    return 1
+  fi
+
+  current_target="$("$READLINK_BIN" -f "$DASHBOARD_STYLE_LINK" 2>/dev/null || true)"
+  current_base="$("$BASENAME_BIN" "$current_target" 2>/dev/null || true)"
+  [[ "$current_base" == "no-waybar.qml" ]]
+}
+
 ln -sfn "${WAYBAR_STYLE}" "${WAYBAR_DIR}/style.css"
 ln -sfn "${WAYBAR_CONFIG}" "${WAYBAR_DIR}/config.jsonc"
-ln -sfn "${DASHBOARD_STYLE}" "${DASHBOARD_DIR}/style.qml"
 
-# notify-send -t 5000 "Waybar" "Updated to ${FORMATTED_NAME}"
+if is_waybar_hidden; then
+  if [[ -f "$NO_WAYBAR_STYLE" ]]; then
+    ln -sfn "$NO_WAYBAR_STYLE" "$DASHBOARD_STYLE_LINK"
+  fi
+  write_state "0" "${DASHBOARD_STYLE}"
+else
+  ln -sfn "${DASHBOARD_STYLE}" "${DASHBOARD_STYLE_LINK}"
+  write_state "1" "${DASHBOARD_STYLE}"
+fi

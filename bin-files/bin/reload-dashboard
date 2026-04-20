@@ -8,7 +8,7 @@ PGREP_BIN="/usr/bin/pgrep"
 KILL_BIN="/usr/bin/kill"
 SLEEP_BIN="/usr/bin/sleep"
 SETSID_BIN="/usr/bin/setsid"
-NOTIFY_SEND_BIN="/usr/bin/notify-send"
+NOTIFY_SEND_BIN="/home/dxle/bin/notify-send"
 
 usage() {
     printf 'Usage: reload-dashboard [--dry-run]\n'

@@ -13,6 +13,7 @@ options="󰋁  Apps
   Style
 󰧑  Learn
   Config
+  Alerts
   Tools
   Activity
 ⏻  System"
@@ -46,6 +47,7 @@ case "$label" in
     Style) "$SCRIPT_DIR/menu-style" ;;
     Learn) "$SCRIPT_DIR/menu-learn" ;;
     Config) "$SCRIPT_DIR/menu-config" ;;
+    Alerts) "$SCRIPT_DIR/toggle-wardnc" --toggle ;;
     Tools) "$SCRIPT_DIR/menu-tools" ;;
     Activity) "$SCRIPT_DIR/launch-terminal" btop ;;
     System) "$SCRIPT_DIR/menu-system" ;;

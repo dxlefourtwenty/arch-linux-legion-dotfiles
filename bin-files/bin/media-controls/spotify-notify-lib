@@ -4,7 +4,7 @@ set -euo pipefail
 PLAYERCTL_BIN="${PLAYERCTL_BIN:-/usr/bin/playerctl}"
 CURL_BIN="${CURL_BIN:-/usr/bin/curl}"
 MAGICK_BIN="${MAGICK_BIN:-/usr/bin/magick}"
-NOTIFY_SEND_BIN="${NOTIFY_SEND_BIN:-/usr/bin/notify-send}"
+NOTIFY_SEND_BIN="${NOTIFY_SEND_BIN:-/home/dxle/bin/notify-send}"
 FLOCK_BIN="${FLOCK_BIN:-/usr/bin/flock}"
 MKDIR_BIN="${MKDIR_BIN:-/usr/bin/mkdir}"
 DATE_BIN="${DATE_BIN:-/usr/bin/date}"

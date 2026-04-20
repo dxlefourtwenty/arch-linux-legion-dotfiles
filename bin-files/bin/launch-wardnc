@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+nohup /home/dxle/builds/wardnc/build/wardnc >/dev/null 2>&1 &

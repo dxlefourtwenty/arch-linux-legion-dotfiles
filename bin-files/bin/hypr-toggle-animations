@@ -8,7 +8,7 @@ HYPR_ANIMATIONS_ALT="${HYPR_DIR}/animations"
 AWK_BIN="${AWK_BIN:-/usr/bin/awk}"
 MKTEMP_BIN="${MKTEMP_BIN:-/usr/bin/mktemp}"
 MV_BIN="${MV_BIN:-/usr/bin/mv}"
-NOTIFY_SEND_BIN="${NOTIFY_SEND_BIN:-/usr/bin/notify-send}"
+NOTIFY_SEND_BIN="${NOTIFY_SEND_BIN:-/home/dxle/bin/notify-send}"
 HYPRCTL_BIN="${HYPRCTL_BIN:-/usr/bin/hyprctl}"
 
 DRY_RUN=0

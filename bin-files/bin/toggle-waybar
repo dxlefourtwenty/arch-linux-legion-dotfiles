@@ -1,3 +1,200 @@
 #!/usr/bin/env bash
 
-pkill -SIGUSR1 waybar
+set -euo pipefail
+
+PKILL_BIN="/usr/bin/pkill"
+MKDIR_BIN="/usr/bin/mkdir"
+MKTEMP_BIN="/usr/bin/mktemp"
+MV_BIN="/usr/bin/mv"
+READLINK_BIN="/usr/bin/readlink"
+BASENAME_BIN="/usr/bin/basename"
+XDG_STATE_HOME_DEFAULT="${HOME}/.local/state"
+STATE_DIR="${XDG_STATE_HOME:-$XDG_STATE_HOME_DEFAULT}/toggle-waybar"
+STATE_FILE="${STATE_DIR}/state"
+DASHBOARD_DIR="${HOME}/.config/dashboard"
+DASHBOARD_STYLE_LINK="${DASHBOARD_DIR}/style.qml"
+NO_WAYBAR_STYLE="${DASHBOARD_DIR}/styles/no-waybar.qml"
+WAYBAR_STYLE_LINK="${HOME}/.config/waybar/style.css"
+RELOAD_DASHBOARD_BIN="${HOME}/bin/reload-dashboard"
+
+usage() {
+    printf 'Usage: %s [--dry-run]\n' "${0##*/}"
+}
+
+read_state_value() {
+    local key="$1"
+    [[ -r "$STATE_FILE" ]] || return 1
+
+    awk -F= -v key="$key" '$1 == key { sub(/^[^=]*=/, "", $0); print; exit }' "$STATE_FILE"
+}
+
+get_saved_visibility() {
+    local value=""
+
+    value="$(read_state_value "visible" 2>/dev/null || true)"
+    case "$value" in
+        0|1)
+            printf '%s\n' "$value"
+            ;;
+        *)
+            printf '\n'
+            ;;
+    esac
+}
+
+resolve_dashboard_target() {
+    local resolved=""
+
+    resolved="$("$READLINK_BIN" -f "$DASHBOARD_STYLE_LINK" 2>/dev/null || true)"
+    if [[ -n "$resolved" ]]; then
+        printf '%s\n' "$resolved"
+        return
+    fi
+
+    if [[ -f "$DASHBOARD_STYLE_LINK" ]]; then
+        printf '%s\n' "$DASHBOARD_STYLE_LINK"
+    fi
+}
+
+infer_visible_state() {
+    local current_target=""
+    local current_base=""
+
+    current_target="$(resolve_dashboard_target)"
+    current_base="$("$BASENAME_BIN" "$current_target" 2>/dev/null || true)"
+
+    if [[ "$current_base" == "no-waybar.qml" ]]; then
+        printf '0\n'
+    else
+        printf '1\n'
+    fi
+}
+
+get_current_visible_state() {
+    local saved=""
+    saved="$(get_saved_visibility)"
+
+    if [[ -n "$saved" ]]; then
+        printf '%s\n' "$saved"
+        return
+    fi
+
+    infer_visible_state
+}
+
+get_fallback_dashboard_style() {
+    local waybar_style_target=""
+    local style_name=""
+    local candidate=""
+
+    waybar_style_target="$("$READLINK_BIN" -f "$WAYBAR_STYLE_LINK" 2>/dev/null || true)"
+    style_name="$("$BASENAME_BIN" "${waybar_style_target}" .css 2>/dev/null || true)"
+    candidate="${DASHBOARD_DIR}/styles/${style_name}.qml"
+
+    if [[ -n "$style_name" && -f "$candidate" ]]; then
+        printf '%s\n' "$candidate"
+        return
+    fi
+
+    printf '%s\n' "$NO_WAYBAR_STYLE"
+}
+
+write_state() {
+    local visible="$1"
+    local previous_dashboard_style="$2"
+    local tmp_file=""
+
+    "$MKDIR_BIN" -p "$STATE_DIR"
+    tmp_file="$("$MKTEMP_BIN" "${STATE_DIR}/.state.XXXXXX")"
+
+    {
+        printf 'visible=%s\n' "$visible"
+        printf 'previous_dashboard_style=%s\n' "$previous_dashboard_style"
+    } > "$tmp_file"
+
+    "$MV_BIN" "$tmp_file" "$STATE_FILE"
+}
+
+set_dashboard_style() {
+    local target="$1"
+
+    [[ -f "$target" ]] || return 1
+    ln -sfn "$target" "$DASHBOARD_STYLE_LINK"
+}
+
+apply_hide_state() {
+    local dry_run="$1"
+    local current_target=""
+
+    current_target="$(resolve_dashboard_target)"
+    if [[ -z "$current_target" || "$("$BASENAME_BIN" "$current_target" 2>/dev/null || true)" == "no-waybar.qml" ]]; then
+        current_target="$(get_fallback_dashboard_style)"
+    fi
+
+    if [[ "$dry_run" -eq 1 ]]; then
+        return 0
+    fi
+
+    set_dashboard_style "$NO_WAYBAR_STYLE"
+    write_state "0" "$current_target"
+    "$PKILL_BIN" -SIGUSR1 waybar
+    "$RELOAD_DASHBOARD_BIN"
+}
+
+apply_show_state() {
+    local dry_run="$1"
+    local restore_target=""
+    local fallback_target=""
+
+    restore_target="$(read_state_value "previous_dashboard_style" 2>/dev/null || true)"
+    if [[ -z "$restore_target" || ! -f "$restore_target" ]]; then
+        fallback_target="$(get_fallback_dashboard_style)"
+        if [[ "$fallback_target" == "$NO_WAYBAR_STYLE" ]]; then
+            fallback_target="${DASHBOARD_DIR}/styles/floating.qml"
+        fi
+        restore_target="$fallback_target"
+    fi
+
+    if [[ "$dry_run" -eq 1 ]]; then
+        return 0
+    fi
+
+    set_dashboard_style "$restore_target"
+    write_state "1" "$restore_target"
+    "$PKILL_BIN" -SIGUSR1 waybar
+    "$RELOAD_DASHBOARD_BIN"
+}
+
+main() {
+    local dry_run=0
+    local current_visible=""
+
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --dry-run)
+                dry_run=1
+                shift
+                ;;
+            --help|-h)
+                usage
+                exit 0
+                ;;
+            *)
+                usage
+                exit 1
+                ;;
+        esac
+    done
+
+    [[ -f "$NO_WAYBAR_STYLE" ]] || exit 1
+    current_visible="$(get_current_visible_state)"
+
+    if [[ "$current_visible" == "1" ]]; then
+        apply_hide_state "$dry_run"
+        exit 0
+    fi
+
+    apply_show_state "$dry_run"
+}
+
+main "$@"

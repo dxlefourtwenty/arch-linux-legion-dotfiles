@@ -8,7 +8,7 @@ THEME_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/themes"
 THEME_DIR_RESOLVED="$(readlink -f "$THEME_DIR" 2>/dev/null || printf '%s' "$THEME_DIR")"
 MENU_ID="menu-theme"
 PID_FILE="/tmp/menu-rofi.pid"
-NOTIFY_SEND_BIN="/usr/bin/notify-send"
+NOTIFY_SEND_BIN="/home/dxle/bin/notify-send"
 
 if "$SCRIPT_DIR/rofi-toggle-pidfile" begin "$MENU_ID"; then
     exit 0

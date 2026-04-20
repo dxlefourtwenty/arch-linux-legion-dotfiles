@@ -1,0 +1,38 @@
+:root {
+    --panel-bg: #1a1b26;
+    --panel-border: #414868;
+    --list-bg: #1a1b26;
+    --header-bg: #24283b;
+    --header-color: #c0caf5;
+    --footer-bg: #24283b;
+    --footer-color: #9aa5ce;
+
+    --card-bg: #24283b;
+    --card-border: #565f89;
+    --summary-color: #c0caf5;
+    --body-color: #a9b1d6;
+    --app-name-color: #7aa2f7;
+    --timestamp-color: #737aa2;
+
+    --badge-bg: #2f3549;
+    --badge-color: #7dcfff;
+
+    --clear-bg: #7aa2f7;
+    --clear-hover-bg: #7dcfff;
+    --clear-color: #1a1b26;
+    --clear-shadow-color: rgba(0, 0, 0, 1.0);
+
+    --dismiss-color: #a9b1d6;
+    --dismiss-hover-bg: #3b4261;
+
+    --action-bg: #2f3549;
+    --action-hover-bg: #3b4261;
+    --action-color: #c0caf5;
+
+    --icon-bg: #24283b;
+    --handle-bg: #7aa2f7;
+
+    --scrollbar-track-bg: #24283b;
+    --scrollbar-thumb-bg: #414868;
+    --scrollbar-thumb-hover-bg: #565f89;
+}

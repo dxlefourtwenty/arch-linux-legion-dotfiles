@@ -5,7 +5,7 @@ set -euo pipefail
 FILTER=3700
 STATE_FILE="${XDG_RUNTIME_DIR:-/tmp}/system-toggle-nightlight.state"
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
-NOTIFY_SEND_BIN="${NOTIFY_SEND_BIN:-/usr/bin/notify-send}"
+NOTIFY_SEND_BIN="${NOTIFY_SEND_BIN:-/home/dxle/bin/notify-send}"
 NIGHTLIGHT_NOTIFY_APP_NAME="${NIGHTLIGHT_NOTIFY_APP_NAME:-system-toggle-nightlight}"
 NIGHTLIGHT_NOTIFY_STACK_TAG="${NIGHTLIGHT_NOTIFY_STACK_TAG:-system-toggle-nightlight}"
 

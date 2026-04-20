@@ -6,7 +6,7 @@ export PATH="/usr/local/sbin:/usr/local/bin:/usr/bin:/bin"
 SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 THEME_DIR="$HOME/.config/themes"
 CURRENT_LINK="$THEME_DIR/current"
-NOTIFY_SEND_BIN="/usr/bin/notify-send"
+NOTIFY_SEND_BIN="/home/dxle/bin/notify-send"
 HYPRLOCK_RANDOM_WALLPAPER_SCRIPT="$HOME/.config/hyprlock/scripts/random-wallpaper.sh"
 HYPRLOCK_RANDOM_WALLPAPER_LINK="/tmp/hyprlock-random-wallpaper"
 
@@ -27,6 +27,7 @@ NEW_THEME="$THEME_DIR/$1"
 
 "$SCRIPT_DIR/reload-nemo" || true
 "$SCRIPT_DIR/reload-pavucontrol" || true
+pkill -9 topdash || true
 
 # Atomic theme switch (IMPORTANT)
 ln -sfn "$NEW_THEME" "$CURRENT_LINK"
@@ -47,6 +48,7 @@ ln -sfn "$NEW_THEME" "$CURRENT_LINK"
 "$SCRIPT_DIR/reload-discord" >/dev/null 2>&1 &
 "$SCRIPT_DIR/spicetify-set" --live "$1" >/dev/null 2>&1 &
 "$SCRIPT_DIR/reload-dashboard" || true
+"$SCRIPT_DIR/reload-wardnc" || true
 
 
 "$SCRIPT_DIR/reload-celluloid" || true

@@ -5,7 +5,7 @@ set -euo pipefail
 readonly AWWW_BIN="${AWWW_BIN:-/usr/bin/awww}"
 readonly FIND_BIN="${FIND_BIN:-/usr/bin/find}"
 readonly LN_BIN="${LN_BIN:-/usr/bin/ln}"
-readonly NOTIFY_SEND_BIN="${NOTIFY_SEND_BIN:-/usr/bin/notify-send}"
+readonly NOTIFY_SEND_BIN="${NOTIFY_SEND_BIN:-/home/dxle/bin/notify-send}"
 readonly READLINK_BIN="${READLINK_BIN:-/usr/bin/readlink}"
 readonly SORT_BIN="${SORT_BIN:-/usr/bin/sort}"
 
