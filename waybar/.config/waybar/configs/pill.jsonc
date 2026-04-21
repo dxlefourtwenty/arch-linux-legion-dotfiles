@@ -121,6 +121,7 @@
 			"custom/shot",
 			"custom/wallpapers",
 			"custom/theme",
+      "custom/chromack"
 		]
 	}, 
 	"custom/infolabel": {
@@ -147,6 +148,11 @@
       "format": "<span font_desc=\"JetBrainsMono Nerd Font\"></span>",  
       "on-click": "~/bin/menu-style",
 		  "tooltip-format": "Style Configuration",
+    },
+    "custom/chromack": {
+      "format": "<span font_desc=\"JetBrainsMono Nerd Font\">󰸌</span>",
+      "on-click": "~/bin/toggle-chromack --toggle",
+      "tooltip-format": "Color Menu",
     },
    "wireplumber": {
        "format":"<span font_desc=\"JetBrainsMono Nerd Font\">{icon}</span> {volume}%",
