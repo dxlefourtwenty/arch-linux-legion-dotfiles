@@ -22,7 +22,15 @@ resolve_chromack_bin() {
         return
     fi
 
+    local path_chromack=""
+    path_chromack="$(command -v chromack || true)"
+    if [[ -n "$path_chromack" ]]; then
+        printf '%s\n' "$path_chromack"
+        return
+    fi
+
     local candidates=(
+        "$HOME/.local/bin/chromack"
         "$HOME/builds/chromack/build-chromack/chromack"
         "$HOME/builds/chromack/build/chromack"
     )

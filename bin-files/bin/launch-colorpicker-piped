@@ -1,0 +1,85 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+PIDFILE="/tmp/launch-colorpicker-piped.pid"
+
+notify_error() {
+    local message="$1"
+    if [[ -x "${NOTIFY_SEND_BIN:-}" ]]; then
+        "$NOTIFY_SEND_BIN" -t 5000 "Color Picker" "$message"
+    fi
+}
+
+require_cmd() {
+    local cmd="$1"
+    local cmd_path
+    cmd_path="$(command -v "$cmd" || true)"
+    if [[ -z "$cmd_path" ]]; then
+        notify_error "Missing dependency: $cmd"
+        exit 1
+    fi
+    printf '%s\n' "$cmd_path"
+}
+
+resolve_chromack() {
+    local cmd_path
+    cmd_path="$(command -v chromack || true)"
+    if [[ -n "$cmd_path" ]]; then
+        printf '%s\n' "$cmd_path"
+        return 0
+    fi
+
+    local candidate
+    for candidate in "$HOME/.local/bin/chromack" "$HOME/builds/chromack/build-chromack/chromack"; do
+        if [[ -x "$candidate" ]]; then
+            printf '%s\n' "$candidate"
+            return 0
+        fi
+    done
+
+    notify_error "Missing dependency: chromack"
+    exit 1
+}
+
+NOTIFY_SEND_BIN="$(command -v notify-send || true)"
+HYPRPICKER_BIN="$(require_cmd hyprpicker)"
+CHROMACK_BIN="$(resolve_chromack)"
+
+if [[ -f "$PIDFILE" ]]; then
+    pid="$(cat "$PIDFILE" 2>/dev/null || true)"
+    if [[ -n "${pid:-}" ]] && kill -0 "$pid" 2>/dev/null; then
+        kill -TERM "$pid" 2>/dev/null || true
+        exit 0
+    fi
+    rm -f "$PIDFILE"
+fi
+
+(
+    set -euo pipefail
+
+    printf '%s\n' "$$" > "$PIDFILE"
+
+    cleanup() {
+        rm -f "$PIDFILE"
+    }
+    trap cleanup EXIT INT TERM
+
+    color="$("$HYPRPICKER_BIN" -a -b -f rgb -o "#{0:02X}{1:02X}{2:02X}")" || exit 0
+    [[ -z "$color" ]] && exit 0
+
+    printf '%s\n' "$color" | "$CHROMACK_BIN" --set-color-stdin >/dev/null 2>&1 || true
+
+    if [[ -x "${NOTIFY_SEND_BIN:-}" ]]; then
+        icon="/tmp/colorpick.png"
+        if command -v magick >/dev/null 2>&1; then
+            magick -size 32x32 xc:"$color" "$icon" >/dev/null 2>&1 || true
+        fi
+
+        if [[ -f "$icon" ]]; then
+            "$NOTIFY_SEND_BIN" -i "$icon" -t 5000 "Color Picker" "$color"
+        else
+            "$NOTIFY_SEND_BIN" -t 5000 "Color Picker" "$color"
+        fi
+    fi
+) >/dev/null 2>&1 &

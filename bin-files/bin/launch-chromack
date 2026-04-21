@@ -1,14 +1,76 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-TOGGLE_SCRIPT="${TOGGLE_CHROMACK_SCRIPT:-$HOME/builds/chromack/scripts/toggle-chromack}"
+TOGGLE_SCRIPT_OVERRIDE="${TOGGLE_CHROMACK_SCRIPT:-}"
+CHROMACK_BIN_OVERRIDE="${CHROMACK_BIN:-}"
 
 usage() {
     printf 'Usage: %s [--dry-run]\n' "${0##*/}"
 }
 
+resolve_chromack_bin() {
+    if [[ -n "$CHROMACK_BIN_OVERRIDE" ]]; then
+        printf '%s\n' "$CHROMACK_BIN_OVERRIDE"
+        return
+    fi
+
+    local path_chromack=""
+    path_chromack="$(command -v chromack || true)"
+    if [[ -n "$path_chromack" ]]; then
+        printf '%s\n' "$path_chromack"
+        return
+    fi
+
+    local candidates=(
+        "$HOME/.local/bin/chromack"
+        "$HOME/builds/chromack/build-chromack/chromack"
+        "$HOME/builds/chromack/build/chromack"
+    )
+
+    local path
+    for path in "${candidates[@]}"; do
+        if [[ -x "$path" ]]; then
+            printf '%s\n' "$path"
+            return
+        fi
+    done
+
+    printf '%s\n' "${candidates[0]}"
+}
+
+resolve_toggle_script() {
+    if [[ -n "$TOGGLE_SCRIPT_OVERRIDE" ]] && [[ -x "$TOGGLE_SCRIPT_OVERRIDE" ]]; then
+        printf '%s\n' "$TOGGLE_SCRIPT_OVERRIDE"
+        return
+    fi
+
+    local path_toggle=""
+    path_toggle="$(command -v toggle-chromack || true)"
+    if [[ -n "$path_toggle" ]]; then
+        printf '%s\n' "$path_toggle"
+        return
+    fi
+
+    local candidates=(
+        "$HOME/bin/toggle-chromack"
+        "$HOME/builds/chromack/scripts/toggle-chromack"
+    )
+
+    local script_path
+    for script_path in "${candidates[@]}"; do
+        if [[ -x "$script_path" ]]; then
+            printf '%s\n' "$script_path"
+            return
+        fi
+    done
+
+    printf '%s\n' "${candidates[0]}"
+}
+
 main() {
     local dry_run=0
+    local toggle_script=""
+    local chromack_bin=""
 
     while [[ $# -gt 0 ]]; do
         case "$1" in
@@ -27,16 +89,19 @@ main() {
         shift
     done
 
-    if [[ ! -x "$TOGGLE_SCRIPT" ]]; then
+    toggle_script="$(resolve_toggle_script)"
+    chromack_bin="$(resolve_chromack_bin)"
+
+    if [[ ! -x "$toggle_script" ]]; then
         return 1
     fi
 
     if [[ "$dry_run" -eq 1 ]]; then
-        "$TOGGLE_SCRIPT" --launch --dry-run
+        CHROMACK_BIN="$chromack_bin" "$toggle_script" --launch --dry-run
         return 0
     fi
 
-    "$TOGGLE_SCRIPT" --launch
+    CHROMACK_BIN="$chromack_bin" "$toggle_script" --launch
 }
 
 main "$@"
