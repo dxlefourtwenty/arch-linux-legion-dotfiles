@@ -1,14 +1,14 @@
 :root {
     --panel-bg: #130e22;
-    --panel-border: #af0439;
-    --list-bg: #0e091d;
+    --panel-border: #2a2e55;
+    --list-bg: #130e22;
     --header-bg: #211d2f;
     --header-color: #14b9b5;
     --footer-bg: #211d2f;
     --footer-color: #115a63;
 
     --card-bg: #2d293a;
-    --card-border: #e20342;
+    --card-border: #2a2e55;
     --summary-color: #14b9b5;
     --body-color: #13999a;
     --app-name-color: #e20342;

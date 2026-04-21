@@ -1,0 +1,455 @@
+@import "/home/dxle/.config/themes/current/chromack.css";
+@import "./material.css";
+
+:root {
+    --font-family: "Liberation Sans";
+    --panel-radius: 16px;
+    --panel-border-width: 1px;
+    --panel-padding: 14px;
+    --section-gap: 10px;
+
+    --header-radius: 12px;
+    --content-radius: 12px;
+    --section-title-size: 13px;
+    --title-size: 17px;
+    --subtitle-size: 12px;
+
+    --picker-height: 220px;
+    --picker-radius: 10px;
+    --hue-width: 22px;
+
+    --swatch-size: 24px;
+    --swatch-radius: 3px;
+    --swatch-gap: 2px;
+
+    --recent-swatch-size: 24px;
+    --recent-swatch-radius: 3px;
+
+    --input-height: 34px;
+    --input-radius: 8px;
+
+    --button-height: 34px;
+    --button-radius: 10px;
+    --button-padding-x: 12px;
+
+    --header-icon-font-family: "Symbols Nerd Font Mono";
+    --header-icon-font-size: 10.67px;
+
+    --preview-width: 74px;
+    --preview-height: 34px;
+    --preview-radius: 10px;
+
+    --control-border-width: 1px;
+
+    --header-bg: var(--color-surface-alt);
+    --content-bg: var(--color-surface-alt);
+    --content-backdrop-bg: var(--color-content-backdrop);
+    --panel-bg: var(--color-surface);
+    --palette-scroll-bg: var(--content-bg);
+
+    --border-color: var(--color-border);
+    --text-color: var(--color-text);
+    --text-muted-color: var(--color-muted);
+
+    --button-primary-bg: var(--color-primary);
+    --button-primary-fg: var(--text-color);
+
+    --input-bg: var(--panel-bg);
+
+    --hue-handle-bg: #ffffff;
+    --hue-handle-border-color: #111111;
+
+    --slider-track-bg: var(--color-surface-alt);
+    --slider-fill-bg: var(--color-primary);
+    --slider-handle-bg: #ffffff;
+    --slider-handle-border-color: #111111;
+
+    --swatch-selected-border-color: var(--text-color);
+}
+
+QWidget#chromackWindow {
+    background: transparent;
+}
+
+QWidget#chromackWindow,
+QWidget#chromackWindow * {
+    font-family: var(--font-family);
+}
+
+QFrame#panelRoot {
+    background: var(--panel-bg);
+    border: var(--panel-border-width) solid var(--border-color);
+    border-radius: var(--panel-radius);
+}
+
+QFrame#headerBar {
+    background: var(--header-bg);
+    border-radius: var(--header-radius);
+}
+
+QLabel#headerTitle {
+    color: var(--text-color);
+    font-size: var(--title-size);
+    font-weight: 700;
+}
+
+QLabel#headerSubtitle {
+    color: var(--text-muted-color);
+    font-size: var(--subtitle-size);
+}
+
+QPushButton#closeButton,
+QPushButton#eyedropperButton {
+    min-height: var(--button-height);
+    min-width: var(--button-height);
+    border: var(--control-border-width) solid var(--border-color);
+    border-radius: var(--button-radius);
+    background: transparent;
+    color: var(--text-color);
+    font-weight: 700;
+}
+
+QPushButton#eyedropperButton:hover {
+    background: var(--color-surface-alt);
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+}
+
+QPushButton#closeButton:hover {
+    background: var(--color-surface-alt);
+    border-color: var(--color-danger);
+    color: var(--color-danger);
+}
+
+QScrollArea#pickerScrollArea {
+    background: var(--content-backdrop-bg);
+    border-radius: var(--content-radius);
+}
+
+QTabWidget#panelTabs {
+    background: var(--panel-bg);
+}
+
+QTabWidget#panelTabs::tab-bar {
+    alignment: left;
+    top: 2px;
+}
+
+QTabWidget#panelTabs QTabBar {
+    background: var(--panel-bg);
+}
+
+QTabWidget#panelTabs QTabBar::base {
+    border: none;
+    background: var(--panel-bg);
+}
+
+QTabWidget#panelTabs::pane {
+    border: none;
+    background: var(--content-bg);
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
+    border-bottom-left-radius: var(--content-radius);
+    border-bottom-right-radius: var(--content-radius);
+}
+
+QTabWidget#panelTabs QTabBar::tab {
+    min-height: 30px;
+    padding: 0 12px;
+    margin-bottom: -1px;
+    border: none;
+    border-top-left-radius: var(--input-radius);
+    border-top-right-radius: var(--input-radius);
+    background: var(--panel-bg);
+    color: var(--text-muted-color);
+}
+
+QTabWidget#panelTabs QTabBar::tab:selected {
+    background: var(--content-bg);
+    color: var(--text-color);
+}
+
+QWidget#pickerViewport,
+QWidget#pickerContainer {
+    background: var(--content-bg);
+    border-radius: var(--content-radius);
+}
+
+QWidget#paletteTab,
+QWidget#shadesTab {
+    background: var(--content-bg);
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
+    border-bottom-left-radius: var(--content-radius);
+    border-bottom-right-radius: var(--content-radius);
+}
+
+QFrame#pickerTopFrame {
+    background: transparent;
+}
+
+QWidget#svPicker {
+    min-height: var(--picker-height);
+    border: var(--control-border-width) solid var(--border-color);
+    border-radius: var(--picker-radius);
+}
+
+QSlider#hueSlider {
+    min-width: var(--hue-width);
+    max-width: var(--hue-width);
+    border: none;
+    background: transparent;
+    margin: 0;
+    padding: 0;
+}
+
+QSlider#hueSlider::groove:vertical {
+    border: none;
+    border-radius: 6px;
+    margin: 0;
+    width: var(--hue-width);
+    background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                                stop:0 #ff0000,
+                                stop:0.17 #ffff00,
+                                stop:0.33 #00ff00,
+                                stop:0.50 #00ffff,
+                                stop:0.67 #0000ff,
+                                stop:0.83 #ff00ff,
+                                stop:1 #ff0000);
+}
+
+QSlider#hueSlider::add-page:vertical,
+QSlider#hueSlider::sub-page:vertical {
+    border: none;
+    background: transparent;
+    margin: 0;
+}
+
+QSlider#hueSlider::handle:vertical {
+    background: var(--hue-handle-bg);
+    border: 1px solid var(--hue-handle-border-color);
+    height: 12px;
+    margin: -2px -2px;
+    border-radius: 6px;
+}
+
+QLabel#sectionLabel {
+    color: var(--text-color);
+    font-size: var(--section-title-size);
+    font-weight: 700;
+}
+
+QPushButton#materialSwatch {
+    min-width: var(--swatch-size);
+    max-width: var(--swatch-size);
+    min-height: var(--swatch-size);
+    max-height: var(--swatch-size);
+    border: var(--control-border-width) solid var(--border-color);
+    border-radius: var(--swatch-radius);
+    margin: 0;
+    padding: 0;
+}
+
+QPushButton#materialSwatch:checked {
+    border: 2px solid var(--swatch-selected-border-color);
+}
+
+QPushButton#recentSwatch {
+    min-width: var(--recent-swatch-size);
+    max-width: var(--recent-swatch-size);
+    min-height: var(--recent-swatch-size);
+    max-height: var(--recent-swatch-size);
+    border: var(--control-border-width) solid var(--border-color);
+    border-radius: var(--recent-swatch-radius);
+    margin: 0;
+    padding: 0;
+}
+
+QLabel#rowLabel {
+    color: var(--text-color);
+}
+
+QSlider#opacitySlider::groove:horizontal {
+    height: 10px;
+    border-radius: 5px;
+    border: var(--control-border-width) solid var(--border-color);
+    background: var(--slider-track-bg);
+}
+
+QSlider#opacitySlider::sub-page:horizontal {
+    background: var(--slider-fill-bg);
+    border-radius: 5px;
+}
+
+QSlider#opacitySlider::handle:horizontal {
+    width: 14px;
+    margin: -3px 0;
+    border-radius: 7px;
+    border: 1px solid var(--slider-handle-border-color);
+    background: var(--slider-handle-bg);
+}
+
+QFrame#opacityPreview {
+    min-width: var(--preview-width);
+    min-height: var(--preview-height);
+    border-radius: var(--preview-radius);
+    border: var(--control-border-width) solid var(--border-color);
+}
+
+QLineEdit#hexInput,
+QLineEdit#rgbaInput {
+    min-height: var(--input-height);
+    border: var(--control-border-width) solid var(--border-color);
+    border-radius: var(--input-radius);
+    padding: 0 10px;
+    color: var(--text-color);
+    background: var(--input-bg);
+}
+
+QPushButton#inlineCopyButton {
+    min-width: var(--input-height);
+    max-width: var(--input-height);
+    min-height: var(--input-height);
+    max-height: var(--input-height);
+    border-radius: var(--input-radius);
+    border: var(--control-border-width) solid var(--border-color);
+    background: var(--input-bg);
+    color: var(--text-color);
+    padding: 0;
+}
+
+QPushButton#inlineCopyButton:hover {
+    border-color: var(--text-color);
+}
+
+QPushButton#applyButton {
+    min-height: var(--button-height);
+    border-radius: var(--button-radius);
+    padding: 0 var(--button-padding-x);
+    border: var(--control-border-width) solid transparent;
+    font-weight: 700;
+}
+
+QPushButton#applyButton {
+    background: var(--button-primary-bg);
+    color: var(--button-primary-fg);
+}
+
+QPushButton#eyedropperButton {
+    font-family: var(--header-icon-font-family), var(--font-family);
+    font-size: var(--header-icon-font-size);
+    font-weight: 500;
+}
+
+QScrollArea#paletteScrollArea {
+    background: var(--palette-scroll-bg);
+    border-radius: var(--content-radius);
+}
+
+QWidget#paletteViewport,
+QWidget#paletteContainer {
+    background: var(--palette-scroll-bg);
+    border-radius: var(--content-radius);
+}
+
+QLineEdit#paletteInput,
+QFrame#paletteInputRow QLineEdit#paletteInput {
+    min-height: var(--input-height);
+    border: var(--control-border-width) solid var(--border-color);
+    border-radius: var(--input-radius);
+    padding: 0 10px;
+    color: var(--text-color);
+    background: var(--input-bg);
+}
+
+QFrame#paletteInputRow QPushButton#paletteGenerateButton {
+    min-height: var(--input-height);
+    border-radius: var(--input-radius);
+    border: var(--control-border-width) solid var(--border-color);
+    background: var(--input-bg);
+    color: var(--text-color);
+    padding: 0 10px;
+}
+
+QFrame#paletteInputRow QPushButton#paletteGenerateButton:hover {
+    border-color: var(--text-color);
+}
+
+QPushButton#paletteInputSwatch,
+QPushButton#paletteBaseSwatch,
+QPushButton#paletteHexSwatch {
+    min-width: var(--swatch-size);
+    max-width: var(--swatch-size);
+    min-height: var(--swatch-size);
+    max-height: var(--swatch-size);
+    border: var(--control-border-width) solid var(--border-color);
+    border-radius: var(--swatch-radius);
+    margin: 0;
+    padding: 0;
+}
+
+QPushButton#paletteInputSwatch:hover,
+QPushButton#paletteBaseSwatch:hover,
+QPushButton#paletteHexSwatch:hover {
+    border-color: var(--text-color);
+}
+
+QFrame#shadeSwatchRow {
+    background: transparent;
+}
+
+QPushButton#shadeSwatch {
+    min-height: var(--preview-height);
+    border: var(--control-border-width) solid var(--border-color);
+    border-radius: 0px;
+    margin: 0;
+    padding: 0;
+}
+
+QPushButton#shadeSwatch:hover {
+    border-color: var(--text-color);
+}
+
+QWidget#theoryTab {
+    background: var(--content-bg);
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
+    border-bottom-left-radius: var(--content-radius);
+    border-bottom-right-radius: var(--content-radius);
+}
+
+QScrollArea#theoryScrollArea {
+    background: var(--palette-scroll-bg);
+    border-radius: var(--content-radius);
+}
+
+QWidget#theoryViewport,
+QWidget#theoryContainer,
+QFrame#theoryContentFrame {
+    background: var(--palette-scroll-bg);
+    border-radius: var(--content-radius);
+}
+
+QFrame#theorySchemeFrame,
+QFrame#theorySwatchRow {
+    background: transparent;
+}
+
+QPushButton#theorySwatch {
+    min-height: var(--preview-height);
+    border: var(--control-border-width) solid var(--border-color);
+    border-radius: 0px;
+    margin: 0;
+    padding: 0;
+}
+
+QPushButton#theorySwatch:hover {
+    border-color: var(--text-color);
+}
+
+QWidget#theoryWheel {
+    min-height: 315px;
+    border: none;
+    border-radius: 0px;
+    background: transparent;
+}

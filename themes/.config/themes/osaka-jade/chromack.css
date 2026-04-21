@@ -1,0 +1,32 @@
+:root {
+    --color-primary: #2fd18f;
+    --color-secondary: #2DD5B7;
+    --color-accent: #459451;
+    --color-surface: #122421;
+    --color-surface-alt: #253531;
+    --color-panel-backdrop: var(--color-surface);
+    --color-picker-backdrop: var(--color-surface);
+    --color-content-backdrop: var(--color-surface-alt);
+    --color-border: #2fd18f;
+    --color-text: #d9f5e6;
+    --color-muted: #526b63;
+    --color-success: #549e6a;
+    --color-warning: #459451;
+    --color-danger: #FF5345;
+    --panel-bg: var(--color-surface);
+    --header-bg: var(--color-surface-alt);
+    --content-bg: #253531;
+    --border-color: var(--color-border);
+    --text-color: var(--color-text);
+    --text-muted-color: var(--color-muted);
+    --button-primary-bg: var(--color-primary);
+    --button-primary-fg: var(--color-surface);
+    --input-bg: #23372B;
+    --hue-handle-bg: #ffffff;
+    --hue-handle-border-color: #111111;
+    --slider-track-bg: #253531;
+    --slider-fill-bg: var(--color-primary);
+    --slider-handle-bg: #ffffff;
+    --slider-handle-border-color: #111111;
+    --swatch-selected-border-color: var(--color-secondary);
+}

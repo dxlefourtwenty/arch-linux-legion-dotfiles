@@ -29,6 +29,7 @@ NEW_THEME="$THEME_DIR/$1"
 "$SCRIPT_DIR/reload-pavucontrol" || true
 pkill -9 topdash || true
 pkill -9 wardnc || true
+pkill -9 chromack || true
 
 # Atomic theme switch (IMPORTANT)
 ln -sfn "$NEW_THEME" "$CURRENT_LINK"
@@ -50,6 +51,7 @@ ln -sfn "$NEW_THEME" "$CURRENT_LINK"
 "$SCRIPT_DIR/spicetify-set" --live "$1" >/dev/null 2>&1 &
 "$SCRIPT_DIR/reload-dashboard" || true
 "$SCRIPT_DIR/reload-wardnc" || true
+"$SCRIPT_DIR/reload-chromack" || true
 
 
 "$SCRIPT_DIR/reload-celluloid" || true

@@ -1,6 +1,6 @@
 :root {
     --panel-bg: #232e48;
-    --panel-border: #bf89a5;
+    --panel-border: #6e4c59;
     --list-bg: #1e2a44;
     --header-bg: #303b53;
     --header-color: #f4f6fa;
@@ -8,7 +8,7 @@
     --footer-color: #808898;
 
     --card-bg: #3b465c;
-    --card-border: #f2a7c4;
+    --card-border: #6e4c59;
     --summary-color: #f4f6fa;
     --body-color: #cdd1d9;
     --app-name-color: #f2a7c4;
