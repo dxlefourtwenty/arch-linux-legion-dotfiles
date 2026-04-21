@@ -6,10 +6,10 @@ anchor = "top-right"
 screen = "HDMI-A-1"
 monitor_position = "left"
 width = 420
-peek_width = 12
+peek_width = 0
 outer_margin = 0
 top_margin = 24
-right_margin = 0
+right_margin = 24
 bottom_margin = 24
 left_margin = 30
 minimum_height = 240
@@ -19,7 +19,7 @@ exclusive_zone = 0
 
 [panel]
 start_open = false
-open_on_new_notification = false
+open_on_new_notification = true
 close_on_escape = true
 close_on_background_click = false
 show_header = true
@@ -32,9 +32,10 @@ clear_button = true
 reverse_order = true
 max_visible_notifications = 120
 max_tracked_notifications = 400
-show_handle = false
+show_handle = true
 scrollbar_position = "none"
-title = "Notifications"
+header_glpyh = "󰂚"
+title = " Notifications"
 footer_text = "wardnc"
 
 [animation]
@@ -42,7 +43,7 @@ enabled = true
 duration_ms = 220
 fade = true
 fade_duration_ms = 180
-slide_distance = 30
+slide_distance = 32
 slide_direction = "left"
 easing = "out-cubic"
 
@@ -60,7 +61,9 @@ ignore_transient = false
 auto_expire = false
 respect_timeout = true
 default_timeout_ms = 5000
-max_icon_size = 128
+max_icon_size = 64
+history_enabled = true
+history_max_entries = 2000
 
 [text]
 strip_pango_markup = true
@@ -71,3 +74,4 @@ summary_fallback = "Notification"
 style_css = "~/.config/wardnc/style.css"
 colors_css = "~/.config/wardnc/colors.css"
 state_file = "${XDG_RUNTIME_DIR}/wardnc/panel.state"
+history_file = "~/.local/state/wardnc/notification-history.jsonl"

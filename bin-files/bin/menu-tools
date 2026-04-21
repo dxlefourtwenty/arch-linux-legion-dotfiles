@@ -14,6 +14,7 @@ options="󰖂  VPN
   Share
 󰞅  Emojis
 󰡯  Unicode
+󰏙  Chromack
 󰸌  Color Converter
 󰸉  Image Palette Converter
   Tasks
@@ -63,6 +64,9 @@ case "$label" in
     ;;
   "Unicode")
     "$SCRIPT_DIR/menu-unicode"
+    ;;
+  "Chromack")
+    "$SCRIPT_DIR/toggle-chromack" --toggle
     ;;
   "Color Converter")
     "$SCRIPT_DIR/menu-color-converter"
