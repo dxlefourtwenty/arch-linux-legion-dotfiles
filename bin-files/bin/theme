@@ -28,6 +28,7 @@ NEW_THEME="$THEME_DIR/$1"
 "$SCRIPT_DIR/reload-nemo" || true
 "$SCRIPT_DIR/reload-pavucontrol" || true
 pkill -9 topdash || true
+pkill -9 wardnc || true
 
 # Atomic theme switch (IMPORTANT)
 ln -sfn "$NEW_THEME" "$CURRENT_LINK"
