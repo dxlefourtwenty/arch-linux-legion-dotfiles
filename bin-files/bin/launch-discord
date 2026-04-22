@@ -2,6 +2,8 @@
 
 set -euo pipefail
 
+pkill -9 vesktop || true
+
 WIDTH=1200
 HEIGHT=800
 APP_CLASS=vesktop
@@ -38,7 +40,4 @@ if [ -z "$discord_address" ]; then
 fi
 
 hyprctl dispatch focuswindow "address:$discord_address"
-hyprctl dispatch setfloating
-hyprctl dispatch resizeactive exact "$WIDTH" "$HEIGHT"
-hyprctl dispatch centerwindow
 hyprctl dispatch movetoworkspacesilent special:discordspace
