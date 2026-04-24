@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+STATE_FILE="/tmp/hypr_toggle_scrolling_focus"
+COMMAND=(hyprctl keyword scrolling:focus_fit_method)
+NOTIFY_COMMAND=(notify-send -t 3000 "Hyprland")
+
+if [[ -f "$STATE_FILE" ]]; then
+  rm "$STATE_FILE"
+  "${COMMAND[@]}" 0
+  "${NOTIFY_COMMAND[@]}" "Set Scrolling Focus to: <b>Center</b>"
+else
+  touch "$STATE_FILE"
+  "${COMMAND[@]}" 1
+  "${NOTIFY_COMMAND[@]}" "Set Scrolling Focus to: <b>Fit</b>"
+fi
