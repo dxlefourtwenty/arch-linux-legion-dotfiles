@@ -12,12 +12,13 @@ readonly MAGICK_BIN="${MAGICK_BIN:-/usr/bin/magick}"
 readonly CKSUM_BIN="${CKSUM_BIN:-/usr/bin/cksum}"
 readonly AWK_BIN="${AWK_BIN:-/usr/bin/awk}"
 readonly RM_BIN="${RM_BIN:-/usr/bin/rm}"
+readonly NETFLIX_ICON="${NETFLIX_PLAY_PAUSE_ICON:-/home/dxle/.local/share/icons/netflix.png}"
 
-STATE_DIR="${YOUTUBE_PLAY_PAUSE_STATE_DIR:-${XDG_RUNTIME_DIR:-/tmp}/media-controls}"
-STATE_FILE="${YOUTUBE_PLAY_PAUSE_STATE_FILE:-$STATE_DIR/youtube-play-pause.state}"
-ICON_DIR="${YOUTUBE_PLAY_PAUSE_ICON_DIR:-$STATE_DIR/icons}"
-THUMB_CURL_MAX_TIME="${YOUTUBE_PLAY_PAUSE_THUMB_CURL_MAX_TIME:-5}"
-DRY_RUN="${YOUTUBE_PLAY_PAUSE_DRY_RUN:-0}"
+STATE_DIR="${NETFLIX_PLAY_PAUSE_STATE_DIR:-${XDG_RUNTIME_DIR:-/tmp}/media-controls}"
+STATE_FILE="${NETFLIX_PLAY_PAUSE_STATE_FILE:-$STATE_DIR/netflix-play-pause.state}"
+ICON_DIR="${NETFLIX_PLAY_PAUSE_ICON_DIR:-$STATE_DIR/icons}"
+THUMB_CURL_MAX_TIME="${NETFLIX_PLAY_PAUSE_THUMB_CURL_MAX_TIME:-5}"
+DRY_RUN="${NETFLIX_PLAY_PAUSE_DRY_RUN:-0}"
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 
 if [[ -r "$script_dir/youtube-notify-lib" ]]; then
@@ -79,7 +80,7 @@ find_candidate_from_active() {
           or
          (($initial_class_l == "chromium") or ($initial_class_l == "brave") or ($initial_class_l == "brave-browser")))
         and
-        (($title_l | contains("youtube")) or ($initial_title_l | contains("youtube")))
+        (($title_l | contains("netflix")) or ($initial_title_l | contains("netflix")))
       then
         [
           (
@@ -114,7 +115,7 @@ find_first_candidate() {
             or
            (($initial_class_l == "chromium") or ($initial_class_l == "brave") or ($initial_class_l == "brave-browser")))
           and
-          (($title_l | contains("youtube")) or ($initial_title_l | contains("youtube")))
+          (($title_l | contains("netflix")) or ($initial_title_l | contains("netflix")))
         )
     )
     | .[0]
@@ -152,7 +153,7 @@ write_state() {
   }
 
   "$MKDIR_BIN" -p "$STATE_DIR"
-  temp_file="$("$MKTEMP_BIN" "$STATE_DIR/.youtube-play-pause.XXXXXX")"
+  temp_file="$("$MKTEMP_BIN" "$STATE_DIR/.netflix-play-pause.XXXXXX")"
   printf '%s\n%s\n%s\n%s\n%s\n' "$player" "$browser_class" "$window_title" "$media_url" "$media_title" > "$temp_file"
   "$MV_BIN" -f "$temp_file" "$STATE_FILE"
 }
@@ -211,7 +212,7 @@ normalize_thumbnail_icon() {
     return 0
   fi
 
-  temp_icon_path="$("$MKTEMP_BIN" "$ICON_DIR/.youtube-thumb.XXXXXX.png")"
+  temp_icon_path="$("$MKTEMP_BIN" "$ICON_DIR/.netflix-thumb.XXXXXX.png")"
 
   if ! "$CURL_BIN" -fsSL --max-time "$THUMB_CURL_MAX_TIME" "$thumbnail_url" \
     | "$MAGICK_BIN" - -resize 64x64^ -gravity center -extent 64x64 "$temp_icon_path"; then
@@ -263,7 +264,7 @@ is_title_match() {
     ' | "$JQ_BIN" -e '. == true' >/dev/null
 }
 
-is_youtube_media() {
+is_netflix_media() {
   local media_url="$1"
   local media_title="$2"
   local window_title="$3"
@@ -273,7 +274,7 @@ is_youtube_media() {
     --arg t "$media_title" '
       ($u | ascii_downcase) as $ul
       | ($t | ascii_downcase) as $tl
-      | (($ul | contains("netflix")) or ($tl | contains("netflix")))
+      | (($ul | contains("youtube")) or ($ul | contains("youtu.be")) or ($tl | contains("youtube")))
     ' | "$JQ_BIN" -e '. == true' >/dev/null; then
     return 1
   fi
@@ -283,7 +284,7 @@ is_youtube_media() {
     --arg t "$media_title" '
       ($u | ascii_downcase) as $ul
       | ($t | ascii_downcase) as $tl
-      | (($ul | contains("youtube")) or ($ul | contains("youtu.be")) or ($tl | contains("youtube")))
+      | (($ul | contains("netflix")) or ($tl | contains("netflix")))
     ' | "$JQ_BIN" -e '. == true' >/dev/null && return 0
 
   is_title_match "$window_title" "$media_title"
@@ -312,7 +313,7 @@ pick_player_for_browser() {
     metadata="$(player_metadata "$player")"
     media_url="${metadata%%|*}"
     media_title="${metadata#*|}"
-    is_youtube_media "$media_url" "$media_title" "$window_title" || continue
+    is_netflix_media "$media_url" "$media_title" "$window_title" || continue
 
     status="$(player_status "$player")"
     [[ -n "$first_any" ]] || first_any="$player"$'\t'"$status"$'\t'"$media_url"$'\t'"$media_title"
@@ -394,7 +395,7 @@ notify_toggle() {
   if [[ -n "$video_artist" ]]; then
     body+=$'\n'"<span foreground=\"var(--border-color)\">$escaped_artist</span>"
   fi
-  [[ -n "$body" ]] || body="YouTube"
+  [[ -n "$body" ]] || body="Netflix"
 
   if declare -F youtube_notify_send >/dev/null 2>&1; then
     YOUTUBE_NOTIFY_DRY_RUN="$DRY_RUN" youtube_notify_send "$summary" "$body" 2500 "$video_thumbnail" || true
@@ -423,7 +424,7 @@ toggle_candidate() {
   fi
 
   [[ -n "$candidate" ]] || {
-    printf 'No Chromium/Brave YouTube window found\n' >&2
+    printf 'No Chromium/Brave Netflix window found\n' >&2
     exit 1
   }
 
@@ -444,7 +445,8 @@ toggle_candidate() {
   media_url="${media_url%%|*}"
   media_artist="$(player_artist "$player_name")"
   media_thumbnail="$(player_thumbnail "$player_name")"
-  media_icon="$(normalize_thumbnail_icon "$media_thumbnail" 2>/dev/null || true)"
+  media_icon="$NETFLIX_ICON"
+  [[ -r "$media_icon" ]] || media_icon="$(normalize_thumbnail_icon "$media_thumbnail" 2>/dev/null || true)"
   [[ -n "$media_title" ]] || media_title="$window_title"
 
   notify_toggle "$summary" "$media_title" "$media_artist" "$media_icon"
