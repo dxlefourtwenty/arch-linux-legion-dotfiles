@@ -13,6 +13,7 @@ HYPRCTL_BIN="/usr/bin/hyprctl"
 READLINK_BIN="/usr/bin/readlink"
 HYPR_CONF="${XDG_CONFIG_HOME:-$HOME/.config}/hypr/decorations.conf"
 ANIMATIONS_CONF="${XDG_CONFIG_HOME:-$HOME/.config}/hypr/animations.conf"
+PLUGINS_CONF="${XDG_CONFIG_HOME:-$HOME/.config}/hypr/plugins.conf"
 XDG_STATE_HOME_DEFAULT="${HOME}/.local/state"
 STATE_DIR="${XDG_STATE_HOME:-$XDG_STATE_HOME_DEFAULT}/menu-layout"
 AXIS_STATE_FILE="${STATE_DIR}/workspace-axis.state"
@@ -23,7 +24,7 @@ SELECTED_LAYOUT=""
 LAYOUTS=("dwindle" "scrolling" "master" "monocle")
 
 usage() {
-    printf 'Usage: %s [--layout master|dwindle|scrolling|monocle] [--config PATH] [--animations-config PATH] [--dry-run]\n' "$(basename "$0")"
+    printf 'Usage: %s [--layout master|dwindle|scrolling|monocle] [--config PATH] [--animations-config PATH] [--plugins-config PATH] [--dry-run]\n' "$(basename "$0")"
 }
 
 notify() {
@@ -71,6 +72,11 @@ require_config() {
         notify "Config not found: $ANIMATIONS_CONF"
         exit 1
     }
+
+    [[ -f "$PLUGINS_CONF" ]] || {
+        notify "Config not found: $PLUGINS_CONF"
+        exit 1
+    }
 }
 
 resolve_config_path() {
@@ -81,6 +87,9 @@ resolve_config_path() {
 
     resolved_path="$("$READLINK_BIN" -f "$ANIMATIONS_CONF" 2>/dev/null || true)"
     [[ -n "$resolved_path" ]] && ANIMATIONS_CONF="$resolved_path"
+
+    resolved_path="$("$READLINK_BIN" -f "$PLUGINS_CONF" 2>/dev/null || true)"
+    [[ -n "$resolved_path" ]] && PLUGINS_CONF="$resolved_path"
 }
 
 get_current_layout() {
@@ -102,6 +111,46 @@ get_current_layout() {
             exit
         }
     ' "$HYPR_CONF"
+}
+
+normalize_layout() {
+    case "$1" in
+        scrollingfix)
+            printf 'scrolling\n'
+            ;;
+        *)
+            printf '%s\n' "$1"
+            ;;
+    esac
+}
+
+get_applied_layout() {
+    local layout="$1"
+
+    if [[ "$layout" == "scrolling" ]] && has_scrolling_fix_plugin; then
+        printf 'scrollingfix\n'
+        return
+    fi
+
+    printf '%s\n' "$layout"
+}
+
+has_scrolling_fix_plugin() {
+    "$AWK_BIN" '
+        {
+            line = $0
+            sub(/[[:space:]]*#.*/, "", line)
+        }
+
+        line ~ /hypr-scrolling-fix/ || line ~ /hyprscrollingfix\.so/ {
+            found = 1
+            exit
+        }
+
+        END {
+            exit found ? 0 : 1
+        }
+    ' "$PLUGINS_CONF"
 }
 
 get_current_axis() {
@@ -351,6 +400,14 @@ while [[ $# -gt 0 ]]; do
             ANIMATIONS_CONF="$2"
             shift 2
             ;;
+        --plugins-config)
+            [[ $# -ge 2 ]] || {
+                usage
+                exit 1
+            }
+            PLUGINS_CONF="$2"
+            shift 2
+            ;;
         --dry-run)
             DRY_RUN=1
             shift
@@ -369,11 +426,13 @@ done
 resolve_config_path
 require_config
 
-CURRENT_LAYOUT="$(get_current_layout)"
-[[ -n "$CURRENT_LAYOUT" ]] || {
+CURRENT_APPLIED_LAYOUT="$(get_current_layout)"
+[[ -n "$CURRENT_APPLIED_LAYOUT" ]] || {
     notify "Failed to detect current layout."
     exit 1
 }
+
+CURRENT_LAYOUT="$(normalize_layout "$CURRENT_APPLIED_LAYOUT")"
 
 CURRENT_AXIS="$(get_current_axis)"
 [[ -n "$CURRENT_AXIS" ]] || {
@@ -397,12 +456,14 @@ is_valid_layout "$SELECTED_LAYOUT" || {
     exit 1
 }
 
-if [[ "$SELECTED_LAYOUT" == "$CURRENT_LAYOUT" && "$SELECTED_LAYOUT" != "scrolling" ]]; then
+TARGET_APPLIED_LAYOUT="$(get_applied_layout "$SELECTED_LAYOUT")"
+
+if [[ "$SELECTED_LAYOUT" == "$CURRENT_LAYOUT" && "$TARGET_APPLIED_LAYOUT" == "$CURRENT_APPLIED_LAYOUT" && "$SELECTED_LAYOUT" != "scrolling" ]]; then
     exit 0
 fi
 
 if [[ "$DRY_RUN" -eq 1 ]]; then
-    printf 'Would set layout to %s in %s\n' "$SELECTED_LAYOUT" "$HYPR_CONF"
+    printf 'Would set layout to %s in %s\n' "$TARGET_APPLIED_LAYOUT" "$HYPR_CONF"
 
     if [[ "$CURRENT_LAYOUT" != "scrolling" && "$SELECTED_LAYOUT" == "scrolling" ]]; then
         printf 'Would save previous workspace axis as %s in %s\n' "$CURRENT_AXIS" "$AXIS_STATE_FILE"
@@ -427,8 +488,8 @@ if [[ "$CURRENT_LAYOUT" != "scrolling" && "$SELECTED_LAYOUT" == "scrolling" ]]; 
     }
 fi
 
-if [[ "$SELECTED_LAYOUT" != "$CURRENT_LAYOUT" ]]; then
-    update_layout "$SELECTED_LAYOUT" || {
+if [[ "$TARGET_APPLIED_LAYOUT" != "$CURRENT_APPLIED_LAYOUT" ]]; then
+    update_layout "$TARGET_APPLIED_LAYOUT" || {
         notify "Failed to update layout."
         exit 1
     }

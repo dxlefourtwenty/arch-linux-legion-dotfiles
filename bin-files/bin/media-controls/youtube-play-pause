@@ -203,7 +203,7 @@ normalize_thumbnail_icon() {
   [[ -x "$CURL_BIN" && -x "$MAGICK_BIN" && -x "$CKSUM_BIN" && -x "$AWK_BIN" && -x "$RM_BIN" ]] || return 1
 
   "$MKDIR_BIN" -p "$ICON_DIR"
-  icon_key="$(printf '%s' "$thumbnail_url" | "$CKSUM_BIN" | "$AWK_BIN" '{print $1}')"
+  icon_key="$(printf '%s' "crop-v1:$thumbnail_url" | "$CKSUM_BIN" | "$AWK_BIN" '{print $1}')"
   icon_path="$ICON_DIR/$icon_key.png"
 
   if [[ -s "$icon_path" ]]; then
@@ -214,7 +214,7 @@ normalize_thumbnail_icon() {
   temp_icon_path="$("$MKTEMP_BIN" "$ICON_DIR/.youtube-thumb.XXXXXX.png")"
 
   if ! "$CURL_BIN" -fsSL --max-time "$THUMB_CURL_MAX_TIME" "$thumbnail_url" \
-    | "$MAGICK_BIN" - -resize 64x64\! "$temp_icon_path"; then
+    | "$MAGICK_BIN" - -resize 64x64^ -gravity center -extent 64x64 "$temp_icon_path"; then
     "$RM_BIN" -f "$temp_icon_path"
     return 1
   fi

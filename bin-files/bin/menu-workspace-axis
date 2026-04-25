@@ -110,6 +110,17 @@ get_current_layout() {
     ' "$LAYOUT_CONF"
 }
 
+normalize_layout() {
+    case "$1" in
+        scrollingfix)
+            printf 'scrolling\n'
+            ;;
+        *)
+            printf '%s\n' "$1"
+            ;;
+    esac
+}
+
 choose_axis() {
     local current_axis="$1"
     local display_axes=()
@@ -283,6 +294,7 @@ CURRENT_LAYOUT="$(get_current_layout)"
     notify "Could not detect current layout."
     exit 1
 }
+CURRENT_LAYOUT="$(normalize_layout "$CURRENT_LAYOUT")"
 
 if [[ "$CURRENT_LAYOUT" == "scrolling" ]]; then
     if [[ "$DRY_RUN" -eq 1 ]]; then
