@@ -1,0 +1,75 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+PGREP_BIN="${PGREP_BIN:-/usr/bin/pgrep}"
+PKILL_BIN="${PKILL_BIN:-/usr/bin/pkill}"
+NOTIFY_SEND_BIN="${NOTIFY_SEND_BIN:-/home/dxle/bin/notify-send}"
+
+DRY_RUN=0
+PROCESS_NAME="hypr-dock"
+SIGNAL="HUP"
+
+usage() {
+    cat <<'EOF'
+Usage: reload-dock [--dry-run]
+
+Reload hypr-dock CSS via SIGHUP.
+EOF
+}
+
+notify_status() {
+    local text="$1"
+
+    "$NOTIFY_SEND_BIN" \
+        -a "reload-dock" \
+        -h "string:x-dunst-stack-tag:reload-dock" \
+        -t 2500 \
+        "Hypr Dock" \
+        "$text" >/dev/null 2>&1 || true
+}
+
+validate_command() {
+    local command_path="$1"
+
+    [[ -x "$command_path" ]]
+}
+
+parse_args() {
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --dry-run)
+                DRY_RUN=1
+                shift
+                ;;
+            --help|-h)
+                usage
+                exit 0
+                ;;
+            *)
+                usage
+                exit 1
+                ;;
+        esac
+    done
+}
+
+main() {
+    parse_args "$@"
+
+    validate_command "$PGREP_BIN" || exit 1
+    validate_command "$PKILL_BIN" || exit 1
+
+    if [[ "$DRY_RUN" -eq 1 ]]; then
+        printf '%s -%s -x %s\n' "$PKILL_BIN" "$SIGNAL" "$PROCESS_NAME"
+        exit 0
+    fi
+
+    if ! "$PGREP_BIN" -u "$USER" -x "$PROCESS_NAME" >/dev/null; then
+        notify_status "hypr-dock is not running"
+        exit 1
+    fi
+
+    "$PKILL_BIN" "-$SIGNAL" -x "$PROCESS_NAME"
+}
+
+main "$@"

@@ -1,7 +1,7 @@
 @import "swayosd.css";
 
 window#osd {
-  border-radius: 0;
+  border-radius: 20px;
   opacity: 0.88;
   padding: 12px 10px;
   border: 2px solid @border-color;

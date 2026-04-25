@@ -1,0 +1,7 @@
+@define-color window-background rgba(18, 18, 18, 0);
+@define-color app-background #121212;
+@define-color button-background rgba(58, 58, 58, 0.47);
+@define-color indicator-point #f59e0b;
+@define-color preview-item-background rgba(58, 58, 58, 0.47);
+@define-color preview-item-border rgba(138, 138, 141, 0.12);
+@define-color preview-item-hover-background rgba(58, 58, 58, 0.30);
