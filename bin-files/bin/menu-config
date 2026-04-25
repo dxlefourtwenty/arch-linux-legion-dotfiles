@@ -17,7 +17,7 @@ options="󰸌  Themes
 󰍹  Displays
   Waybar
 󰮫  Rofi
-  Mako
+  Ward
   Kitty
   Alacritty"
 
@@ -75,9 +75,9 @@ case "$chosen" in
     "$SCRIPT_DIR/launch-terminal-floating" 1400 800 nvim ~/.config/rofi &
     notify-send -t 3000 "Config" "Editing $HOME_DIR/.config/rofi"
     ;;
-  *Mako)
-    "$SCRIPT_DIR/launch-terminal-floating" 1400 800 nvim ~/.config/mako/config &
-    notify-send -t 3000 "Config" "Editing $HOME_DIR/.config/mako/config"
+  *Ward)
+    "$SCRIPT_DIR/launch-terminal-floating" 1400 800 nvim ~/.config/ward &
+    notify-send -t 3000 "Config" "Editing $HOME_DIR/.config/ward"
     ;;
   *Kitty)
     "$SCRIPT_DIR/launch-terminal-floating" 1400 800 nvim ~/.config/kitty/kitty.conf &
