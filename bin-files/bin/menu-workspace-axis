@@ -9,6 +9,7 @@ MKTEMP_BIN="/usr/bin/mktemp"
 MV_BIN="/usr/bin/mv"
 HYPRCTL_BIN="/usr/bin/hyprctl"
 HYPR_CONF="${XDG_CONFIG_HOME:-$HOME/.config}/hypr/animations.conf"
+LAYOUT_CONF="${XDG_CONFIG_HOME:-$HOME/.config}/hypr/decorations.conf"
 MENU_ID="menu-workspace-axis"
 PID_FILE="/tmp/menu-rofi.pid"
 DRY_RUN=0
@@ -16,7 +17,7 @@ SELECTED_AXIS=""
 AXES=("horizontal" "vertical")
 
 usage() {
-    printf 'Usage: %s [--axis horizontal|vertical] [--config PATH] [--dry-run]\n' "$(basename "$0")"
+    printf 'Usage: %s [--axis horizontal|vertical] [--config PATH] [--layout-config PATH] [--dry-run]\n' "$(basename "$0")"
 }
 
 notify() {
@@ -86,6 +87,27 @@ get_current_axis() {
             exit
         }
     ' "$HYPR_CONF"
+}
+
+get_current_layout() {
+    "$AWK_BIN" '
+        /^[[:space:]]*general[[:space:]]*\{/ {
+            in_section = 1
+            next
+        }
+
+        in_section && /^[[:space:]]*\}/ {
+            in_section = 0
+        }
+
+        in_section && /^[[:space:]]*layout[[:space:]]*=/ {
+            value = $0
+            sub(/^[[:space:]]*layout[[:space:]]*=[[:space:]]*/, "", value)
+            sub(/[[:space:]]*(#.*)?$/, "", value)
+            print value
+            exit
+        }
+    ' "$LAYOUT_CONF"
 }
 
 choose_axis() {
@@ -217,6 +239,14 @@ while [[ $# -gt 0 ]]; do
             HYPR_CONF="$2"
             shift 2
             ;;
+        --layout-config)
+            [[ $# -ge 2 ]] || {
+                usage
+                exit 1
+            }
+            LAYOUT_CONF="$2"
+            shift 2
+            ;;
         --dry-run)
             DRY_RUN=1
             shift
@@ -237,11 +267,44 @@ done
     exit 1
 }
 
+[[ -f "$LAYOUT_CONF" ]] || {
+    notify "Config not found: $LAYOUT_CONF"
+    exit 1
+}
+
 CURRENT_AXIS="$(get_current_axis)"
 [[ -n "$CURRENT_AXIS" ]] || {
     notify "Could not detect current workspace axis."
     exit 1
 }
+
+CURRENT_LAYOUT="$(get_current_layout)"
+[[ -n "$CURRENT_LAYOUT" ]] || {
+    notify "Could not detect current layout."
+    exit 1
+}
+
+if [[ "$CURRENT_LAYOUT" == "scrolling" ]]; then
+    if [[ "$DRY_RUN" -eq 1 ]]; then
+        printf 'Scrolling layout is active; would force workspace axis to vertical (slidevert) in %s\n' "$HYPR_CONF"
+        exit 0
+    fi
+
+    if [[ "$CURRENT_AXIS" != "vertical" ]]; then
+        update_workspace_animation "slidevert" || {
+            notify "Failed to force vertical workspace axis."
+            exit 1
+        }
+
+        reload_hyprland || {
+            notify "Forced vertical axis for scrolling, but reload failed."
+            exit 1
+        }
+    fi
+
+    notify "Workspace axis locked to Vertical while layout is Scrolling."
+    exit 0
+fi
 
 if [[ -z "$SELECTED_AXIS" ]]; then
     if "$SCRIPT_DIR/rofi-toggle-pidfile" begin "$MENU_ID"; then

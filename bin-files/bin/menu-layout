@@ -5,11 +5,17 @@ SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 ROFI_BIN="/usr/bin/rofi"
 NOTIFY_BIN="/home/dxle/bin/notify-send"
 AWK_BIN="/usr/bin/awk"
+MKDIR_BIN="/usr/bin/mkdir"
 MKTEMP_BIN="/usr/bin/mktemp"
 MV_BIN="/usr/bin/mv"
+RM_BIN="/usr/bin/rm"
 HYPRCTL_BIN="/usr/bin/hyprctl"
 READLINK_BIN="/usr/bin/readlink"
 HYPR_CONF="${XDG_CONFIG_HOME:-$HOME/.config}/hypr/decorations.conf"
+ANIMATIONS_CONF="${XDG_CONFIG_HOME:-$HOME/.config}/hypr/animations.conf"
+XDG_STATE_HOME_DEFAULT="${HOME}/.local/state"
+STATE_DIR="${XDG_STATE_HOME:-$XDG_STATE_HOME_DEFAULT}/menu-layout"
+AXIS_STATE_FILE="${STATE_DIR}/workspace-axis.state"
 MENU_ID="menu-layouts"
 PID_FILE="/tmp/menu-rofi.pid"
 DRY_RUN=0
@@ -17,7 +23,7 @@ SELECTED_LAYOUT=""
 LAYOUTS=("dwindle" "scrolling" "master" "monocle")
 
 usage() {
-    printf 'Usage: %s [--layout master|dwindle|scrolling|monocle] [--config PATH] [--dry-run]\n' "$(basename "$0")"
+    printf 'Usage: %s [--layout master|dwindle|scrolling|monocle] [--config PATH] [--animations-config PATH] [--dry-run]\n' "$(basename "$0")"
 }
 
 notify() {
@@ -60,6 +66,11 @@ require_config() {
         notify "Config not found: $HYPR_CONF"
         exit 1
     }
+
+    [[ -f "$ANIMATIONS_CONF" ]] || {
+        notify "Config not found: $ANIMATIONS_CONF"
+        exit 1
+    }
 }
 
 resolve_config_path() {
@@ -67,6 +78,9 @@ resolve_config_path() {
 
     resolved_path="$("$READLINK_BIN" -f "$HYPR_CONF" 2>/dev/null || true)"
     [[ -n "$resolved_path" ]] && HYPR_CONF="$resolved_path"
+
+    resolved_path="$("$READLINK_BIN" -f "$ANIMATIONS_CONF" 2>/dev/null || true)"
+    [[ -n "$resolved_path" ]] && ANIMATIONS_CONF="$resolved_path"
 }
 
 get_current_layout() {
@@ -88,6 +102,84 @@ get_current_layout() {
             exit
         }
     ' "$HYPR_CONF"
+}
+
+get_current_axis() {
+    "$AWK_BIN" '
+        {
+            line = $0
+            sub(/[[:space:]]*#.*/, "", line)
+        }
+
+        line ~ /^[[:space:]]*animation[[:space:]]*=[[:space:]]*workspaces([[:space:]]*,.*)?$/ {
+            count = split(line, parts, ",")
+            style = (count >= 5) ? parts[5] : ""
+
+            if (style ~ /slidevert/) {
+                print "vertical"
+                exit
+            }
+
+            if (style ~ /slide/) {
+                print "horizontal"
+                exit
+            }
+
+            exit
+        }
+    ' "$ANIMATIONS_CONF"
+}
+
+axis_to_animation_style() {
+    case "$1" in
+        horizontal)
+            printf 'slide\n'
+            ;;
+        vertical)
+            printf 'slidevert\n'
+            ;;
+        *)
+            return 1
+            ;;
+    esac
+}
+
+is_valid_axis() {
+    case "$1" in
+        horizontal|vertical)
+            return 0
+            ;;
+        *)
+            return 1
+            ;;
+    esac
+}
+
+read_previous_axis() {
+    local previous_axis=""
+
+    [[ -r "$AXIS_STATE_FILE" ]] || return 1
+
+    previous_axis="$("$AWK_BIN" 'NR == 1 { print; exit }' "$AXIS_STATE_FILE")"
+    is_valid_axis "$previous_axis" || return 1
+
+    printf '%s\n' "$previous_axis"
+}
+
+write_previous_axis() {
+    local previous_axis="$1"
+    local tmp_file=""
+
+    is_valid_axis "$previous_axis" || return 1
+
+    "$MKDIR_BIN" -p "$STATE_DIR"
+    tmp_file="$("$MKTEMP_BIN" "${STATE_DIR}/.workspace-axis.XXXXXX")"
+    printf '%s\n' "$previous_axis" > "$tmp_file"
+    "$MV_BIN" "$tmp_file" "$AXIS_STATE_FILE"
+}
+
+clear_previous_axis() {
+    "$RM_BIN" -f "$AXIS_STATE_FILE"
 }
 
 choose_layout() {
@@ -166,6 +258,68 @@ update_layout() {
     "$MV_BIN" "$tmp_file" "$HYPR_CONF"
 }
 
+update_workspace_animation() {
+    local target_style="$1"
+    local tmp_file=""
+
+    tmp_file="$("$MKTEMP_BIN")"
+
+    "$AWK_BIN" -v target_style="$target_style" '
+        {
+            raw_line = $0
+            test_line = raw_line
+            sub(/[[:space:]]*#.*/, "", test_line)
+        }
+
+        !updated && test_line ~ /^[[:space:]]*animation[[:space:]]*=[[:space:]]*workspaces([[:space:]]*,.*)?$/ {
+            comment = ""
+            body = raw_line
+
+            if (match(raw_line, /[[:space:]]+#.*/)) {
+                comment = substr(raw_line, RSTART)
+                body = substr(raw_line, 1, RSTART - 1)
+            }
+
+            count = split(body, parts, ",")
+
+            if (count >= 5) {
+                style = parts[5]
+
+                if (style ~ /slidevert/) {
+                    sub(/slidevert/, target_style, style)
+                } else if (style ~ /slide/) {
+                    sub(/slide/, target_style, style)
+                } else {
+                    style = style " " target_style
+                }
+
+                parts[5] = style
+                body = parts[1]
+
+                for (i = 2; i <= count; i++) {
+                    body = body "," parts[i]
+                }
+            } else {
+                body = body ", " target_style
+            }
+
+            print body comment
+            updated = 1
+            next
+        }
+
+        { print raw_line }
+
+        END {
+            if (!updated) {
+                exit 1
+            }
+        }
+    ' "$ANIMATIONS_CONF" > "$tmp_file"
+
+    "$MV_BIN" "$tmp_file" "$ANIMATIONS_CONF"
+}
+
 reload_hyprland() {
     [[ -x "$HYPRCTL_BIN" ]] || return 0
     "$HYPRCTL_BIN" reload >/dev/null 2>&1
@@ -187,6 +341,14 @@ while [[ $# -gt 0 ]]; do
                 exit 1
             }
             HYPR_CONF="$2"
+            shift 2
+            ;;
+        --animations-config)
+            [[ $# -ge 2 ]] || {
+                usage
+                exit 1
+            }
+            ANIMATIONS_CONF="$2"
             shift 2
             ;;
         --dry-run)
@@ -213,6 +375,12 @@ CURRENT_LAYOUT="$(get_current_layout)"
     exit 1
 }
 
+CURRENT_AXIS="$(get_current_axis)"
+[[ -n "$CURRENT_AXIS" ]] || {
+    notify "Failed to detect current workspace axis."
+    exit 1
+}
+
 if [[ -z "$SELECTED_LAYOUT" ]]; then
     if "$SCRIPT_DIR/rofi-toggle-pidfile" begin "$MENU_ID"; then
         exit 0
@@ -229,17 +397,62 @@ is_valid_layout "$SELECTED_LAYOUT" || {
     exit 1
 }
 
-[[ "$SELECTED_LAYOUT" != "$CURRENT_LAYOUT" ]] || exit 0
-
-if [[ "$DRY_RUN" -eq 1 ]]; then
-    printf 'Would set layout to %s in %s\n' "$SELECTED_LAYOUT" "$HYPR_CONF"
+if [[ "$SELECTED_LAYOUT" == "$CURRENT_LAYOUT" && "$SELECTED_LAYOUT" != "scrolling" ]]; then
     exit 0
 fi
 
-update_layout "$SELECTED_LAYOUT" || {
-    notify "Failed to update layout."
-    exit 1
-}
+if [[ "$DRY_RUN" -eq 1 ]]; then
+    printf 'Would set layout to %s in %s\n' "$SELECTED_LAYOUT" "$HYPR_CONF"
+
+    if [[ "$CURRENT_LAYOUT" != "scrolling" && "$SELECTED_LAYOUT" == "scrolling" ]]; then
+        printf 'Would save previous workspace axis as %s in %s\n' "$CURRENT_AXIS" "$AXIS_STATE_FILE"
+        printf 'Would force workspace axis to vertical (slidevert) in %s\n' "$ANIMATIONS_CONF"
+    fi
+
+    if [[ "$CURRENT_LAYOUT" == "scrolling" && "$SELECTED_LAYOUT" != "scrolling" ]]; then
+        if PREVIOUS_AXIS="$(read_previous_axis)"; then
+            printf 'Would restore previous workspace axis to %s in %s\n' "$PREVIOUS_AXIS" "$ANIMATIONS_CONF"
+        else
+            printf 'No saved previous workspace axis to restore from %s\n' "$AXIS_STATE_FILE"
+        fi
+    fi
+
+    exit 0
+fi
+
+if [[ "$CURRENT_LAYOUT" != "scrolling" && "$SELECTED_LAYOUT" == "scrolling" ]]; then
+    write_previous_axis "$CURRENT_AXIS" || {
+        notify "Failed to save previous workspace axis."
+        exit 1
+    }
+fi
+
+if [[ "$SELECTED_LAYOUT" != "$CURRENT_LAYOUT" ]]; then
+    update_layout "$SELECTED_LAYOUT" || {
+        notify "Failed to update layout."
+        exit 1
+    }
+fi
+
+if [[ "$SELECTED_LAYOUT" == "scrolling" ]]; then
+    update_workspace_animation "slidevert" || {
+        notify "Failed to force vertical workspace axis."
+        exit 1
+    }
+fi
+
+if [[ "$CURRENT_LAYOUT" == "scrolling" && "$SELECTED_LAYOUT" != "scrolling" ]]; then
+    if PREVIOUS_AXIS="$(read_previous_axis)"; then
+        TARGET_STYLE="$(axis_to_animation_style "$PREVIOUS_AXIS")"
+
+        update_workspace_animation "$TARGET_STYLE" || {
+            notify "Failed to restore previous workspace axis."
+            exit 1
+        }
+
+        clear_previous_axis
+    fi
+fi
 
 if ! reload_hyprland; then
     notify "Set to $(format_layout_display "$SELECTED_LAYOUT"), but reload failed."
