@@ -2,13 +2,11 @@
 set -euo pipefail
 
 TOPDASH_BIN="${TOPDASH_BIN:-/home/dxle/builds/dashboard/build/topdash}"
-PKILL_BIN="/usr/bin/pkill"
-NOHUP_BIN="/usr/bin/nohup"
 PGREP_BIN="/usr/bin/pgrep"
 KILL_BIN="/usr/bin/kill"
-SLEEP_BIN="/usr/bin/sleep"
-SETSID_BIN="/usr/bin/setsid"
+READLINK_BIN="/usr/bin/readlink"
 NOTIFY_SEND_BIN="/home/dxle/bin/notify-send"
+RELOAD_SIGNAL="${RELOAD_SIGNAL:-WINCH}"
 
 usage() {
     printf 'Usage: reload-dashboard [--dry-run]\n'
@@ -30,57 +28,48 @@ validate_inputs() {
         notify_error "topdash binary not found: $TOPDASH_BIN"
         exit 1
     fi
+
+    case "$RELOAD_SIGNAL" in
+        WINCH|SIGWINCH)
+            ;;
+        *)
+            notify_error "Unsupported reload signal: $RELOAD_SIGNAL"
+            exit 1
+            ;;
+    esac
+}
+
+topdash_real_path() {
+    "$READLINK_BIN" -f -- "$TOPDASH_BIN"
 }
 
 collect_topdash_pids() {
-    {
-        "$PGREP_BIN" -x topdash 2>/dev/null || true
-        "$PGREP_BIN" -f -- "$TOPDASH_BIN" 2>/dev/null || true
-    } | awk 'NF { print $1 }' | awk '!seen[$1]++'
-}
+    local expected_exe=""
+    local exe=""
+    local pid=""
 
-stop_topdash() {
-    local pids=()
-    mapfile -t pids < <(collect_topdash_pids)
+    expected_exe="$(topdash_real_path)"
 
-    [[ ${#pids[@]} -gt 0 ]] || return 0
+    while IFS= read -r pid; do
+        [[ -n "$pid" ]] || continue
 
-    "$PKILL_BIN" -x topdash >/dev/null 2>&1 || true
-    "$PKILL_BIN" -f -- "$TOPDASH_BIN" >/dev/null 2>&1 || true
-
-    for _ in {1..20}; do
-        mapfile -t pids < <(collect_topdash_pids)
-        [[ ${#pids[@]} -eq 0 ]] && return 0
-        "$SLEEP_BIN" 0.05
-    done
-
-    mapfile -t pids < <(collect_topdash_pids)
-    if [[ ${#pids[@]} -gt 0 ]]; then
-        "$KILL_BIN" -9 "${pids[@]}" >/dev/null 2>&1 || true
-    fi
-}
-
-start_topdash() {
-    if [[ -x "$SETSID_BIN" ]]; then
-        "$SETSID_BIN" -f "$TOPDASH_BIN" >/dev/null 2>&1 || true
-    else
-        "$NOHUP_BIN" "$TOPDASH_BIN" >/dev/null 2>&1 &
-    fi
-}
-
-wait_for_topdash() {
-    local pids=()
-
-    for _ in {1..40}; do
-        mapfile -t pids < <(collect_topdash_pids)
-        if [[ ${#pids[@]} -gt 0 ]]; then
-            return 0
+        exe="$("$READLINK_BIN" -f "/proc/$pid/exe" 2>/dev/null || true)"
+        if [[ "$exe" == "$expected_exe" ]]; then
+            printf '%s\n' "$pid"
         fi
-        "$SLEEP_BIN" 0.05
-    done
+    done < <("$PGREP_BIN" -x topdash 2>/dev/null || true)
+}
 
-    notify_error "Failed to start topdash."
-    exit 1
+reload_topdash() {
+    local pids=()
+    mapfile -t pids < <(collect_topdash_pids)
+
+    if [[ ${#pids[@]} -eq 0 ]]; then
+        notify_error "topdash is not running."
+        exit 1
+    fi
+
+    "$KILL_BIN" "-$RELOAD_SIGNAL" "${pids[@]}"
 }
 
 main() {
@@ -109,9 +98,7 @@ main() {
         return 0
     fi
 
-    stop_topdash
-    start_topdash
-    wait_for_topdash
+    reload_topdash
 }
 
 main "$@"

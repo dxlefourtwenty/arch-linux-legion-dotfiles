@@ -13,7 +13,7 @@ usage() {
     cat <<'EOF'
 Usage: hypr-toggle-dock [--dry-run]
 
-Toggle the hypr-dock window via SIGUSR2.
+Toggle the hypr-dock slide state via SIGUSR2.
 EOF
 }
 
@@ -56,20 +56,20 @@ parse_args() {
 main() {
     parse_args "$@"
 
-	validate_command "$PGREP_BIN" || exit 1
-	validate_command "$PKILL_BIN" || exit 1
+    validate_command "$PGREP_BIN" || exit 1
+    validate_command "$PKILL_BIN" || exit 1
 
-	if [[ "$DRY_RUN" -eq 1 ]]; then
-		printf '%s -%s -x %s\n' "$PKILL_BIN" "$SIGNAL" "$PROCESS_NAME"
-		exit 0
-	fi
+    if [[ "$DRY_RUN" -eq 1 ]]; then
+        printf '%s -%s -u %s -x %s\n' "$PKILL_BIN" "$SIGNAL" "$USER" "$PROCESS_NAME"
+        exit 0
+    fi
 
-	if ! "$PGREP_BIN" -u "$USER" -x "$PROCESS_NAME" >/dev/null; then
-		notify_status "hypr-dock is not running"
-		exit 1
-	fi
+    if ! "$PGREP_BIN" -u "$USER" -x "$PROCESS_NAME" >/dev/null; then
+        notify_status "hypr-dock is not running"
+        exit 1
+    fi
 
-	"$PKILL_BIN" "-$SIGNAL" -x "$PROCESS_NAME"
+    "$PKILL_BIN" "-$SIGNAL" -u "$USER" -x "$PROCESS_NAME"
 }
 
 main "$@"

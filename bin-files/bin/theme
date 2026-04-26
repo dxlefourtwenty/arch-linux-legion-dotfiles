@@ -27,9 +27,6 @@ NEW_THEME="$THEME_DIR/$1"
 
 "$SCRIPT_DIR/reload-nemo" || true
 "$SCRIPT_DIR/reload-pavucontrol" || true
-pkill -9 topdash || true
-pkill -9 wardnc || true
-pkill -9 chromack || true
 
 # Atomic theme switch (IMPORTANT)
 ln -sfn "$NEW_THEME" "$CURRENT_LINK"
@@ -37,11 +34,14 @@ ln -sfn "$NEW_THEME" "$CURRENT_LINK"
 
 "$SCRIPT_DIR/bg-refresh-current" >/dev/null 2>&1 &
 "$SCRIPT_DIR/cursor-set" >/dev/null 2>&1 &
+"$SCRIPT_DIR/reload-wardnc" || true
+"$SCRIPT_DIR/reload-chromack" || true
 "$SCRIPT_DIR/reload-browsers" || true
 
 "$SCRIPT_DIR/reload-borders" || true
 "$SCRIPT_DIR/reload-terminal" || true
 "$SCRIPT_DIR/reload-waybar" || true
+"$SCRIPT_DIR/reload-dashboard" || true
 "$SCRIPT_DIR/reload-dock" || true
 "$SCRIPT_DIR/reload-btop" || true
 "$SCRIPT_DIR/reload-cava" || true
@@ -50,10 +50,6 @@ ln -sfn "$NEW_THEME" "$CURRENT_LINK"
 
 "$SCRIPT_DIR/reload-discord" >/dev/null 2>&1 &
 "$SCRIPT_DIR/spicetify-set" --live "$1" >/dev/null 2>&1 &
-"$SCRIPT_DIR/reload-dashboard" || true
-"$SCRIPT_DIR/reload-wardnc" || true
-"$SCRIPT_DIR/reload-chromack" || true
-
 
 "$SCRIPT_DIR/reload-celluloid" || true
 "$SCRIPT_DIR/reload-swayosd" || true
