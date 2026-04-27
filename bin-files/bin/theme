@@ -36,12 +36,12 @@ ln -sfn "$NEW_THEME" "$CURRENT_LINK"
 "$SCRIPT_DIR/cursor-set" >/dev/null 2>&1 &
 "$SCRIPT_DIR/reload-wardnc" || true
 "$SCRIPT_DIR/reload-chromack" || true
+"$SCRIPT_DIR/reload-dashboard" || true
 "$SCRIPT_DIR/reload-browsers" || true
 
 "$SCRIPT_DIR/reload-borders" || true
 "$SCRIPT_DIR/reload-terminal" || true
 "$SCRIPT_DIR/reload-waybar" || true
-"$SCRIPT_DIR/reload-dashboard" || true
 "$SCRIPT_DIR/reload-dock" || true
 "$SCRIPT_DIR/reload-btop" || true
 "$SCRIPT_DIR/reload-cava" || true

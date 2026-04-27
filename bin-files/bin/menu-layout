@@ -9,7 +9,8 @@ MKDIR_BIN="/usr/bin/mkdir"
 MKTEMP_BIN="/usr/bin/mktemp"
 MV_BIN="/usr/bin/mv"
 RM_BIN="/usr/bin/rm"
-HYPRCTL_BIN="/usr/bin/hyprctl"
+HYPRCTL_BIN="${HYPRCTL_BIN:-/usr/bin/hyprctl}"
+SLEEP_BIN="${SLEEP_BIN:-/usr/bin/sleep}"
 READLINK_BIN="/usr/bin/readlink"
 HYPR_CONF="${XDG_CONFIG_HOME:-$HOME/.config}/hypr/decorations.conf"
 ANIMATIONS_CONF="${XDG_CONFIG_HOME:-$HOME/.config}/hypr/animations.conf"
@@ -19,8 +20,11 @@ STATE_DIR="${XDG_STATE_HOME:-$XDG_STATE_HOME_DEFAULT}/menu-layout"
 AXIS_STATE_FILE="${STATE_DIR}/workspace-axis.state"
 MENU_ID="menu-layouts"
 PID_FILE="/tmp/menu-rofi.pid"
+NOTIFY_SUCCESS_DELAY="${MENU_LAYOUT_NOTIFY_SUCCESS_DELAY:-0.2}"
 DRY_RUN=0
 SELECTED_LAYOUT=""
+ROFI_MENU_ACTIVE=0
+HYPR_AUTORELOAD_SUSPENDED=0
 LAYOUTS=("dwindle" "scrolling" "master" "monocle")
 
 usage() {
@@ -29,6 +33,14 @@ usage() {
 
 notify() {
     "$NOTIFY_BIN" -t 4000 "Layout" "$1" >/dev/null 2>&1 || true
+}
+
+notify_success() {
+    (
+        "$SLEEP_BIN" "$NOTIFY_SUCCESS_DELAY"
+        notify "$1"
+    ) >/dev/null 2>&1 &
+    disown || true
 }
 
 is_valid_layout() {
@@ -374,6 +386,78 @@ reload_hyprland() {
     "$HYPRCTL_BIN" reload >/dev/null 2>&1
 }
 
+suspend_hyprland_autoreload() {
+    [[ -x "$HYPRCTL_BIN" ]] || return 0
+    "$HYPRCTL_BIN" keyword misc:disable_autoreload true >/dev/null 2>&1 || return 0
+    HYPR_AUTORELOAD_SUSPENDED=1
+}
+
+restore_hyprland_autoreload() {
+    [[ "$HYPR_AUTORELOAD_SUSPENDED" -eq 1 ]] || return 0
+
+    HYPR_AUTORELOAD_SUSPENDED=0
+    [[ -x "$HYPRCTL_BIN" ]] || return 0
+    "$HYPRCTL_BIN" keyword misc:disable_autoreload false >/dev/null 2>&1 || true
+}
+
+apply_runtime_layout() {
+    local applied_layout="$1"
+
+    [[ -x "$HYPRCTL_BIN" ]] || return 0
+    "$HYPRCTL_BIN" keyword general:layout "$applied_layout" >/dev/null 2>&1
+}
+
+get_workspace_animation_rule() {
+    "$AWK_BIN" '
+        {
+            raw_line = $0
+            test_line = raw_line
+            sub(/[[:space:]]*#.*/, "", test_line)
+        }
+
+        test_line ~ /^[[:space:]]*animation[[:space:]]*=[[:space:]]*workspaces([[:space:]]*,.*)?$/ {
+            sub(/^[[:space:]]*animation[[:space:]]*=[[:space:]]*/, "", test_line)
+            print test_line
+            exit
+        }
+    ' "$ANIMATIONS_CONF"
+}
+
+apply_runtime_workspace_animation() {
+    local animation_rule=""
+
+    [[ -x "$HYPRCTL_BIN" ]] || return 0
+
+    animation_rule="$(get_workspace_animation_rule)"
+    [[ -n "$animation_rule" ]] || return 1
+
+    "$HYPRCTL_BIN" keyword animation "$animation_rule" >/dev/null 2>&1
+}
+
+apply_runtime_changes() {
+    local applied_layout="$1"
+    local layout_changed="$2"
+    local workspace_animation_changed="$3"
+
+    if [[ "$layout_changed" -eq 1 ]]; then
+        apply_runtime_layout "$applied_layout" || return 1
+    fi
+
+    if [[ "$workspace_animation_changed" -eq 1 ]]; then
+        apply_runtime_workspace_animation || return 1
+    fi
+}
+
+cleanup() {
+    restore_hyprland_autoreload
+
+    if [[ "$ROFI_MENU_ACTIVE" -eq 1 ]]; then
+        "$SCRIPT_DIR/rofi-toggle-pidfile" clear "$MENU_ID" || true
+    fi
+}
+
+trap cleanup EXIT
+
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --layout)
@@ -445,7 +529,7 @@ if [[ -z "$SELECTED_LAYOUT" ]]; then
         exit 0
     fi
 
-    trap '"$SCRIPT_DIR/rofi-toggle-pidfile" clear "$MENU_ID"' EXIT
+    ROFI_MENU_ACTIVE=1
 
     SELECTED_LAYOUT="$(choose_layout "$CURRENT_LAYOUT" || true)"
     [[ -n "$SELECTED_LAYOUT" ]] || exit 0
@@ -481,6 +565,11 @@ if [[ "$DRY_RUN" -eq 1 ]]; then
     exit 0
 fi
 
+LAYOUT_CHANGED=0
+WORKSPACE_ANIMATION_CHANGED=0
+
+suspend_hyprland_autoreload
+
 if [[ "$CURRENT_LAYOUT" != "scrolling" && "$SELECTED_LAYOUT" == "scrolling" ]]; then
     write_previous_axis "$CURRENT_AXIS" || {
         notify "Failed to save previous workspace axis."
@@ -493,6 +582,8 @@ if [[ "$TARGET_APPLIED_LAYOUT" != "$CURRENT_APPLIED_LAYOUT" ]]; then
         notify "Failed to update layout."
         exit 1
     }
+
+    LAYOUT_CHANGED=1
 fi
 
 if [[ "$SELECTED_LAYOUT" == "scrolling" ]]; then
@@ -500,6 +591,8 @@ if [[ "$SELECTED_LAYOUT" == "scrolling" ]]; then
         notify "Failed to force vertical workspace axis."
         exit 1
     }
+
+    WORKSPACE_ANIMATION_CHANGED=1
 fi
 
 if [[ "$CURRENT_LAYOUT" == "scrolling" && "$SELECTED_LAYOUT" != "scrolling" ]]; then
@@ -511,13 +604,22 @@ if [[ "$CURRENT_LAYOUT" == "scrolling" && "$SELECTED_LAYOUT" != "scrolling" ]]; 
             exit 1
         }
 
+        WORKSPACE_ANIMATION_CHANGED=1
         clear_previous_axis
     fi
 fi
 
-if ! reload_hyprland; then
-    notify "Set to $(format_layout_display "$SELECTED_LAYOUT"), but reload failed."
+if ! apply_runtime_changes "$TARGET_APPLIED_LAYOUT" "$LAYOUT_CHANGED" "$WORKSPACE_ANIMATION_CHANGED"; then
+    restore_hyprland_autoreload
+
+    if reload_hyprland; then
+        notify_success "Set to $(format_layout_display "$SELECTED_LAYOUT")"
+        exit 0
+    fi
+
+    notify "Set to $(format_layout_display "$SELECTED_LAYOUT"), but Hyprland update failed."
     exit 1
 fi
 
-notify "Set to $(format_layout_display "$SELECTED_LAYOUT")"
+restore_hyprland_autoreload
+notify_success "Set to $(format_layout_display "$SELECTED_LAYOUT")"

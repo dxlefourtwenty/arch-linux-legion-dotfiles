@@ -1,15 +1,209 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-DASH="/home/dxle/builds/dashboard/build/topdash"
+TOPDASH_BIN="${TOPDASH_BIN:-/home/dxle/builds/dashboard/build/topdash}"
+PGREP_BIN="/usr/bin/pgrep"
+KILL_BIN="/usr/bin/kill"
+READLINK_BIN="/usr/bin/readlink"
+SLEEP_BIN="/usr/bin/sleep"
+SETSID_BIN="/usr/bin/setsid"
+NOHUP_BIN="/usr/bin/nohup"
+AWK_BIN="/usr/bin/awk"
+NOTIFY_SEND_BIN="/home/dxle/bin/notify-send"
+TOGGLE_SIGNAL="${TOGGLE_SIGNAL:-USR1}"
+START_WAIT_ATTEMPTS="${START_WAIT_ATTEMPTS:-40}"
+START_WAIT_SECONDS="${START_WAIT_SECONDS:-0.05}"
+SIGNAL_READY_WAIT_ATTEMPTS="${SIGNAL_READY_WAIT_ATTEMPTS:-80}"
+SIGNAL_READY_WAIT_SECONDS="${SIGNAL_READY_WAIT_SECONDS:-0.05}"
+SIGUSR1_MASK=$((1 << 9))
 
-# If running: toggle
-if pgrep -x topdash >/dev/null; then
-  pkill -USR1 -x topdash
-  exit 0
-fi
+usage() {
+    printf 'Usage: toggle-dashboard [--dry-run]\n'
+}
 
-# Not running: start hidden, then toggle open
-"$DASH" >/dev/null 2>&1 &
-sleep 0.05
-pkill -USR1 -x topdash
+notify_error() {
+    if [[ -x "$NOTIFY_SEND_BIN" ]]; then
+        "$NOTIFY_SEND_BIN" -t 4000 "Dashboard" "$1" >/dev/null 2>&1 || true
+    fi
+}
+
+validate_positive_integer() {
+    local name="$1"
+    local value="$2"
+
+    if [[ ! "$value" =~ ^[1-9][0-9]*$ ]]; then
+        notify_error "$name must be a positive integer."
+        exit 1
+    fi
+}
+
+validate_positive_number() {
+    local name="$1"
+    local value="$2"
+
+    if [[ ! "$value" =~ ^([0-9]+([.][0-9]+)?|[.][0-9]+)$ ]]; then
+        notify_error "$name must be a positive number."
+        exit 1
+    fi
+}
+
+validate_inputs() {
+    if [[ -z "$TOPDASH_BIN" ]]; then
+        notify_error "topdash binary path is empty."
+        exit 1
+    fi
+
+    if [[ ! -x "$TOPDASH_BIN" ]]; then
+        notify_error "topdash binary not found: $TOPDASH_BIN"
+        exit 1
+    fi
+
+    case "$TOGGLE_SIGNAL" in
+        USR1|SIGUSR1)
+            ;;
+        *)
+            notify_error "Unsupported toggle signal: $TOGGLE_SIGNAL"
+            exit 1
+            ;;
+    esac
+
+    validate_positive_integer "START_WAIT_ATTEMPTS" "$START_WAIT_ATTEMPTS"
+    validate_positive_number "START_WAIT_SECONDS" "$START_WAIT_SECONDS"
+    validate_positive_integer "SIGNAL_READY_WAIT_ATTEMPTS" "$SIGNAL_READY_WAIT_ATTEMPTS"
+    validate_positive_number "SIGNAL_READY_WAIT_SECONDS" "$SIGNAL_READY_WAIT_SECONDS"
+}
+
+topdash_real_path() {
+    "$READLINK_BIN" -f -- "$TOPDASH_BIN"
+}
+
+collect_topdash_pids() {
+    local expected_exe=""
+    local exe=""
+    local pid=""
+
+    expected_exe="$(topdash_real_path)"
+
+    while IFS= read -r pid; do
+        [[ -n "$pid" ]] || continue
+
+        exe="$("$READLINK_BIN" -f "/proc/$pid/exe" 2>/dev/null || true)"
+        if [[ "$exe" == "$expected_exe" ]]; then
+            printf '%s\n' "$pid"
+        fi
+    done < <("$PGREP_BIN" -x topdash 2>/dev/null || true)
+}
+
+start_topdash() {
+    if [[ -x "$SETSID_BIN" ]]; then
+        "$SETSID_BIN" -f "$TOPDASH_BIN" >/dev/null 2>&1
+    else
+        "$NOHUP_BIN" "$TOPDASH_BIN" >/dev/null 2>&1 &
+    fi
+}
+
+wait_for_topdash() {
+    local pids=()
+
+    for ((attempt = 0; attempt < START_WAIT_ATTEMPTS; attempt++)); do
+        mapfile -t pids < <(collect_topdash_pids)
+        if [[ ${#pids[@]} -gt 0 ]]; then
+            return 0
+        fi
+        "$SLEEP_BIN" "$START_WAIT_SECONDS"
+    done
+
+    notify_error "Failed to start topdash."
+    exit 1
+}
+
+signal_caught_mask() {
+    local pid="$1"
+
+    "$AWK_BIN" '/^SigCgt:/ { print $2 }' "/proc/$pid/status" 2>/dev/null || true
+}
+
+has_toggle_signal_handler() {
+    local pid="$1"
+    local mask=""
+
+    mask="$(signal_caught_mask "$pid")"
+    [[ -n "$mask" ]] || return 1
+
+    (( (16#$mask & SIGUSR1_MASK) != 0 ))
+}
+
+wait_for_toggle_signal_handler() {
+    local pids=()
+    local pid=""
+
+    for ((attempt = 0; attempt < SIGNAL_READY_WAIT_ATTEMPTS; attempt++)); do
+        mapfile -t pids < <(collect_topdash_pids)
+        for pid in "${pids[@]}"; do
+            if has_toggle_signal_handler "$pid"; then
+                return 0
+            fi
+        done
+
+        "$SLEEP_BIN" "$SIGNAL_READY_WAIT_SECONDS"
+    done
+
+    notify_error "topdash did not become ready for toggle."
+    exit 1
+}
+
+ensure_topdash_running() {
+    local pids=()
+
+    mapfile -t pids < <(collect_topdash_pids)
+    if [[ ${#pids[@]} -gt 0 ]]; then
+        return 1
+    fi
+
+    start_topdash
+    wait_for_topdash
+    wait_for_toggle_signal_handler
+    return 0
+}
+
+toggle_topdash() {
+    local pids=()
+
+    if ensure_topdash_running; then
+        :
+    fi
+
+    mapfile -t pids < <(collect_topdash_pids)
+    "$KILL_BIN" "-$TOGGLE_SIGNAL" "${pids[@]}"
+}
+
+main() {
+    local dry_run=0
+
+    while [[ $# -gt 0 ]]; do
+        case "$1" in
+            --dry-run)
+                dry_run=1
+                shift
+                ;;
+            --help|-h)
+                usage
+                exit 0
+                ;;
+            *)
+                usage
+                exit 1
+                ;;
+        esac
+    done
+
+    validate_inputs
+
+    if [[ "$dry_run" -eq 1 ]]; then
+        return 0
+    fi
+
+    toggle_topdash
+}
+
+main "$@"

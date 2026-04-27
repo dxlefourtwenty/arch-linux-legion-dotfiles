@@ -6,15 +6,17 @@
 
 NotificationPopup {
     background: transparent;
-    --notification-card-padding: 10px 10px 10px 10px;
+    --notification-card-padding: 12px 16px 12px 16px;
     --notification-card-gap: 12px;
+    --notification-card-blur-radius: 12px;
 }
 
 QFrame#notificationCard {
     background-color: var(--background);
     border: 2px solid var(--border-color);
+    /* border: 0; */
     padding: 0;
-    border-radius: 0;
+    border-radius: 16px;
 }
 
 QLabel#summaryLabel {
