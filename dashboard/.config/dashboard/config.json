@@ -1,6 +1,8 @@
 {
-    "outputName": "HDMI-A-1",
-    "profileImage": "/home/dxle/bin/images/profile-picture.png",
-    "use24Hour": false,
-    "username": "dxlefourtwenty"
+  "monitor": "HDMI-A-1",
+  "outputName": "HDMI-A-1",
+  "profileImage": "/home/dxle/bin/images/profile-picture.png",
+  "use24Hour": false,
+  "username": "dxlefourtwenty",
+  "netflixThumbnail": "/home/dxle/.local/share/icons/netflix.png"
 }

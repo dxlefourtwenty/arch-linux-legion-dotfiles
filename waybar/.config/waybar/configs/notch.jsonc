@@ -25,24 +25,24 @@
         "custom/update"
     ],
     "custom/launcher": {
-		"format":"󰣇",
+		"format":"<span font_desc=\"JetBrainsMono Nerd Font\">󰣇</span>",
 		"tooltip": false,
-		"on-click":"fuzzel"
+		"on-click":"~/bin/menu"
 	},
     "custom/info": {
-		"format":"󰀨",
+		"format":"<span font_desc=\"JetBrainsMono Nerd Font\">󰀨</span>",
 		"tooltip": false,
-		"on-click":"alacritty -e btm"
+		"on-click":"kitty -e btop"
 	},
     "custom/music": {
-		"format":"󰎆",
+		"format":"<span font_desc=\"JetBrainsMono Nerd Font\">󰎆</span>",
 		"tooltip": false,
-		"on-click":"alacritty -e kew"
+		"on-click":"~/bin/toggle-dashboard --open --media"
 	},
     "custom/power": {
-		"format":"󱍷",
+		"format":"<span font_desc=\"JetBrainsMono Nerd Font\">󱍷</span>",
 		"tooltip": false,
-		"on-click":"~/.config/fuzzel/powermenu.sh"
+		"on-click":"~/bin/menu-system"
 	},
     "group/date": {
         "orientation": "horizontal",
@@ -71,20 +71,17 @@
         "format": "{:%I:%M %p}",
         "tooltip-format": "<tt><small>{calendar}</small></tt>",
         "timezones": [
-            "Asia/Kolkata",
-            "America/Los_Angeles",
+            "America/Los_Angeles"
         ],
-        "actions":  {
-            "on-click": "tz_up",
-        },
+        "on-click": "~/bin/toggle-dashboard --open --dashboard",
     },
     "cpu": {
         "states": {
             "warning": 75,
             "critical": 90,
         },
-        "format": " {usage}%",
-        "format-critical": "󰀦 {usage}%",
+        "format": "<span font_desc=\"JetBrainsMono Nerd Font\"></span> {usage}%",
+        "format-critical": "<span font_desc=\"JetBrainsMono Nerd Font\">󰀦</span> {usage}%",
         "on-click": "alacritty -e btm",
         "tooltip": true,
         "interval": 5,
@@ -94,8 +91,8 @@
             "warning": 75,
             "critical": 90,
         },
-        "format": " {percentage}%",
-        "format-critical": "󰀦 {percentage}%",
+        "format": "<span font_desc=\"JetBrainsMono Nerd Font\"></span> {percentage}%",
+        "format-critical": "<span font_desc=\"JetBrainsMono Nerd Font\">󰀦</span> {percentage}%",
         "on-click": "alacritty -e btm",
         "tooltip": true,
         "tooltip-format": "Memory Used: {used:0.1f} GB / {total:0.1f} GB",
@@ -107,20 +104,20 @@
             "warning": 30,
             "critical": 15
         },
-        "format": "{icon} {capacity}%",
-        "format-full": "{icon} {capacity}%",
-        "format-charging": "{icon}  {capacity}%",
-        "format-plugged": "{icon}  {capacity}%",
-        "format-alt": "{icon}",
+        "format": "<span font_desc=\"JetBrainsMono Nerd Font\">{icon}</span> {capacity}%",
+        "format-full": "<span font_desc=\"JetBrainsMono Nerd Font\">{icon}</span> {capacity}%",
+        "format-charging": "<span font_desc=\"JetBrainsMono Nerd Font\">{icon}</span> <span font_desc=\"JetBrainsMono Nerd Font\"></span> {capacity}%",
+        "format-plugged": "<span font_desc=\"JetBrainsMono Nerd Font\">{icon}</span> <span font_desc=\"JetBrainsMono Nerd Font\"></span> {capacity}%",
+        "format-alt": "<span font_desc=\"JetBrainsMono Nerd Font\">{icon}</span>",
         "format-icons": ["󰂎", "󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"],
     },
     "network": {
         "interval": 1000,
-        "format-wifi": "{icon} {signalStrength}%",
-        "format-ethernet": "{ipaddr}/{cidr} ",
+        "format-wifi": "<span font_desc=\"JetBrainsMono Nerd Font\">{icon}</span> {signalStrength}%",
+        "format-ethernet": "{ipaddr}/{cidr} <span font_desc=\"JetBrainsMono Nerd Font\"></span>",
         "tooltip-format": "{essid}\n{ifname} via {gwaddr}\n{ipaddr}/{cidr}",
-        "format-linked": "{ifname} (No IP) ",
-        "format-disconnected": "󰤭",
+        "format-linked": "{ifname} (No IP) <span font_desc=\"JetBrainsMono Nerd Font\"></span>",
+        "format-disconnected": "<span font_desc=\"JetBrainsMono Nerd Font\">󰤭</span>",
         "format-alt": "{essid}",
         "format-icons": [
             "󰤯",
@@ -132,12 +129,12 @@
         "on-click-right": "alacritty -e nmtui"
     },
     "pulseaudio": {
-        "format": "{icon}  {volume}%",
-        "format-muted": "  {format_source}",
-        "format-source": "",
-        "format-source-muted": " ",
-        "format-bluetooth": "{icon} {format_source}",
-        "format-bluetooth-muted": "{icon} {format_source}",
+        "format": "<span font_desc=\"JetBrainsMono Nerd Font\">{icon}</span>  {volume}%",
+        "format-muted": "<span font_desc=\"JetBrainsMono Nerd Font\"></span>  {format_source}",
+        "format-source": "<span font_desc=\"JetBrainsMono Nerd Font\"></span>",
+        "format-source-muted": "<span font_desc=\"JetBrainsMono Nerd Font\"></span> ",
+        "format-bluetooth": "<span font_desc=\"JetBrainsMono Nerd Font\">{icon}</span><span font_desc=\"JetBrainsMono Nerd Font\"></span> {format_source}",
+        "format-bluetooth-muted": "<span font_desc=\"JetBrainsMono Nerd Font\">{icon}</span><span font_desc=\"JetBrainsMono Nerd Font\"></span> {format_source}",
         "format-icons": {
             "headphone": "",
             "hands-free": "",
@@ -151,11 +148,11 @@
                 ""
             ]
         },
-        "tooltip-format": "{icon} {volume}%\n{format_source}",
+        "tooltip-format": "<span font_desc=\"JetBrainsMono Nerd Font\">{icon}</span> {volume}%\n{format_source}",
         "on-click": "pavucontrol"
     },
     "hyprland/workspaces": {
-        "format": "{icon}",
+        "format": "<span font_desc=\"JetBrainsMono Nerd Font\">{icon}</span>",
         "format-icons": {
             "active": "",
             "default": ""

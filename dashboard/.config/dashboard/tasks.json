@@ -12,9 +12,15 @@
     "created_at": "2026-03-01T09:09:19Z"
   },
   {
-    "task": "CS4630 Work on Seminar Presentation",
+    "task": "CS4650 Cloud Computing Assignment",
     "recurrence_type": "daily",
     "recurrence_value": "daily",
-    "created_at": "2026-04-03T07:11:40Z"
+    "created_at": "2026-04-27T11:29:51Z"
+  },
+  {
+    "task": "CS4800 Project",
+    "recurrence_type": "daily",
+    "recurrence_value": "daily",
+    "created_at": "2026-04-27T11:30:10Z"
   }
 ]

@@ -9,16 +9,41 @@ SLEEP_BIN="/usr/bin/sleep"
 SETSID_BIN="/usr/bin/setsid"
 NOHUP_BIN="/usr/bin/nohup"
 AWK_BIN="/usr/bin/awk"
+HYPRCTL_BIN="${HYPRCTL_BIN:-/usr/bin/hyprctl}"
+JQ_BIN="${JQ_BIN:-/usr/bin/jq}"
 NOTIFY_SEND_BIN="/home/dxle/bin/notify-send"
 TOGGLE_SIGNAL="${TOGGLE_SIGNAL:-USR1}"
+TAB_SIGNAL="${TAB_SIGNAL:-USR2}"
+RUNTIME_DIR="${XDG_RUNTIME_DIR:-/tmp}"
+TOPDASH_TAB_COMMAND_PATH="${TOPDASH_TAB_COMMAND_PATH:-$RUNTIME_DIR/topdash-tab}"
 START_WAIT_ATTEMPTS="${START_WAIT_ATTEMPTS:-40}"
 START_WAIT_SECONDS="${START_WAIT_SECONDS:-0.05}"
 SIGNAL_READY_WAIT_ATTEMPTS="${SIGNAL_READY_WAIT_ATTEMPTS:-80}"
 SIGNAL_READY_WAIT_SECONDS="${SIGNAL_READY_WAIT_SECONDS:-0.05}"
+TERM_WAIT_ATTEMPTS="${TERM_WAIT_ATTEMPTS:-30}"
+TERM_WAIT_SECONDS="${TERM_WAIT_SECONDS:-0.05}"
+VISIBILITY_WAIT_ATTEMPTS="${VISIBILITY_WAIT_ATTEMPTS:-40}"
+VISIBILITY_WAIT_SECONDS="${VISIBILITY_WAIT_SECONDS:-0.05}"
+INITIAL_TAB="${TOPDASH_INITIAL_TAB:-}"
+START_OPEN="${TOPDASH_START_OPEN:-}"
 SIGUSR1_MASK=$((1 << 9))
+SIGUSR2_MASK=$((1 << 11))
 
 usage() {
-    printf 'Usage: toggle-dashboard [--dry-run]\n'
+    cat <<'USAGE'
+Usage: toggle-dashboard [--open|--close] [--dashboard|--media|--performance|--weather] [--dry-run]
+
+Modes:
+  (no flags)      Toggle dashboard (existing behavior)
+  --open          Open dashboard
+  --close         Close dashboard
+
+Tabs (only with --open):
+  --dashboard
+  --media
+  --performance
+  --weather
+USAGE
 }
 
 notify_error() {
@@ -67,10 +92,28 @@ validate_inputs() {
             ;;
     esac
 
+    case "$TAB_SIGNAL" in
+        USR2|SIGUSR2)
+            ;;
+        *)
+            notify_error "Unsupported tab signal: $TAB_SIGNAL"
+            exit 1
+            ;;
+    esac
+
+    if [[ -z "$TOPDASH_TAB_COMMAND_PATH" || "$TOPDASH_TAB_COMMAND_PATH" != /* ]]; then
+        notify_error "TOPDASH_TAB_COMMAND_PATH must be an absolute path."
+        exit 1
+    fi
+
     validate_positive_integer "START_WAIT_ATTEMPTS" "$START_WAIT_ATTEMPTS"
     validate_positive_number "START_WAIT_SECONDS" "$START_WAIT_SECONDS"
     validate_positive_integer "SIGNAL_READY_WAIT_ATTEMPTS" "$SIGNAL_READY_WAIT_ATTEMPTS"
     validate_positive_number "SIGNAL_READY_WAIT_SECONDS" "$SIGNAL_READY_WAIT_SECONDS"
+    validate_positive_integer "TERM_WAIT_ATTEMPTS" "$TERM_WAIT_ATTEMPTS"
+    validate_positive_number "TERM_WAIT_SECONDS" "$TERM_WAIT_SECONDS"
+    validate_positive_integer "VISIBILITY_WAIT_ATTEMPTS" "$VISIBILITY_WAIT_ATTEMPTS"
+    validate_positive_number "VISIBILITY_WAIT_SECONDS" "$VISIBILITY_WAIT_SECONDS"
 }
 
 topdash_real_path() {
@@ -88,6 +131,7 @@ collect_topdash_pids() {
         [[ -n "$pid" ]] || continue
 
         exe="$("$READLINK_BIN" -f "/proc/$pid/exe" 2>/dev/null || true)"
+        exe="${exe% (deleted)}"
         if [[ "$exe" == "$expected_exe" ]]; then
             printf '%s\n' "$pid"
         fi
@@ -95,10 +139,30 @@ collect_topdash_pids() {
 }
 
 start_topdash() {
+    local initial_tab="$INITIAL_TAB"
+    local start_open="$START_OPEN"
+    local env_args=()
+
+    if [[ -n "$initial_tab" ]]; then
+        env_args+=(TOPDASH_INITIAL_TAB="$initial_tab")
+    fi
+
+    if [[ -n "$start_open" ]]; then
+        env_args+=(TOPDASH_START_OPEN="$start_open")
+    fi
+
     if [[ -x "$SETSID_BIN" ]]; then
-        "$SETSID_BIN" -f "$TOPDASH_BIN" >/dev/null 2>&1
+        if [[ ${#env_args[@]} -gt 0 ]]; then
+            /usr/bin/env "${env_args[@]}" "$SETSID_BIN" -f "$TOPDASH_BIN" >/dev/null 2>&1
+        else
+            "$SETSID_BIN" -f "$TOPDASH_BIN" >/dev/null 2>&1
+        fi
     else
-        "$NOHUP_BIN" "$TOPDASH_BIN" >/dev/null 2>&1 &
+        if [[ ${#env_args[@]} -gt 0 ]]; then
+            /usr/bin/env "${env_args[@]}" "$NOHUP_BIN" "$TOPDASH_BIN" >/dev/null 2>&1 &
+        else
+            "$NOHUP_BIN" "$TOPDASH_BIN" >/dev/null 2>&1 &
+        fi
     fi
 }
 
@@ -117,6 +181,26 @@ wait_for_topdash() {
     exit 1
 }
 
+stop_topdash() {
+    local pids=()
+
+    mapfile -t pids < <(collect_topdash_pids)
+    [[ ${#pids[@]} -gt 0 ]] || return 0
+
+    "$KILL_BIN" -TERM "${pids[@]}" >/dev/null 2>&1 || true
+
+    for ((attempt = 0; attempt < TERM_WAIT_ATTEMPTS; attempt++)); do
+        mapfile -t pids < <(collect_topdash_pids)
+        [[ ${#pids[@]} -eq 0 ]] && return 0
+        "$SLEEP_BIN" "$TERM_WAIT_SECONDS"
+    done
+
+    mapfile -t pids < <(collect_topdash_pids)
+    if [[ ${#pids[@]} -gt 0 ]]; then
+        "$KILL_BIN" -KILL "${pids[@]}" >/dev/null 2>&1 || true
+    fi
+}
+
 signal_caught_mask() {
     local pid="$1"
 
@@ -131,6 +215,30 @@ has_toggle_signal_handler() {
     [[ -n "$mask" ]] || return 1
 
     (( (16#$mask & SIGUSR1_MASK) != 0 ))
+}
+
+has_tab_signal_handler() {
+    local pid="$1"
+    local mask=""
+
+    mask="$(signal_caught_mask "$pid")"
+    [[ -n "$mask" ]] || return 1
+
+    (( (16#$mask & SIGUSR2_MASK) != 0 ))
+}
+
+tab_signal_handler_ready() {
+    local pids=()
+    local pid=""
+
+    mapfile -t pids < <(collect_topdash_pids)
+    for pid in "${pids[@]}"; do
+        if has_tab_signal_handler "$pid"; then
+            return 0
+        fi
+    done
+
+    return 1
 }
 
 wait_for_toggle_signal_handler() {
@@ -166,22 +274,243 @@ ensure_topdash_running() {
     return 0
 }
 
-toggle_topdash() {
+send_toggle_signal() {
     local pids=()
 
-    if ensure_topdash_running; then
-        :
-    fi
+    mapfile -t pids < <(collect_topdash_pids)
+    [[ ${#pids[@]} -gt 0 ]] || return 0
+
+    "$KILL_BIN" "-$TOGGLE_SIGNAL" "${pids[@]}"
+}
+
+send_tab_toggle_signal() {
+    local pids=()
 
     mapfile -t pids < <(collect_topdash_pids)
-    "$KILL_BIN" "-$TOGGLE_SIGNAL" "${pids[@]}"
+    [[ ${#pids[@]} -gt 0 ]] || return 0
+
+    "$KILL_BIN" "-$TAB_SIGNAL" "${pids[@]}"
+}
+
+hypr_visibility_available() {
+    [[ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]] || return 1
+    [[ -x "$HYPRCTL_BIN" ]] || return 1
+    [[ -x "$JQ_BIN" ]] || return 1
+    return 0
+}
+
+dashboard_is_open() {
+    local layers_json=""
+
+    hypr_visibility_available || return 2
+
+    layers_json="$("$HYPRCTL_BIN" -j layers 2>/dev/null || true)"
+    [[ -n "$layers_json" ]] || return 2
+
+    if "$JQ_BIN" -e '
+        .. | objects
+        | (.namespace? // .class? // .xwaylandClass? // .title? // empty)
+        | strings
+        | ascii_downcase
+        | test("topdash|dashboard")
+    ' >/dev/null 2>&1 <<<"$layers_json"; then
+        return 0
+    fi
+
+    return 1
+}
+
+wait_for_dashboard_open() {
+    local state=2
+
+    hypr_visibility_available || return 0
+
+    for ((attempt = 0; attempt < VISIBILITY_WAIT_ATTEMPTS; attempt++)); do
+        if dashboard_is_open; then
+            state=0
+        else
+            state=$?
+        fi
+
+        if [[ "$state" -eq 0 ]]; then
+            return 0
+        fi
+
+        "$SLEEP_BIN" "$VISIBILITY_WAIT_SECONDS"
+    done
+
+    return 1
+}
+
+wait_for_dashboard_closed() {
+    local state=2
+
+    hypr_visibility_available || return 0
+
+    for ((attempt = 0; attempt < VISIBILITY_WAIT_ATTEMPTS; attempt++)); do
+        if dashboard_is_open; then
+            state=0
+        else
+            state=$?
+        fi
+
+        if [[ "$state" -eq 1 ]]; then
+            return 0
+        fi
+
+        "$SLEEP_BIN" "$VISIBILITY_WAIT_SECONDS"
+    done
+
+    return 1
+}
+
+select_tab_index() {
+    local tab="$1"
+
+    case "$tab" in
+        dashboard) printf '0\n' ;;
+        media) printf '1\n' ;;
+        performance) printf '2\n' ;;
+        weather) printf '3\n' ;;
+        *)
+            notify_error "Unsupported tab: $tab"
+            exit 1
+            ;;
+    esac
+}
+
+open_topdash() {
+    local started_new=0
+    local state=2
+
+    if ensure_topdash_running; then
+        started_new=1
+    fi
+
+    if dashboard_is_open; then
+        state=0
+    else
+        state=$?
+    fi
+
+    if [[ "$state" -eq 0 ]]; then
+        return 0
+    fi
+
+    send_toggle_signal
+
+    if [[ "$started_new" -eq 1 ]]; then
+        wait_for_dashboard_open || true
+        return 0
+    fi
+
+    if [[ "$state" -eq 2 ]]; then
+        wait_for_dashboard_open || true
+        return 0
+    fi
+
+    wait_for_dashboard_open || true
+}
+
+close_topdash() {
+    local pids=()
+    local state=2
+
+    mapfile -t pids < <(collect_topdash_pids)
+    [[ ${#pids[@]} -gt 0 ]] || return 0
+
+    if dashboard_is_open; then
+        state=0
+    else
+        state=$?
+    fi
+
+    if [[ "$state" -eq 1 ]]; then
+        return 0
+    fi
+
+    send_toggle_signal
+    wait_for_dashboard_closed || true
+}
+
+write_tab_command() {
+    local tab_index="$1"
+
+    printf '%s\n' "$tab_index" >"$TOPDASH_TAB_COMMAND_PATH"
+}
+
+open_with_tab() {
+    local tab="$1"
+    local tab_index=""
+
+    tab_index="$(select_tab_index "$tab")"
+    INITIAL_TAB="$tab"
+    START_OPEN=1
+
+    if ensure_topdash_running; then
+        return 0
+    fi
+
+    if ! tab_signal_handler_ready; then
+        stop_topdash
+        start_topdash
+        wait_for_topdash
+        wait_for_toggle_signal_handler
+        return 0
+    fi
+
+    write_tab_command "$tab_index"
+    send_tab_toggle_signal
+}
+
+toggle_topdash() {
+    ensure_topdash_running || true
+    send_toggle_signal
 }
 
 main() {
     local dry_run=0
+    local mode="toggle"
+    local tab=""
 
     while [[ $# -gt 0 ]]; do
         case "$1" in
+            --open)
+                if [[ "$mode" != "toggle" ]]; then
+                    usage
+                    exit 1
+                fi
+                mode="open"
+                shift
+                ;;
+            --close)
+                if [[ "$mode" != "toggle" ]]; then
+                    usage
+                    exit 1
+                fi
+                mode="close"
+                shift
+                ;;
+            --dashboard)
+                [[ -z "$tab" ]] || { usage; exit 1; }
+                tab="dashboard"
+                shift
+                ;;
+            --media)
+                [[ -z "$tab" ]] || { usage; exit 1; }
+                tab="media"
+                shift
+                ;;
+            --performance)
+                [[ -z "$tab" ]] || { usage; exit 1; }
+                tab="performance"
+                shift
+                ;;
+            --weather)
+                [[ -z "$tab" ]] || { usage; exit 1; }
+                tab="weather"
+                shift
+                ;;
             --dry-run)
                 dry_run=1
                 shift
@@ -197,13 +526,41 @@ main() {
         esac
     done
 
+    if [[ "$mode" == "toggle" && -n "$tab" ]]; then
+        notify_error "Tab flag requires --open."
+        exit 1
+    fi
+
+    if [[ "$mode" == "close" && -n "$tab" ]]; then
+        notify_error "Tab flag cannot be used with --close."
+        exit 1
+    fi
+
     validate_inputs
 
     if [[ "$dry_run" -eq 1 ]]; then
         return 0
     fi
 
-    toggle_topdash
+    case "$mode" in
+        toggle)
+            toggle_topdash
+            ;;
+        open)
+            if [[ -n "$tab" ]]; then
+                open_with_tab "$tab"
+            else
+                open_topdash
+            fi
+            ;;
+        close)
+            close_topdash
+            ;;
+        *)
+            usage
+            exit 1
+            ;;
+    esac
 }
 
 main "$@"

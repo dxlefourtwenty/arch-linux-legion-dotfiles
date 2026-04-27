@@ -8,12 +8,12 @@ QtObject {
     property bool borderRight: false
     property bool borderTop: false
     property bool borderBottom: false
-    property int radiusTopLeft: 0
-    property int radiusTopRight: 0
-    property int radiusBottomRight: 0
-    property int radiusBottomLeft: 0
+    property int radiusTopLeft: 16
+    property int radiusTopRight: 16
+    property int radiusBottomRight: 16
+    property int radiusBottomLeft: 16
     property int barHeight: 0
-    property int finalPosition: 40
+    property int finalPosition: 60
 
     property string font: "CaskaydiaMono Nerd Font"
     property int fontSize: 16
