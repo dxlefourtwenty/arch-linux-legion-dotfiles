@@ -1,0 +1,125 @@
+@import url("theme.css");
+
+* {
+	border: none;
+	border-radius: 0;
+	font-family: "CaskaydiaMono Nerd Font";
+	font-size: 16px;
+	min-height: 0;
+}
+
+window#waybar {
+	background: @background-alpha;
+	color: @foreground;
+	border-radius: 0 0 20px 20px;
+	border: solid 1px @background-alt;
+	border-top: 0;
+}
+
+button {
+	margin: 3px;
+	padding: 3px;
+}
+
+tooltip {
+	background: @background-alt;
+	border: 1px solid @foreground-inactive;
+	color: @green;
+	border-radius: 4px;
+}
+
+#workspaces {
+	margin: 8px 0;
+	padding: 0 10px;
+	background: @background-alt;
+	color: @purple;
+	border-radius: 30px;
+}
+
+#workspaces button {
+	all: initial;
+	min-width: 0;
+	box-shadow: inset 0 -3px transparent;
+	background: transparent;
+	color: @purple;
+}
+
+#workspaces button.active {
+	color: @blue;
+}
+
+#clock,
+#battery,
+#pulseaudio,
+#network,
+#cpu,
+#memory,
+#custom-weather {
+	padding: 0 10px;
+}
+
+#custom-launcher,
+#custom-update {
+	padding: 0 25px;
+	font-size: 28px;
+	color: @blue;
+}
+
+#custom-info,
+#custom-music,
+#custom-power {
+	padding: 0 15px;
+	color: @purple;
+	font-size: 20px;
+}
+
+#custom-info {
+	padding-left: 25px;
+}
+
+#pulseaudio {
+	color: @cyan;
+}
+
+#network {
+	color: @green;
+}
+
+#cpu {
+	color: @orange;
+}
+
+#memory {
+	color: @cyan;
+}
+
+#date,
+#utils,
+#monitor,
+#workspaces button {
+	margin: 8px 0;
+	padding: 0 10px;
+	background: @background-alt;
+	color: @green;
+	border-radius: 30px;
+}
+
+#monitor {
+	margin-right: 15px;
+}
+
+#battery,
+#network,
+#pulseaudio,
+#cpu,
+#memory {
+	font-size: 13px;
+}
+
+#battery {
+	color: @purple;
+}
+
+#battery.charging {
+	color: @green;
+}

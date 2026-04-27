@@ -1,0 +1,181 @@
+{
+    "layer": "top",
+    "output": "HDMI-A-1",
+    "position": "top", // (top|bottom|left|right)
+    "height": 40, // (to be removed for auto height)
+    "width": "auto",
+    "spacing": 0, // Gaps between modules
+    "margin-left": 200,
+    "margin-right": 200,
+    "fixed-center": true,
+    "reload_style_on_change": true,
+    "modules-left": [
+        "custom/launcher",
+        "hyprland/workspaces",
+        "custom/info",
+        "custom/music",
+        "custom/power",
+    ],
+    "modules-center": [
+        "group/date",
+    ],
+    "modules-right": [
+        "group/monitor",
+        "group/utils",
+        "custom/update"
+    ],
+    "custom/launcher": {
+		"format":"󰣇",
+		"tooltip": false,
+		"on-click":"fuzzel"
+	},
+    "custom/info": {
+		"format":"󰀨",
+		"tooltip": false,
+		"on-click":"alacritty -e btm"
+	},
+    "custom/music": {
+		"format":"󰎆",
+		"tooltip": false,
+		"on-click":"alacritty -e kew"
+	},
+    "custom/power": {
+		"format":"󱍷",
+		"tooltip": false,
+		"on-click":"~/.config/fuzzel/powermenu.sh"
+	},
+    "group/date": {
+        "orientation": "horizontal",
+        "modules": [
+            "custom/weather",
+            "clock",
+        ]
+    },
+    "group/utils": {
+        "orientation": "horizontal",
+        "modules": [
+            "battery",
+            "network",
+            "pulseaudio"
+        ]
+    }, 
+    "group/monitor": {
+        "orientation": "horizontal",
+        "modules": [
+            "cpu",
+            "memory"
+        ]
+    },        
+    "clock": {
+        "interval": 1,
+        "format": "{:%I:%M %p}",
+        "tooltip-format": "<tt><small>{calendar}</small></tt>",
+        "timezones": [
+            "Asia/Kolkata",
+            "America/Los_Angeles",
+        ],
+        "actions":  {
+            "on-click": "tz_up",
+        },
+    },
+    "cpu": {
+        "states": {
+            "warning": 75,
+            "critical": 90,
+        },
+        "format": " {usage}%",
+        "format-critical": "󰀦 {usage}%",
+        "on-click": "alacritty -e btm",
+        "tooltip": true,
+        "interval": 5,
+    },
+    "memory": {
+        "states": {
+            "warning": 75,
+            "critical": 90,
+        },
+        "format": " {percentage}%",
+        "format-critical": "󰀦 {percentage}%",
+        "on-click": "alacritty -e btm",
+        "tooltip": true,
+        "tooltip-format": "Memory Used: {used:0.1f} GB / {total:0.1f} GB",
+        "interval": 5,
+    },
+    "battery": {
+        "states": {
+            // "good": 95,
+            "warning": 30,
+            "critical": 15
+        },
+        "format": "{icon} {capacity}%",
+        "format-full": "{icon} {capacity}%",
+        "format-charging": "{icon}  {capacity}%",
+        "format-plugged": "{icon}  {capacity}%",
+        "format-alt": "{icon}",
+        "format-icons": ["󰂎", "󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"],
+    },
+    "network": {
+        "interval": 1000,
+        "format-wifi": "{icon} {signalStrength}%",
+        "format-ethernet": "{ipaddr}/{cidr} ",
+        "tooltip-format": "{essid}\n{ifname} via {gwaddr}\n{ipaddr}/{cidr}",
+        "format-linked": "{ifname} (No IP) ",
+        "format-disconnected": "󰤭",
+        "format-alt": "{essid}",
+        "format-icons": [
+            "󰤯",
+            "󰤟",
+            "󰤢",
+            "󰤥",
+            "󰤨"
+        ],
+        "on-click-right": "alacritty -e nmtui"
+    },
+    "pulseaudio": {
+        "format": "{icon}  {volume}%",
+        "format-muted": "  {format_source}",
+        "format-source": "",
+        "format-source-muted": " ",
+        "format-bluetooth": "{icon} {format_source}",
+        "format-bluetooth-muted": "{icon} {format_source}",
+        "format-icons": {
+            "headphone": "",
+            "hands-free": "",
+            "headset": "󰋎",
+            "phone": " ",
+            "portable": " ",
+            "car": "",
+            "default": [
+                "",
+                "",
+                ""
+            ]
+        },
+        "tooltip-format": "{icon} {volume}%\n{format_source}",
+        "on-click": "pavucontrol"
+    },
+    "hyprland/workspaces": {
+        "format": "{icon}",
+        "format-icons": {
+            "active": "",
+            "default": ""
+        }
+    },
+    "custom/weather": {
+        "format": "{}°C",
+        "tooltip": true,
+        "interval": 3600,
+        "exec": "wttrbar --location bopodi --nerd --date-format \"%d.%m.%Y\" -l en",
+        "return-type": "json",
+    },
+    "custom/update": {
+        "exec": "~/.config/waybar/scripts/updates.sh",
+        "return-type": "json",
+        "format": " {}",
+        "on-click": "alacritty -e paru -Syu",
+        "interval": 600,
+        "tooltip": true,
+        "min-length": 1,
+        "max-length": 5,
+    },
+}

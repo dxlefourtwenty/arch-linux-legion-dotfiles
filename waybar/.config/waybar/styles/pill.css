@@ -12,7 +12,7 @@ window#waybar {
 	color: @foreground;
 	font-weight: bold;
 	border-radius: 16px;
-	box-shadow: rgba(0, 0, 0, 0.24) 0px 6px 16px;
+	box-shadow: none;
 }
 
 #custom-menu,

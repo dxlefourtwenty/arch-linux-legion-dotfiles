@@ -6,6 +6,7 @@ window#osd {
   padding: 12px 10px;
   margin-bottom: 20px;
   border: 2px solid @border-color;
+  /* border: 0; */
 
   background-color: @background-color;
 }
