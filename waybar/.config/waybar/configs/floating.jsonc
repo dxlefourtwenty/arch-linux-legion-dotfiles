@@ -24,7 +24,7 @@
         "orientation": "horizontal",
         "modules": [
             "custom/expo",
-            "hyprland/workspaces"
+            "hyprland/workspaces",
         ],
     },
     "group/right": {
@@ -74,6 +74,10 @@
         "format": "<span font_desc=\"JetBrainsMono Nerd Font\"> </span>",
         "tooltip-format": "Workspace Overview",
         "on-click": "~/bin/hypr-toggle-expo"
+    },
+    "custom/cava": {
+        "format": "{}",
+        "exec": "~/.config/waybar/scripts/cava.sh",
     },
     "keyboard-state": {
         "numlock": true,

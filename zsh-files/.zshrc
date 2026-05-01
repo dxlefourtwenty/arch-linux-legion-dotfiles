@@ -92,3 +92,5 @@ ssh-add -l > /dev/null 2>&1
 if [ $? -ne 0 ]; then
   ssh-add ~/.ssh/id_ed25519 > /dev/null 2>&1
 fi
+
+source /usr/share/nvm/init-nvm.sh

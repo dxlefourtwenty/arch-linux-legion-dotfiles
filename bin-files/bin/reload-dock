@@ -65,7 +65,6 @@ main() {
     fi
 
     if ! "$PGREP_BIN" -u "$USER" -x "$PROCESS_NAME" >/dev/null; then
-        notify_status "hypr-dock is not running"
         exit 1
     fi
 

@@ -32,20 +32,30 @@ tooltip {
 	margin: 8px 0 8px 3px;
 	padding: 0 10px 0 5px;
 	background: @background-alt;
-	color: @purple;
 	border-radius: 30px;
 }
 
+#custom-cava {
+  margin: 8px 0px 8px 15px;
+  padding: 0 15px;
+  background: @background-alt;
+  border-radius: 30px;
+}
+
 #workspaces button {
-	all: initial;
 	min-width: 0;
-	box-shadow: inset 0 -3px transparent;
 	background: transparent;
-	color: @purple;
+  color: @primary;
 }
 
 #workspaces button.active {
-	color: @blue;
+	color: @primary;
+}
+
+#workspaces button.empty {
+	min-width: 0;
+	background: transparent;
+	color: @muted;
 }
 
 #clock,
@@ -75,12 +85,12 @@ tooltip {
 #custom-music,
 #custom-power {
 	padding: 0 15px;
-	color: @purple;
+	color: @bright-magenta;
 	font-size: 20px;
 }
 
 #custom-info {
-	padding-left: 25px;
+	padding-left: 20px;
 }
 
 #pulseaudio {

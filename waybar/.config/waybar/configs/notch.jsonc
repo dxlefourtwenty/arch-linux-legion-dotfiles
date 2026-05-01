@@ -12,6 +12,7 @@
     "modules-left": [
         "custom/launcher",
         "hyprland/workspaces",
+        "custom/cava",
         "custom/info",
         "custom/music",
         "custom/power",
@@ -44,6 +45,10 @@
 		"tooltip": false,
 		"on-click":"~/bin/menu-system"
 	},
+    "custom/cava": {
+    "format": "{}",
+    "exec": "~/.config/waybar/scripts/cava.sh",
+  },
     "group/date": {
         "orientation": "horizontal",
         "modules": [
@@ -155,9 +160,15 @@
     },
     "hyprland/workspaces": {
         "format": "<span font_desc=\"JetBrainsMono Nerd Font\">{icon}</span>",
+        "show-special": true,
         "format-icons": {
             "active": "",
-            "default": ""
+            "default": "",
+            "socialspace": "<span font-size='9pt'></span>",
+            "discordspace": "<span font-size='9pt'> 󱋊 </span>",
+            "mediaspace": "<span font-size='8pt'> </span>",
+            "scratchpad": "<span font-size='8pt'> </span>",
+            "floating": "+",
         },
         "persistent-workspaces": {
           "HDMI-A-1": [ 1,2,3,4,5 ],
