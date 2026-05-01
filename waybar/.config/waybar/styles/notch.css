@@ -40,6 +40,7 @@ tooltip {
   padding: 0 15px;
   background: @background-alt;
   border-radius: 30px;
+  color: @foreground;
 }
 
 #workspaces button {
@@ -102,7 +103,7 @@ tooltip {
 }
 
 #cpu {
-	color: @orange;
+	color: @yellow;
 }
 
 #memory {
@@ -137,7 +138,7 @@ tooltip {
 }
 
 #battery {
-	color: @purple;
+	color: @magenta;
 }
 
 #battery.charging {
