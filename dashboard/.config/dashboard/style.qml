@@ -1,1 +1,1 @@
-/home/dxle/.config/dashboard/styles/notch.qml
+/home/dxle/.config/dashboard/styles/floating.qml

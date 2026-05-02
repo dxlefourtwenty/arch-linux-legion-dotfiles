@@ -88,6 +88,11 @@ tooltip label {
 	color: @muted;
 }
 
+#workspaces button.active {
+  color: @primary;
+  font-weight: bold;
+}
+
 #wireplumber {
 	color: @blue;
 }

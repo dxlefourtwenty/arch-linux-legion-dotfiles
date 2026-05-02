@@ -44,8 +44,8 @@ while IFS= read -r line; do
         fi
 
         # hide after 2 seconds of silence
-        if (( now - pause_start >= 5 )); then
-            echo ""
+        if (( now - pause_start >= 2 )); then
+            echo "▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁▁"
         else
             convert_to_bars "$line"
         fi

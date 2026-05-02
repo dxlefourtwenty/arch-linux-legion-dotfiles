@@ -12,13 +12,15 @@
     "spacing": 4, // Gaps between modules (4px)
     // Choose the order of the modules
     "modules-left": [
-        "group/left",
+        "group/custom-bg1",
+        "group/custom-bg2"
     ],
     "modules-center": [
         "clock"
     ],
     "modules-right": [
-        "group/right",
+        "group/custom-bg3",
+        "group/custom-bg4"
     ],
     "group/left": {
         "orientation": "horizontal",
@@ -30,16 +32,45 @@
     "group/right": {
         "orientation": "horizontal",
         "modules": [
-           "custom/menu",
+            "custom/menu",
             "custom/wallpapers",
-            "pulseaudio",
-            "network",
             "custom/bluetooth",
-            "cpu",
-            "memory",
-            "temperature",
-            "battery",
             "custom/power"
+        ]
+    },
+    "group/system-info": {
+        "orientation": "horizontal",
+        "modules": [
+          "pulseaudio",
+          "network",
+          "cpu",
+          "memory",
+          "temperature",
+          "battery"
+        ],
+    },
+    "group/custom-bg1": {
+        "orientation": "horizontal",
+        "modules": [
+            "group/left", 
+        ]
+    },
+    "group/custom-bg2": {
+        "orientation": "horizontal",
+        "modules": [
+            "custom/cava", 
+        ]
+    },
+    "group/custom-bg3": {
+        "orientation": "horizontal",
+        "modules": [
+           "group/system-info" 
+        ]
+    },
+    "group/custom-bg4": {
+        "orientation": "horizontal",
+        "modules": [
+            "group/right"
         ]
     },
     "hyprland/workspaces": {
@@ -49,22 +80,21 @@
         "warp-on-scroll": false,
         "format": "<span font_desc=\"JetBrainsMono Nerd Font\">{icon}</span>",
         "format-icons": {
-            "1": "",
-            "2": "",
-            "3": "",
-            "4": "",
-            "5": "",
-            "6": "",
-            "7": "",
-            "8": "",
-            "9": "",
+            "1": "1",
+            "2": "2",
+            "3": "3",
+            "4": "4",
+            "5": "5",
+            "6": "6",
+            "7": "7",
+            "8": "8",
+            "9": "9",
             "10": "0",
             "socialspace": "<span font-size='12pt'></span>",
             "discordspace": "<span font-size='12pt'>󱋊</span>",
             "mediaspace": "<span font-size='12pt'></span>",
             "scratchpad": "<span font-size='12pt'></span>",
             "floating": "+",
-            "active": "",
         },
         "persistent-workspaces": {
             "HDMI-A-1": [ 1,2,3,4,5 ],

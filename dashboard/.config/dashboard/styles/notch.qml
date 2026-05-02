@@ -13,7 +13,7 @@ QtObject {
     property int radiusBottomRight: 16
     property int radiusBottomLeft: 16
     property int barHeight: 0
-    property int finalPosition: 60
+    property int finalPosition: 80
 
     property string font: "CaskaydiaMono Nerd Font"
     property int fontSize: 16

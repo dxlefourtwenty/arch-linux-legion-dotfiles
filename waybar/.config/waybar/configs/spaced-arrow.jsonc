@@ -190,13 +190,21 @@
         "warp-on-scroll": false,
         "format": "<span font_desc=\"JetBrainsMono Nerd Font\">{icon}</span>",
         "format-icons": {
-            "default": "",
+            "1": "I",
+            "2": "II",
+            "3": "III",
+            "4": "IV",
+            "5": "V",
+            "6": "VI",
+            "7": "VII",
+            "8": "VIII",
+            "9": "IX",
+            "0": "X",
             "socialspace": "<span font-size='13pt'></span>",
             "discordspace": "<span font-size='13pt'> 󱋊 </span>",
             "mediaspace": "<span font-size='12pt'> </span>",
             "scratchpad": "<span font-size='12pt'> </span>",
             "floating": "+",
-            "active": ""
         },
         "persistent-workspaces": {
             "HDMI-A-1": [ 1,2,3,4,5 ],

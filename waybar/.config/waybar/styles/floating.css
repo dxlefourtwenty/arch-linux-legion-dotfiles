@@ -24,7 +24,7 @@ window#waybar.hidden {
 }
 
 tooltip {
-  background: @background-gray;
+  background: @background;
   border: 1px solid @foreground;
   border-radius: 12px;
 }
@@ -34,22 +34,28 @@ tooltip label {
   padding: 6px;
 }
 
-.modules-left {
+.modules-center {
+  border-radius: 2rem;
+  background: linear-gradient(45deg, @primary, @bright-cyan);
+  padding: 2px;
+}
+
+#custom-bg1,
+#custom-bg2,
+#custom-bg3, 
+#custom-bg4 {
   padding: 2px;
   border-radius: 2rem;
   background: linear-gradient(45deg, @primary, @bright-cyan);
 }
 
-.modules-right {
-    border-radius: 2rem;
-    background: linear-gradient(45deg, @primary, @bright-cyan);
-    padding: 2px;
+#custom-bg2 {
+  margin-left: 10px;
+  min-width: 222px;
 }
 
-.modules-center {
-    border-radius: 2rem;
-    background: linear-gradient(45deg, @primary, @bright-cyan);
-    padding: 2px;
+#custom-bg3 {
+  margin-right: 10px;
 }
 
 /* you can set a style on hover for any module like this */
@@ -62,36 +68,39 @@ tooltip label {
 }
 
 #workspaces button {
-    padding: 0;
+    padding: 0 6px;
     margin: 0 4px;
-    border-radius: 2rem;
-    font-size: 20px;
+    border-radius: 20px;
+    font-size: 14px;
     background-color: transparent;
-    transition: all 1s ease-in-out;
+    transition: all 0.3s ease-in-out;
     color: @foreground;
-}
-
-#workspaces button:hover {
-    background: transparent;
     border: none;
-    color: @cyan;
 }
 
 #workspaces button.active {
-    background-color: transparent;
-    transition: all 1s ease-in-out;
-    color: @foreground;
+    background: linear-gradient(45deg, @cyan, @yellow, @magenta);
+    transition: all 0.3s ease-in-out;
+    color: @background;
+    border-radius: 20px;
+    min-width: 45px;
 }
 
 #workspaces button.empty {
     font-weight: bolder;
-    transition: all 1s ease-in-out;
+    transition: all 0.3s ease-in-out;
     color: alpha(@background, 0.7);
 }
 
 #workspaces button.urgent {
     background-color: @muted;
     color: @primary;
+}
+
+#workspaces button:hover {
+    background: linear-gradient(45deg, @magenta, @cyan, @yellow);
+    border: none;
+    color: @background;
 }
 
 #right {
@@ -107,6 +116,18 @@ tooltip label {
     border-radius: 2rem;
     background-color: alpha(@background, 0.7);
     padding: 3px 10px 3px 0; 
+}
+
+#custom-cava,
+#system-info {
+    padding: 3px 15px 3px 15px;
+    border-radius: 2rem;
+    background-color: alpha(@background, 0.7);
+    color: @magenta;
+}
+
+#custom-cava:hover {
+    color: @cyan;
 }
 
 #left * {
@@ -138,7 +159,19 @@ tooltip label {
     color: @foreground;
 }
 
+#network,
+#cpu,
+#memory {
+    padding-right: 30px;
+}
 
+#pulseaudio {
+    padding-right: 15px;
+}
+
+#temperature {
+    padding-right: 25px;
+}
 
 #clock {
     padding: 0 20px 0 20px;
@@ -148,7 +181,6 @@ tooltip label {
 
 #battery {
     background-color: transparent;
-    padding-right: 10px;
     color: @foreground;
 }
 
@@ -192,7 +224,6 @@ tooltip label {
 #pulseaudio {
     background-color: transparent;
     color: @foreground;
-    padding-right: 0;
 }
 
 #pulseaudio.muted {
