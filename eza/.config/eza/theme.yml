@@ -1,0 +1,76 @@
+filenames:
+  Makefile:
+    filename:
+      foreground: White
+    icon:
+      style:
+        foreground: Yellow
+  downloads:
+    icon:
+      glyph: "󰉍"
+  documents:
+    icon:
+      glyph: ""
+  pictures:
+    icon:
+      glyph: ""
+  videos:
+    icon:
+      glyph: ""
+  music:
+    icon:
+      glyph: ""
+  templates:
+    icon:
+      glyph: ""
+  public:
+    icon:
+      glyph: ""
+  desktop:
+    icon:
+      glyph: ""
+  dev:
+    icon:
+      glyph: "󰚗"
+  builds:
+    icon:
+      glyph: ""
+  files:
+    icon:
+      glyph: ""
+  bin:
+    icon:
+      glyph: ""
+  dotfiles:
+    icon:
+      glyph: ""
+  wallpapers:
+    icon:
+      glyph: "󰸉"
+  screenshots:
+    icon:
+      glyph: ""
+  appdata:
+    icon:
+      glyph: ""
+
+extensions:
+  h:
+    filename:
+      foreground: Magenta
+    icon:
+      style:
+        foreground: Magenta
+  hpp:
+    filename:
+      foreground: Magenta
+    icon:
+      style:
+        foreground: Magenta
+  tpp:
+    filename:
+      foreground: Blue
+    icon:
+      glyph: "󰬁"
+      style:
+        foreground: Blue

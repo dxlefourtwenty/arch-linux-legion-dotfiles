@@ -2,6 +2,9 @@ return {
   {
     "nvim-mini/mini.icons",
     opts = {
+      file = {
+        Makefile = { glyph = "", hl = "MiniIconsYellow" },
+      },
       extension = {
         tpp = { glyph = "󰬁", hl = "MiniIconsAzure" },
       },

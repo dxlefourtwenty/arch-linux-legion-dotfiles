@@ -100,6 +100,20 @@ ls.add_snippets("cpp", {
 })
 
 ls.add_snippets("cpp", {
+  s("doxygfuncb", {
+    t({
+      "/**",
+      " * @brief desc",
+    }),
+    i(1),
+    t({
+      "",
+      " */",
+    })
+  })
+})
+
+ls.add_snippets("cpp", {
   s("doxygh", {
     t({
       "/**",
