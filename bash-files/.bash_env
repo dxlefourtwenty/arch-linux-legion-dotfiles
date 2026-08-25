@@ -46,6 +46,8 @@ export LOX_DEV=/home/dxle/dev/coding-in-class/spring2026/4080CS/lox-dev/lox/com/
 export EDITOR=nvim
 export VISUAL=nvim
 
+export CODING=/home/dxle/dev/coding
+
 export DOWNLOADS=~/files/downloads
 export PICTURES=~/files/pictures
 export SCREENSHOTS=~/files/pictures/screenshots/
