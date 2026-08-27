@@ -4,6 +4,7 @@ local routing_config = {
 }
 
 local route_states = {}
+local M = {}
 
 local function route_key(client_id, source_uri)
   return string.format("%d:%s", client_id, source_uri)
@@ -49,10 +50,15 @@ local function included_location(diagnostic, source_uri)
       and location
       and location.uri
       and location.uri ~= source_uri
+      and vim.uri_to_fname(location.uri):match("%.tpp$")
     then
       return location
     end
   end
+end
+
+local function has_direct_clangd(buffer)
+  return #vim.lsp.get_clients({ bufnr = buffer, name = "clangd" }) > 0
 end
 
 local function buffer_for_uri(uri)
@@ -101,10 +107,10 @@ local function route_included_diagnostics(result, ctx, state)
     local location = included_location(diagnostic, result.uri)
     local buffer = location and buffer_for_uri(location.uri)
 
-    if buffer then
+    if buffer and not has_direct_clangd(buffer) then
       routed[buffer] = routed[buffer] or {}
       table.insert(routed[buffer], to_vim_diagnostic(diagnostic, location, buffer, position_encoding))
-    else
+    elseif not buffer then
       table.insert(remaining, diagnostic)
     end
   end
@@ -136,11 +142,16 @@ local function setup_cleanup()
       end
     end,
   })
+  vim.api.nvim_create_autocmd("LspAttach", {
+    group = group,
+    callback = function(event)
+      local client = vim.lsp.get_client_by_id(event.data.client_id)
+      if client and client.name == "clangd" and vim.api.nvim_buf_get_name(event.buf):match("%.tpp$") then
+        M.clear_buffer(event.buf)
+      end
+    end,
+  })
 end
-
-setup_cleanup()
-
-local M = {}
 
 function M.clear_buffer(buffer)
   for _, state in pairs(route_states) do
@@ -162,5 +173,7 @@ function M.publish_diagnostics(err, result, ctx, config)
 
   return vim.lsp.handlers["textDocument/publishDiagnostics"](err, forwarded_result, ctx, config)
 end
+
+setup_cleanup()
 
 return M

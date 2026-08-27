@@ -13,11 +13,46 @@ validate_positive_integer() {
     [[ "$1" =~ ^[1-9][0-9]*$ ]]
 }
 
+player_statuses() {
+    /usr/bin/timeout "${timeout_seconds}s" \
+        /usr/bin/playerctl --all-players status \
+        --format '{{playerName}}|{{status}}' 2>/dev/null \
+        || true
+}
+
+select_player() {
+    local statuses player status normalized_player
+    local playing_spotify=""
+    local playing_player=""
+    local paused_spotify=""
+    local paused_player=""
+
+    statuses="$(player_statuses)"
+
+    while IFS='|' read -r player status; do
+        [[ -n "$player" ]] || continue
+        normalized_player="${player,,}"
+
+        if [[ "$status" == "Playing" && "$normalized_player" == *spotify* ]]; then
+            playing_spotify="$player"
+        elif [[ "$status" == "Playing" && -z "$playing_player" ]]; then
+            playing_player="$player"
+        elif [[ "$status" == "Paused" && "$normalized_player" == *spotify* ]]; then
+            paused_spotify="$player"
+        elif [[ "$status" == "Paused" && -z "$paused_player" ]]; then
+            paused_player="$player"
+        fi
+    done <<< "$statuses"
+
+    printf '%s' "${playing_spotify:-${playing_player:-${paused_spotify:-$paused_player}}}"
+}
+
 metadata() {
-    local format="$1"
+    local player="$1"
+    local format="$2"
 
     /usr/bin/timeout "${timeout_seconds}s" \
-        /usr/bin/playerctl metadata --format "$format" 2>/dev/null \
+        /usr/bin/playerctl -p "$player" metadata --format "$format" 2>/dev/null \
         || true
 }
 
@@ -36,10 +71,10 @@ escape_markup() {
 }
 
 print_icon() {
-    local player_name
-    player_name="$(metadata '{{playerName}}')"
+    local player
+    player="$(select_player)"
 
-    case "${player_name,,}" in
+    case "${player,,}" in
         *spotify*)
             printf ' <b> </b> \n'
             ;;
@@ -53,8 +88,9 @@ print_icon() {
 }
 
 print_title() {
-    local title
-    title="$(metadata '{{xesam:title}}')"
+    local player title
+    player="$(select_player)"
+    title="$(metadata "$player" '{{xesam:title}}')"
 
     if [[ -z "$title" ]]; then
         printf 'No Music Playing\n'
@@ -66,8 +102,9 @@ print_title() {
 }
 
 print_artist() {
-    local artist
-    artist="$(metadata '{{xesam:artist}}')"
+    local player artist
+    player="$(select_player)"
+    artist="$(metadata "$player" '{{xesam:artist}}')"
 
     if [[ -z "$artist" ]]; then
         printf '\n'

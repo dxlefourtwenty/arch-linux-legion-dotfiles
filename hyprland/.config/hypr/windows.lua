@@ -118,6 +118,7 @@ hl.window_rule({
   match = {
     class = "xdg-desktop-portal-gtk", 
   },
+  monitor = "HDMI-A-1",
   float = true,
   size = { 1100, 800 },
   center = true,

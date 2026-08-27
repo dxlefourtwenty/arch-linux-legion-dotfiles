@@ -136,6 +136,7 @@ N | Previous Search Match
 # | Search Word Under Cursor Backward
 
 <leader>t | Toggle Floating Terminal
+<leader>uh | Toggle Inlay Hints
 
 >> | Indent Line One Shiftwidth
 << | De-indent Line One Shiftwidth
@@ -173,3 +174,4 @@ f: w | Jump to : Then Next Word Start
 
 <leader>gg | Open Lazygit
 H | Enable Hidden Files (Explorer)
+K | Show Function Definition
