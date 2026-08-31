@@ -3,6 +3,9 @@
 set -e
 
 ASSETS_DIR="/home/dxle/bin/dev/assets/template-files/react"
+TEMPLATE_DIR="jsx"
+TEMPLATE="react-compiler"
+EXTENSION="js"
 
 MSG="Installing"
 
@@ -38,6 +41,13 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
 
+        -ts|--typescript)
+            TEMPLATE_DIR="tsx"
+            TEMPLATE="react-compiler-ts"
+            EXTENSION="ts"
+            shift
+            ;;
+
         -r|--run-dev)
             run_dev=true
             shift
@@ -52,11 +62,13 @@ while [[ $# -gt 0 ]]; do
             echo "  -t  | --tailwind          Install TailwindCSS"
             echo "  -d  | --directory         Install to a new root directory"
             echo "  -dt | --default-template  Generate the vite default template files"
+            echo "  -ts | --typescript        Change to a TypeScript project"
             echo "  -r  | --run-dev           Run local dev server after installs"
             echo "  -h  | --help              Show help"
             echo 
             echo "Examples: "
             echo "  react-generate-files -t"
+            echo "  react-generate-files -t -ts -d ."
             echo "  react-generate-files -d new-project"
             echo "  react-generate-files -d new-project -t"
             echo "  react-generate-files -d new-project -t -r"
@@ -74,10 +86,10 @@ while [[ $# -gt 0 ]]; do
 done
 
 if [[ "$new_directory" == true ]]; then
-  npm create vite@latest "$project_name" -- --template react-compiler --eslint --no-immediate --no-interactive
+  npm create vite@latest "$project_name" -- --template "$TEMPLATE" --eslint --no-immediate --no-interactive
   cd "$project_name"
 else 
-  npm create vite@latest . -- --template react-compiler --eslint --no-immediate --no-interactive
+  npm create vite@latest . -- --template "$TEMPLATE" --eslint --no-immediate --no-interactive
 fi
 
 echo "$MSG dependencies…"
@@ -88,12 +100,12 @@ npm install babel-plugin-react-compiler
 echo "$MSG eslint-plugin-react…"
 npm install -D eslint-plugin-react
 
-cp $ASSETS_DIR/eslint.config.js .
+cp "$ASSETS_DIR/$TEMPLATE_DIR/eslint.config.js" .
 
 if [[ "$install_tailwind" == true ]]; then
   echo "$MSG TailwindCSS…"
   npm install tailwindcss @tailwindcss/vite
-  cp "$ASSETS_DIR/vite.config.js" .
+  cp "$ASSETS_DIR/$TEMPLATE_DIR/vite.config.$EXTENSION" .
   
   echo ""
   echo "TailwindCSS installed."
@@ -102,9 +114,10 @@ if [[ "$install_tailwind" == true ]]; then
 fi
 
 if [[ "$default_template" == false ]]; then
-  cp "$ASSETS_DIR/App.jsx" src/App.jsx
-  cp "$ASSETS_DIR/App.css" src/App.css
-  cp "$ASSETS_DIR/App.css" src/index.css
+  rm "src/App.$TEMPLATE_DIR"
+  cp "$ASSETS_DIR/$TEMPLATE_DIR/App.$TEMPLATE_DIR" "src/App.$TEMPLATE_DIR"
+  cp "$ASSETS_DIR/$TEMPLATE_DIR/App.css" src/App.css
+  cp "$ASSETS_DIR/$TEMPLATE_DIR/App.css" src/index.css
   rm src/assets/react.svg
   rm src/assets/vite.svg
   mv src/assets/hero.png src/assets/example.png

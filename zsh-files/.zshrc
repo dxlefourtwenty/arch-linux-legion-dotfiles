@@ -7,6 +7,7 @@
 [[ -f ~/.bash_aliases ]] && source ~/.bash_aliases
 [[ -f ~/.bash_env ]] && source ~/.bash_env
 [[ -f ~/.bash_functions ]] && source ~/.bash_functions
+[[ -f /home/dxle/bin/dev/react/react-generate-files-wrapper ]] && source /home/dxle/bin/dev/react/react-generate-files-wrapper
 
 # -------------------------
 # Zsh completion system

@@ -62,6 +62,11 @@ return {
         emmet_language_server = {
           filetypes = web_filetypes,
         },
+        tailwindcss = {
+          before_init = function(...)
+            return require("config.tailwind-lsp").before_init(...)
+          end,
+        },
       },
     },
   },

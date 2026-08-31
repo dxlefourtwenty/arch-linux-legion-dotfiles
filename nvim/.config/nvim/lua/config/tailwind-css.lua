@@ -1,7 +1,10 @@
 local M = {}
 
 M.config = {
-  import_line = '@import "tailwindcss";',
+  import_lines = {
+    ['@import "tailwindcss";'] = true,
+    ["@import 'tailwindcss';"] = true,
+  },
   suppressed_diagnostics = {
     ["Unknown at rule @apply"] = true,
     ["Unknown at rule @config"] = true,
@@ -18,7 +21,7 @@ M.config = {
 
 local function has_tailwind_import(bufnr)
   for _, line in ipairs(vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)) do
-    if vim.trim(line) == M.config.import_line then
+    if M.config.import_lines[vim.trim(line)] then
       return true
     end
   end

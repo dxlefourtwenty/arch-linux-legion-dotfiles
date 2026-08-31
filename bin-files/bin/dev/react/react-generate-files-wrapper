@@ -1,0 +1,24 @@
+react-generate-files() {
+  local project_directory=""
+  local expect_project_directory=false
+  local argument
+
+  for argument in "$@"; do
+    if [[ "$expect_project_directory" == true ]]; then
+      project_directory="$argument"
+      break
+    fi
+
+    case "$argument" in
+      -d|--directory)
+        expect_project_directory=true
+        ;;
+    esac
+  done
+
+  command react-generate-files "$@" || return
+
+  if [[ -n "$project_directory" && "$project_directory" != "." ]]; then
+    builtin cd -- "$project_directory"
+  fi
+}

@@ -53,3 +53,4 @@ require("lazy").setup({
 })
 
 require("config.snippets_cpp")
+require("config.snippets_react")
