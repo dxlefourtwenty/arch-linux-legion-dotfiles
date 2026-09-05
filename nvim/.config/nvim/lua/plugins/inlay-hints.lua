@@ -1,4 +1,5 @@
 local inlay_hint_config = {
+  enabled_by_default = false,
   show_jsx_function_type_hints = false,
   show_struct_field_hints = false,
 }
@@ -123,7 +124,8 @@ end
 return {
   {
     "neovim/nvim-lspconfig",
-    opts = function()
+    opts = function(_, opts)
+      opts.inlay_hints.enabled = inlay_hint_config.enabled_by_default
       setup_inlay_hint_filter()
     end,
   },

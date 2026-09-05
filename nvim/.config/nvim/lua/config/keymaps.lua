@@ -20,5 +20,11 @@ vim.keymap.set("n", "<C-S-v>", "<C-v>", {
 
 vim.keymap.set("n", "<leader>gg", "<cmd>LazyGit<cr>")
 
+vim.keymap.set("n", "<leader>bh", "<cmd>BufferLineMovePrev<cr>", {
+  desc = "Move buffer left",
+})
 
+vim.keymap.set("n", "<leader>bl", "<cmd>BufferLineMoveNext<cr>", {
+  desc = "Move buffer right",
+})
 

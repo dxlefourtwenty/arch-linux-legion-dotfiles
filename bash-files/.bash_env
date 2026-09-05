@@ -49,6 +49,7 @@ export VISUAL=nvim
 export CODING=/home/dxle/dev/coding
 export LEETCODE=/home/dxle/dev/coding/leetcode
 export LC=/home/dxle/dev/coding/leetcode
+export PORTFOLIO=/home/dxle/dev/web-apps/portfolio
 
 export DOWNLOADS=~/files/downloads
 export PICTURES=~/files/pictures

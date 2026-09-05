@@ -10,6 +10,7 @@ EXTENSION="js"
 MSG="Installing"
 
 install_tailwind=false
+install_react_icons=false
 new_directory=false
 run_dev=false
 default_template=false
@@ -20,6 +21,11 @@ while [[ $# -gt 0 ]]; do
     case "$1" in
         -t|--tailwind)
             install_tailwind=true
+            shift
+            ;;
+
+        -ri|--react-icons)
+            install_react_icons=true
             shift
             ;;
 
@@ -97,10 +103,16 @@ npm install
 npm install -D @rolldown/plugin-babel @babel/core
 npm install babel-plugin-react-compiler
 
-echo "$MSG eslint-plugin-react…"
-npm install -D eslint-plugin-react
-
 cp "$ASSETS_DIR/$TEMPLATE_DIR/eslint.config.js" .
+
+if [[ "$install_react_icons" == true ]]; then
+  echo "$MSG React Icons"
+  npm install react-icons
+  echo ""
+  echo "React Icons installed."
+  echo "add import { FaGithub, FaLinkedin } from  \"react-icons/fa\";"
+  echo "or other icons to use in your project"
+fi
 
 if [[ "$install_tailwind" == true ]]; then
   echo "$MSG TailwindCSS…"
@@ -128,5 +140,4 @@ fi
 if [[ "$run_dev" == true ]]; then
   npm run dev
 fi
-
 

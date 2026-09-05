@@ -30,6 +30,9 @@ return {
   {
     "nvim-treesitter/nvim-treesitter",
     opts = {
+      indent = {
+        disable = { "typescript" },
+      },
       ensure_installed = {
         "css",
         "scss",
@@ -49,6 +52,9 @@ return {
               return require("config.tailwind-css").publish_diagnostics(...)
             end,
           },
+        },
+        denols = {
+          mason = false,
         },
         eslint = {
           settings = {

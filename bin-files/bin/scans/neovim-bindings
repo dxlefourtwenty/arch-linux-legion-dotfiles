@@ -175,3 +175,6 @@ f: w | Jump to : Then Next Word Start
 <leader>gg | Open Lazygit
 H | Enable Hidden Files (Explorer)
 K | Show Function Definition
+
+<leader>bh | Move Buffer (Tab) Left
+<leader>bl | Move Buffer (Tab) Right
