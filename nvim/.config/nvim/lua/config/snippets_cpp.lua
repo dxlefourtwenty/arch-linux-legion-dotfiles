@@ -198,3 +198,37 @@ for _, ft in ipairs({ "c", "cpp" }) do
     hdef,
   })
 end
+
+local function namespace_open(_, snip)
+  local lines = {}
+  for _, name in ipairs(vim.split(snip.captures[1], "::", { plain = true })) do
+    lines[#lines + 1] = "namespace " .. name
+    lines[#lines + 1] = "{"
+  end
+  lines[#lines + 1] = ""
+  return lines
+end
+
+local function namespace_close(_, snip)
+  local lines = { "" }
+  for _ in ipairs(vim.split(snip.captures[1], "::", { plain = true })) do
+    lines[#lines + 1] = "}"
+  end
+  return lines
+end
+
+ls.add_snippets("cpp", {
+  s({
+    trig = "([%a_][%w_:]*)%s+nsdef",
+    regTrig = true,
+    wordTrig = false,
+    snippetType = "autosnippet",
+    name = "namespace definition",
+  }, {
+    f(namespace_open),
+    t({ "", "" }),
+    i(1),
+    t({ "", "" }),
+    f(namespace_close),
+  }),
+})
