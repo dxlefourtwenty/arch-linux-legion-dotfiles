@@ -11,6 +11,8 @@ return {
 
         override = function()
           return {
+            [string.char(64) .. "lsp.type.namespace"] = { link = string.char(64) .. "namespace.cpp" },
+            [string.char(64) .. "lsp.type.namespace.cpp"] = { link = string.char(64) .. "namespace.cpp" },
             NonText = { fg = "#948a8b" },
 
             MiniIconsGrey = { fg = "#948a8b" },

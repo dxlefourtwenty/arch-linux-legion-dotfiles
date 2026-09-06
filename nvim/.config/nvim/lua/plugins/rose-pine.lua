@@ -1,4 +1,5 @@
 local rose_pine_colors = {
+  namespace_reference = "#E0DEF4",
   return_keyword = "#DDB2B4",
   new_keyword = "#C4A7E7",
   inlay_hint = "#504C62",
@@ -24,6 +25,24 @@ return {
     require("rose-pine").setup(opts)
 
     local function rose_pine_fixes()
+      vim.api.nvim_set_hl(0, "@module", {
+        fg = rose_pine_colors.namespace_reference,
+      })
+      vim.api.nvim_set_hl(0, string.char(64) .. "namespace.definition", {
+        fg = rose_pine_colors.return_keyword,
+      })
+      vim.api.nvim_set_hl(0, string.char(64) .. "namespace.definition.cpp", {
+        link = string.char(64) .. "namespace.definition",
+      })
+      for _, group in ipairs({
+        "@module.cpp",
+        "@namespace",
+        "@namespace.cpp",
+        "@lsp.type.namespace",
+        "@lsp.type.namespace.cpp",
+      }) do
+        vim.api.nvim_set_hl(0, group, { link = "@module" })
+      end
       vim.api.nvim_set_hl(0, "@keyword.return", {
         fg = rose_pine_colors.return_keyword,
         italic = true,

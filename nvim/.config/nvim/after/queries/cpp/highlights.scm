@@ -1,5 +1,9 @@
 ; extends
 
+((namespace_definition
+  name: (namespace_identifier) @namespace.definition)
+ (#set! priority 200))
+
 ("new" @keyword.operator.new
  (#set! priority 200))
 
