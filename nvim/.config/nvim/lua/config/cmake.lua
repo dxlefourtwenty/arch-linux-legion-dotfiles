@@ -3,11 +3,14 @@ local M = {}
 M.options = {
   build_directory = "build",
   configure_args = {},
+  hide_build_directory_from_picker = true,
   parallel = 4,
 }
 
-function M.root(buffer)
-  local directory = vim.fs.dirname(vim.api.nvim_buf_get_name(buffer))
+function M.find_root(directory)
+  if not directory or directory == "" then
+    return
+  end
   local root
   while directory do
     if vim.uv.fs_stat(vim.fs.joinpath(directory, "CMakeLists.txt")) then
@@ -20,6 +23,21 @@ function M.root(buffer)
     directory = parent ~= directory and parent or nil
   end
   return root
+end
+
+function M.root(buffer)
+  local path = vim.api.nvim_buf_get_name(buffer)
+  local directory = path ~= "" and vim.fs.dirname(path) or vim.uv.cwd()
+  return M.find_root(directory)
+end
+
+function M.picker_excludes(directory)
+  directory = directory or vim.uv.cwd()
+  if not M.options.hide_build_directory_from_picker or M.find_root(directory) ~= directory then
+    return {}
+  end
+  local build_directory = M.options.build_directory:gsub("^%./", ""):gsub("/+$", "")
+  return { "**/" .. build_directory .. "/**" }
 end
 
 function M.build_directory(root)

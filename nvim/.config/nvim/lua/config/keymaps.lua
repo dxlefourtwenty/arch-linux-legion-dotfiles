@@ -28,3 +28,23 @@ vim.keymap.set("n", "<leader>bl", "<cmd>BufferLineMoveNext<cr>", {
   desc = "Move buffer right",
 })
 
+local window_resize_ratio = 0.05
+
+local function resize_window_width(direction)
+  local resize_columns = math.max(1, math.floor(vim.o.columns * window_resize_ratio + 0.5))
+  vim.cmd(string.format("vertical resize %+d", direction * resize_columns))
+end
+
+local function increase_window_width()
+  resize_window_width(1)
+end
+
+local function decrease_window_width()
+  resize_window_width(-1)
+end
+
+vim.keymap.set("n", "<C-w><", increase_window_width, { desc = "Increase window width by 5%" })
+vim.keymap.set("n", "<C-,>", increase_window_width, { desc = "Increase window width by 5%" })
+
+vim.keymap.set("n", "<C-w>>", decrease_window_width, { desc = "Decrease window width by 5%" })
+vim.keymap.set("n", "<C-.>", decrease_window_width, { desc = "Decrease window width by 5%" })
